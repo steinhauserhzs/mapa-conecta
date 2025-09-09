@@ -39,15 +39,24 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route
-                  path="/*"
+                  path="/dashboard"
                   element={
                     <ProtectedRoute>
                       <AppLayout />
                     </ProtectedRoute>
                   }
                 >
-                  <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="admin/users" element={<AdminUsers />} />
+                  <Route index element={<Dashboard />} />
+                </Route>
+                <Route
+                  path="/admin/users"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AdminUsers />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
