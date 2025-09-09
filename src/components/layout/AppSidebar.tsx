@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Table,
   Calculator,
+  Briefcase,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -65,6 +66,11 @@ const navigation = [
     title: 'Tabela de Conversão',
     url: '/tabela-conversao',
     icon: Calculator,
+  },
+  {
+    title: 'Tabela de Profissões',
+    url: '/tabela-profissoes',
+    icon: Briefcase,
   },
   {
     title: 'Análises',
