@@ -7,7 +7,8 @@ const corsHeaders = {
 };
 
 // ---- Engine de cálculo numerológico (Jé Fêrraz) ----
-const BASE_MAP = {
+// Fallback BASE_MAP - will be replaced by database conversion table
+const FALLBACK_BASE_MAP = {
   A:1, B:2, C:3, D:4, E:5, F:8, G:3, H:5, I:1,
   J:1, K:2, L:3, M:4, N:5, O:7, P:8, Q:1, R:2,
   S:3, T:4, U:6, V:6, W:6, X:6, Y:1, Z:7, 'Ç':8
@@ -45,19 +46,19 @@ function applyMods(v: number, m: any) {
   return val;
 }
 
-function letterValue(ch: string) {
+function letterValue(ch: string, baseMap: Record<string, number>) {
   const info = analyzeChar(ch);
   if (!info) return null;
-  const base = BASE_MAP[info.baseChar as keyof typeof BASE_MAP];
+  const base = baseMap[info.baseChar as keyof typeof baseMap];
   if (!base) return null;
   return { ...info, base, value: applyMods(base, info.marks), raw: ch };
 }
 
-function sumLetters(str: string, filter = () => true) {
+function sumLetters(str: string, baseMap: Record<string, number>, filter = () => true) {
   let total = 0;
   const list: any[] = [];
   for (const ch of [...str]) {
-    const lv = letterValue(ch);
+    const lv = letterValue(ch, baseMap);
     if (!lv) continue;
     if (filter(lv.baseChar)) { 
       total += lv.value; 
@@ -93,23 +94,42 @@ function sumBirth({ d, m, y }: { d: number, m: number, y: number }) {
   return (String(d) + String(m) + String(y)).split('').reduce((a, c) => a + Number(c), 0); 
 }
 
-function calcularBasico({ name, birth }: { name: string, birth: string }) {
+function calcularCompleto({ name, birth }: { name: string, birth: string }, baseMap: Record<string, number>) {
   const nm = String(name || '').trim();
   const b = parseBirth(String(birth || '').trim());
 
-  const all = sumLetters(nm);
-  const vow = sumLetters(nm, (ch: string) => VOWELS.has(ch));
-  const cons = sumLetters(nm, (ch: string) => !VOWELS.has(ch));
+  if (!b) {
+    throw new Error("Data de nascimento inválida");
+  }
 
+  const all = sumLetters(nm, baseMap);
+  const vow = sumLetters(nm, baseMap, (ch: string) => VOWELS.has(ch));
+  const cons = sumLetters(nm, baseMap, (ch: string) => !VOWELS.has(ch));
+
+  // Números básicos
   const expressao = reduce(all.total);
   const motivacao = reduce(vow.total);
   const impressao = reduce(cons.total);
-  let destino = 0;
-  if (b) destino = reduce(sumBirth(b));
+  const destino = reduce(sumBirth(b));
+  
+  // Número Psíquico (dia do nascimento reduzido)
+  const numero_psiquico = reduce(b.d);
+  
+  // Dia do Nascimento (natural)
+  const dia_nascimento_natural = b.d;
+  const dia_nascimento_reduzido = reduce(b.d);
+  
+  // Grau de Ascensão (soma de expressão + destino)
+  const grau_ascensao = reduce(expressao + destino);
 
   return {
     expressao, motivacao, impressao, destino,
-    debug: { somas: { todas: all.total, vogais: vow.total, consoantes: cons.total }, letras: all.list }
+    numero_psiquico, dia_nascimento_natural, dia_nascimento_reduzido, grau_ascensao,
+    debug: { 
+      somas: { todas: all.total, vogais: vow.total, consoantes: cons.total }, 
+      letras: all.list,
+      nascimento: b
+    }
   };
 }
 
@@ -132,43 +152,105 @@ serve(async (req) => {
       throw new Error("Nome e data de nascimento são obrigatórios");
     }
 
-    // Cálculos básicos
-    const base = calcularBasico({ name, birth });
-    console.log('🧮 Números calculados:', base);
+    // Buscar tabela de conversão do banco
+    console.log('🔍 Buscando tabela de conversão...');
+    const { data: conversionTables, error: convError } = await supabase
+      .from('conversion_tables')
+      .select('mapping')
+      .eq('is_default', true)
+      .eq('locale', 'pt-BR')
+      .limit(1);
+
+    let baseMap = FALLBACK_BASE_MAP;
+    if (conversionTables && conversionTables.length > 0) {
+      baseMap = conversionTables[0].mapping as Record<string, number>;
+      console.log('✅ Tabela de conversão carregada do banco');
+    } else {
+      console.log('⚠️ Usando tabela de conversão padrão (fallback)');
+    }
+
+    // Cálculos completos
+    const numeros = calcularCompleto({ name, birth }, baseMap);
+    console.log('🧮 Números calculados:', numeros);
 
     // Cálculo do Ano Pessoal
     const ano = yearRef ?? new Date().getFullYear();
     const birthObj = parseBirth(birth);
-    let anoPessoal = 1;
-    
-    if (birthObj) {
-      const anoPessoalRaw = birthObj.d + birthObj.m + ano;
-      anoPessoal = reduce(anoPessoalRaw);
+    if (!birthObj) {
+      throw new Error("Data de nascimento inválida");
     }
+    
+    const anoPessoalRaw = birthObj.d + birthObj.m + ano;
+    const anoPessoal = reduce(anoPessoalRaw);
     console.log('📅 Ano pessoal calculado:', anoPessoal, 'para ano', ano);
 
-    // Buscar textos oficiais
-    const numbersToSearch = [base.motivacao, base.expressao, base.impressao, base.destino, anoPessoal];
-    console.log('🔍 Buscando textos para números:', numbersToSearch);
-    
-    const { data: textos, error: textError } = await supabase
+    // Definir seções e números para buscar
+    const secoes = [
+      'motivacao', 'expressao', 'impressao', 'destino', 'ano_pessoal',
+      'Número Psíquico', 'Dia do Nascimento', 'Grau de Ascensão',
+      'Cores Favoráveis', 'Dias do Mês Favoráveis'
+    ];
+
+    const numerosCompletos = {
+      ...numeros,
+      ano_pessoal: anoPessoal
+    };
+
+    console.log('🔍 Buscando textos para todas as seções...');
+    const { data: todosTextos, error: textError } = await supabase
       .from('numerology_texts')
       .select('section, key_number, title, body')
-      .in('section', ['motivacao', 'expressao', 'impressao', 'destino', 'ano_pessoal'])
-      .in('key_number', numbersToSearch)
       .eq('lang', 'pt-BR');
 
-    console.log('📚 Textos encontrados:', textos?.length || 0);
+    console.log('📚 Total de textos encontrados:', todosTextos?.length || 0);
     if (textError) {
       console.error('❌ Erro ao buscar textos:', textError);
     }
 
-    // Organizar textos por seção
-    const textosMap = (textos || []).reduce((acc: any, texto: any) => {
+    // Organizar textos por seção e número
+    const textosMap = (todosTextos || []).reduce((acc: any, texto: any) => {
       const key = `${texto.section}_${texto.key_number}`;
       acc[key] = texto;
       return acc;
     }, {});
+
+    // Criar textos dinâmicos baseados nos números calculados
+    const textosDinamicos: any = {};
+    
+    // Seções básicas numerológicas
+    textosDinamicos.motivacao = textosMap[`motivacao_${numeros.motivacao}`] || 
+      { title: `Motivação ${numeros.motivacao}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.expressao = textosMap[`expressao_${numeros.expressao}`] || 
+      { title: `Expressão ${numeros.expressao}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.impressao = textosMap[`impressao_${numeros.impressao}`] || 
+      { title: `Impressão ${numeros.impressao}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.destino = textosMap[`destino_${numeros.destino}`] || 
+      { title: `Destino ${numeros.destino}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.ano_pessoal = textosMap[`ano_pessoal_${anoPessoal}`] || 
+      { title: `Ano Pessoal ${anoPessoal}`, body: 'Conteúdo em desenvolvimento.' };
+
+    // Seções adicionais
+    textosDinamicos.numero_psiquico = textosMap[`Número Psíquico_${numeros.numero_psiquico}`] || 
+      { title: `Número Psíquico ${numeros.numero_psiquico}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.dia_nascimento = textosMap[`Dia do Nascimento_${numeros.dia_nascimento_natural}`] || 
+      { title: `Dia do Nascimento ${numeros.dia_nascimento_natural}`, body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.grau_ascensao = textosMap[`Grau de Ascensão_${numeros.grau_ascensao}`] || 
+      { title: `Grau de Ascensão ${numeros.grau_ascensao}`, body: 'Conteúdo em desenvolvimento.' };
+
+    // Seções especiais (buscar o primeiro disponível se não tiver número específico)
+    textosDinamicos.cores_favoraveis = textosMap[`Cores Favoráveis_${numeros.destino}`] || 
+      (todosTextos || []).find(t => t.section === 'Cores Favoráveis') || 
+      { title: 'Cores Favoráveis', body: 'Conteúdo em desenvolvimento.' };
+    
+    textosDinamicos.dias_favoraveis = textosMap[`Dias do Mês Favoráveis_${numeros.destino}`] || 
+      (todosTextos || []).find(t => t.section === 'Dias do Mês Favoráveis') || 
+      { title: 'Dias do Mês Favoráveis', body: 'Conteúdo em desenvolvimento.' };
 
     const resultado = {
       header: { 
@@ -177,24 +259,13 @@ serve(async (req) => {
         anoReferencia: ano,
         dataGeracao: new Date().toISOString()
       },
-      numeros: {
-        expressao: base.expressao,
-        motivacao: base.motivacao,
-        impressao: base.impressao,
-        destino: base.destino,
-        ano_pessoal: anoPessoal
-      },
-      textos: {
-        motivacao: textosMap[`motivacao_${base.motivacao}`] || { title: `Motivação ${base.motivacao}`, body: 'Texto não encontrado.' },
-        expressao: textosMap[`expressao_${base.expressao}`] || { title: `Expressão ${base.expressao}`, body: 'Texto não encontrado.' },
-        impressao: textosMap[`impressao_${base.impressao}`] || { title: `Impressão ${base.impressao}`, body: 'Texto não encontrado.' },
-        destino: textosMap[`destino_${base.destino}`] || { title: `Destino ${base.destino}`, body: 'Texto não encontrado.' },
-        ano_pessoal: textosMap[`ano_pessoal_${anoPessoal}`] || { title: `Ano Pessoal ${anoPessoal}`, body: 'Texto não encontrado.' }
-      },
-      debug: base.debug
+      numeros: numerosCompletos,
+      textos: textosDinamicos,
+      debug: numeros.debug
     };
 
-    console.log('✅ Mapa gerado com sucesso!', JSON.stringify(resultado, null, 2));
+    console.log('✅ Mapa completo gerado com sucesso!');
+    console.log('📋 Seções incluídas:', Object.keys(textosDinamicos));
 
     return new Response(JSON.stringify(resultado), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -202,7 +273,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Erro na geração do mapa:', error);
+    console.error('💥 Erro na geração do mapa:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

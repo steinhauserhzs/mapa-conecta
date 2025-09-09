@@ -13,14 +13,16 @@ interface MapaData {
     impressao: number;
     destino: number;
     ano_pessoal: number;
+    numero_psiquico?: number;
+    dia_nascimento_natural?: number;
+    dia_nascimento_reduzido?: number;
+    grau_ascensao?: number;
   };
-  textos: {
-    motivacao: { title: string; body: string };
-    expressao: { title: string; body: string };
-    impressao: { title: string; body: string };
-    destino: { title: string; body: string };
-    ano_pessoal: { title: string; body: string };
-  };
+  textos: Record<string, {
+    title: string;
+    body: string;
+  }>;
+  debug?: any;
 }
 
 interface MapaPDFProps {
@@ -41,8 +43,18 @@ const Section = ({ title, body }: { title: string; body: string }) => (
 export default function MapaPDF({ data }: MapaPDFProps) {
   const { header, numeros, textos } = data;
   
+  // Define section order for display
+  const secaoOrdem = [
+    'motivacao', 'expressao', 'impressao', 'destino', 'ano_pessoal',
+    'numero_psiquico', 'dia_nascimento', 'grau_ascensao', 
+    'cores_favoraveis', 'dias_favoraveis'
+  ];
+
+  // Get available sections in defined order
+  const secoesDisponiveis = secaoOrdem.filter(secao => textos[secao]);
+
   return (
-    <div className="w-[794px] mx-auto bg-background text-foreground font-serif" id="mapa-pdf">
+    <div className="w-[794px] mx-auto bg-background text-foreground font-serif" id="mapa-para-pdf">
       {/* CAPA */}
       <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20 relative overflow-hidden">
         {/* Decorative elements */}
@@ -111,6 +123,34 @@ export default function MapaPDF({ data }: MapaPDFProps) {
               <span className="text-3xl font-bold text-primary">{numeros.ano_pessoal}</span>
             </div>
           </div>
+
+          {/* Additional numbers if available */}
+          {numeros.numero_psiquico && (
+            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-semibold">Número Psíquico</span>
+                <span className="text-3xl font-bold text-primary">{numeros.numero_psiquico}</span>
+              </div>
+            </div>
+          )}
+          
+          {numeros.dia_nascimento_natural && (
+            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-semibold">Dia Nascimento</span>
+                <span className="text-3xl font-bold text-primary">{numeros.dia_nascimento_natural}</span>
+              </div>
+            </div>
+          )}
+          
+          {numeros.grau_ascensao && (
+            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
+              <div className="flex justify-between items-center">
+                <span className="text-xl font-semibold">Grau Ascensão</span>
+                <span className="text-3xl font-bold text-primary">{numeros.grau_ascensao}</span>
+              </div>
+            </div>
+          )}
         </div>
         
         <div className="text-center mt-12">
@@ -120,12 +160,14 @@ export default function MapaPDF({ data }: MapaPDFProps) {
         </div>
       </section>
 
-      {/* SEÇÕES */}
-      <Section title={textos.motivacao.title} body={textos.motivacao.body} />
-      <Section title={textos.impressao.title} body={textos.impressao.body} />
-      <Section title={textos.expressao.title} body={textos.expressao.body} />
-      <Section title={textos.destino.title} body={textos.destino.body} />
-      <Section title={textos.ano_pessoal.title} body={textos.ano_pessoal.body} />
+      {/* SEÇÕES DINÂMICAS */}
+      {secoesDisponiveis.map((secao) => (
+        <Section 
+          key={secao}
+          title={textos[secao].title}
+          body={textos[secao].body}
+        />
+      ))}
       
       {/* RODAPÉ FINAL */}
       <section className="px-12 py-16 text-center break-before-page min-h-screen flex flex-col justify-center">
