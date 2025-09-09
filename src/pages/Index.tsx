@@ -6,10 +6,12 @@ import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { PricingSection } from "@/components/PricingSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <SEO />
       <Navbar />
       <main>
         <div id="home">

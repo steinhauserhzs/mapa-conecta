@@ -39,6 +39,7 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          gold: "hsl(42 87% 65%)",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -62,6 +63,20 @@ export default {
       fontFamily: {
         heading: "var(--font-heading)",
         body: "var(--font-body)",
+      },
+      backgroundImage: {
+        'gradient-cosmic': 'var(--gradient-cosmic)',
+        'gradient-gold': 'var(--gradient-gold)', 
+        'gradient-background': 'var(--gradient-background)',
+        'gradient-mystical': 'linear-gradient(135deg, hsl(240 15% 6%), hsl(240 12% 8%))',
+      },
+      boxShadow: {
+        'mystical': 'var(--shadow-mystical)',
+        'cosmic': 'var(--shadow-cosmic)',
+        'gold': 'var(--shadow-gold)',
+      },
+      screens: {
+        'xs': '475px',
       },
       borderRadius: {
         lg: "var(--radius)",
