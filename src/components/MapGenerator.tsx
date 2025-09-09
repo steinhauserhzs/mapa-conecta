@@ -6,14 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { EnhancedDatePicker } from '@/components/ui/enhanced-date-picker';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { CalendarIcon, Download, FileText, Loader2, Edit3, RotateCcw, Save } from 'lucide-react';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MapaPDF from './MapaPDF';
@@ -242,33 +239,12 @@ export default function MapGenerator() {
 
                   <div className="space-y-2">
                     <Label>Data de Nascimento</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !form.watch('birth') && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {form.watch('birth') ? (
-                            format(form.watch('birth'), "dd/MM/yyyy", { locale: ptBR })
-                          ) : (
-                            "Selecione a data"
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={form.watch('birth')}
-                          onSelect={(date) => form.setValue('birth', date!)}
-                          disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <EnhancedDatePicker
+                      date={form.watch('birth')}
+                      onDateChange={(date) => form.setValue('birth', date!)}
+                      placeholder="Selecione a data de nascimento"
+                      className="w-full"
+                    />
                     {form.formState.errors.birth && (
                       <p className="text-sm text-destructive">{form.formState.errors.birth.message}</p>
                     )}
