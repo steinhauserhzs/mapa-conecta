@@ -176,7 +176,8 @@ export default function PlanilhaEquivalencia() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            {/* Versão Desktop - Tabela */}
+            <div className="hidden md:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -205,6 +206,64 @@ export default function PlanilhaEquivalencia() {
                   ))}
                 </TableBody>
               </Table>
+            </div>
+
+            {/* Versão Mobile - Cards */}
+            <div className="md:hidden space-y-4">
+              {filteredData.map((item) => (
+                <Card key={item.destino} className="border-l-4 border-l-primary">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-center">
+                      <div className="text-2xl font-bold text-primary bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-2">
+                        {item.destino}
+                      </div>
+                      Número de Destino {item.destino}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Favoráveis */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-green-700 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-50 border border-green-200 rounded"></div>
+                        Favoráveis ({item.favoraveis.length})
+                      </h4>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div className="text-green-800 font-medium text-center">
+                          {renderNumbersInCell(item.favoraveis, 'favoravel')}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Desfavoráveis */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-semibold text-red-700 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-50 border border-red-200 rounded"></div>
+                        Desfavoráveis ({item.desfavoraveis.length})
+                      </h4>
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <div className="text-red-800 font-medium text-center">
+                          {renderNumbersInCell(item.desfavoraveis, 'desfavoravel')}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Neutros */}
+                    {item.neutros.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-blue-700 flex items-center gap-2">
+                          <div className="w-3 h-3 bg-blue-50 border border-blue-200 rounded"></div>
+                          Neutros ({item.neutros.length})
+                        </h4>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                          <div className="text-blue-800 font-medium text-center">
+                            {renderNumbersInCell(item.neutros, 'neutro')}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             {filteredData.length === 0 && (
