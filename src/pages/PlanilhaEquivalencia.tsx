@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Search, Download, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Dados da planilha de equivalência baseados na imagem compartilhada
@@ -80,10 +80,7 @@ export default function PlanilhaEquivalencia() {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredData = equivalenceData.filter(item => 
-    item.destino.toString().includes(searchTerm) ||
-    item.favoraveis.some(num => num.toString().includes(searchTerm)) ||
-    item.desfavoraveis.some(num => num.toString().includes(searchTerm)) ||
-    item.neutros.some(num => num.toString().includes(searchTerm))
+    item.destino.toString().includes(searchTerm)
   );
 
   const handleExportPDF = () => {
@@ -91,18 +88,18 @@ export default function PlanilhaEquivalencia() {
     console.log('Export PDF functionality to be implemented');
   };
 
-  const renderNumberBadge = (number: number, type: 'favoravel' | 'desfavoravel' | 'neutro') => {
+  const getCellClass = (type: 'favoravel' | 'desfavoravel' | 'neutro') => {
     const variants = {
-      favoravel: 'bg-green-100 text-green-800 border-green-200',
-      desfavoravel: 'bg-red-100 text-red-800 border-red-200',
-      neutro: 'bg-blue-100 text-blue-800 border-blue-200'
+      favoravel: 'bg-green-50 text-green-800 border-green-200',
+      desfavoravel: 'bg-red-50 text-red-800 border-red-200',
+      neutro: 'bg-blue-50 text-blue-800 border-blue-200'
     };
+    return variants[type];
+  };
 
-    return (
-      <Badge key={number} variant="outline" className={`${variants[type]} m-1`}>
-        {number}
-      </Badge>
-    );
+  const renderNumbersInCell = (numbers: number[], type: 'favoravel' | 'desfavoravel' | 'neutro') => {
+    if (numbers.length === 0) return '-';
+    return numbers.join(', ');
   };
 
   return (
@@ -147,7 +144,7 @@ export default function PlanilhaEquivalencia() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por número..."
+            placeholder="Buscar número de destino..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -155,94 +152,66 @@ export default function PlanilhaEquivalencia() {
         </div>
 
         {/* Legenda */}
-        <div className="flex flex-wrap gap-4 p-4 bg-muted/30 rounded-lg">
+        <div className="flex flex-wrap gap-6 p-4 bg-muted/30 rounded-lg">
           <div className="flex items-center gap-2">
-            <Badge className="bg-green-100 text-green-800 border-green-200">Exemplo</Badge>
-            <span className="text-sm">Favoráveis</span>
+            <div className="w-4 h-4 bg-green-50 border border-green-200 rounded"></div>
+            <span className="text-sm font-medium">Números Favoráveis</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-red-100 text-red-800 border-red-200">Exemplo</Badge>
-            <span className="text-sm">Desfavoráveis</span>
+            <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+            <span className="text-sm font-medium">Números Desfavoráveis</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-blue-100 text-blue-800 border-blue-200">Exemplo</Badge>
-            <span className="text-sm">Neutros</span>
+            <div className="w-4 h-4 bg-blue-50 border border-blue-200 rounded"></div>
+            <span className="text-sm font-medium">Números Neutros</span>
           </div>
         </div>
 
-        {/* Grid de Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredData.map((item) => (
-            <Card key={item.destino} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center justify-center">
-                  <div className="text-2xl font-bold text-primary bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center">
-                    {item.destino}
-                  </div>
-                </CardTitle>
-                <CardDescription className="text-center">
-                  Número de Destino {item.destino}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Números Favoráveis */}
-                <div>
-                  <h4 className="text-sm font-semibold text-green-700 mb-2">
-                    Favoráveis ({item.favoraveis.length})
-                  </h4>
-                  <div className="flex flex-wrap min-h-[2rem]">
-                    {item.favoraveis.map(num => renderNumberBadge(num, 'favoravel'))}
-                  </div>
-                </div>
-
-                {/* Números Desfavoráveis */}
-                <div>
-                  <h4 className="text-sm font-semibold text-red-700 mb-2">
-                    Desfavoráveis ({item.desfavoraveis.length})
-                  </h4>
-                  <div className="flex flex-wrap min-h-[2rem]">
-                    {item.desfavoraveis.map(num => renderNumberBadge(num, 'desfavoravel'))}
-                  </div>
-                </div>
-
-                {/* Números Neutros */}
-                {item.neutros.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">
-                      Neutros ({item.neutros.length})
-                    </h4>
-                    <div className="flex flex-wrap min-h-[2rem]">
-                      {item.neutros.map(num => renderNumberBadge(num, 'neutro'))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {filteredData.length === 0 && (
-          <Card>
-            <CardContent className="text-center py-8">
-              <p className="text-muted-foreground">
-                Nenhum resultado encontrado para "{searchTerm}"
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Calculadora rápida de compatibilidade */}
+        {/* Tabela Principal */}
         <Card>
           <CardHeader>
-            <CardTitle>Calculadora Rápida de Compatibilidade</CardTitle>
+            <CardTitle>Planilha de Equivalência Numerológica</CardTitle>
             <CardDescription>
-              Em breve: ferramenta para calcular compatibilidade entre dois números de destino
+              Tabela completa de compatibilidade entre números de destino
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              Funcionalidade em desenvolvimento
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center font-bold">Número de Destino</TableHead>
+                    <TableHead className="text-center font-bold">Números Favoráveis</TableHead>
+                    <TableHead className="text-center font-bold">Números Desfavoráveis</TableHead>
+                    <TableHead className="text-center font-bold">Números Neutros</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.map((item) => (
+                    <TableRow key={item.destino} className="hover:bg-muted/50">
+                      <TableCell className="text-center font-bold text-lg bg-primary/10">
+                        {item.destino}
+                      </TableCell>
+                      <TableCell className={`text-center ${getCellClass('favoravel')} border`}>
+                        {renderNumbersInCell(item.favoraveis, 'favoravel')}
+                      </TableCell>
+                      <TableCell className={`text-center ${getCellClass('desfavoravel')} border`}>
+                        {renderNumbersInCell(item.desfavoraveis, 'desfavoravel')}
+                      </TableCell>
+                      <TableCell className={`text-center ${getCellClass('neutro')} border`}>
+                        {renderNumbersInCell(item.neutros, 'neutro')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
+
+            {filteredData.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhum resultado encontrado para "{searchTerm}"
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
