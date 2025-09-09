@@ -49,6 +49,154 @@ interface MapaData {
   debug?: any;
 }
 
+// -------- Fallback de cálculo no cliente --------
+const MASTER = new Set([11, 22]);
+const VOWELS = new Set(['A','E','I','O','U','Y']);
+
+function analyzeChar(raw: string) {
+  if (!raw) return null;
+  const nfd = raw.normalize('NFD');
+  const m = nfd.toUpperCase().match(/[A-Z]|Ç/);
+  if (!m) return null;
+  const baseChar = m[0];
+  return {
+    baseChar,
+    marks: {
+      apostrophe: /['']/.test(raw),
+      circumflex: /[\u0302]|\^/.test(nfd),
+      ring: /[\u030A]|\u02DA/.test(nfd),
+      tilde: /[\u0303]|~/.test(nfd),
+      diaeresis: /[\u0308]|\u00A8/.test(nfd),
+      grave: /[\u0300]|`/.test(nfd)
+    }
+  };
+}
+
+function applyMods(v: number, m: any) {
+  let val = v;
+  if (m.apostrophe) val += 2;
+  if (m.circumflex) val += 7;
+  if (m.ring) val += 7;
+  if (m.tilde) val += 3;
+  if (m.diaeresis) val *= 2;
+  if (m.grave) val *= 2;
+  return val;
+}
+
+function letterValue(ch: string, baseMap: Record<string, number>) {
+  const info = analyzeChar(ch);
+  if (!info) return null;
+  const base = baseMap[info.baseChar as keyof typeof baseMap];
+  if (!base) return null;
+  return { ...info, base, value: applyMods(base, info.marks), raw: ch };
+}
+
+function sumLetters(str: string, baseMap: Record<string, number>, filter: (ch: string) => boolean = () => true) {
+  let total = 0;
+  for (const ch of [...str]) {
+    const lv = letterValue(ch, baseMap);
+    if (!lv) continue;
+    if (filter(lv.baseChar)) total += lv.value;
+  }
+  return total;
+}
+
+function reduce(n: number): number {
+  if (n <= 0) return 0;
+  if (MASTER.has(n)) return n;
+  while (n > 9 && !MASTER.has(n)) {
+    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
+    if (MASTER.has(n)) return n;
+  }
+  return n;
+}
+
+function parseBirth(b: string) {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(b)) { 
+    const [y, m, d] = b.split('-').map(Number); 
+    return { d, m, y }; 
+  }
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(b)) { 
+    const [d, m, y] = b.split('/').map(Number); 
+    return { d, m, y }; 
+  }
+  return null;
+}
+
+function sumBirth({ d, m, y }: { d: number, m: number, y: number }) {
+  return (String(d) + String(m) + String(y)).split('').reduce((a, c) => a + Number(c), 0);
+}
+
+async function computeOnClient(name: string, birthStr: string, yearRef?: number): Promise<MapaData> {
+  // Buscar tabela de conversão
+  const { data: conv } = await supabase
+    .from('conversion_tables')
+    .select('mapping')
+    .eq('is_default', true)
+    .eq('locale', 'pt-BR')
+    .maybeSingle();
+  const FALLBACK: Record<string, number> = { A:1, B:2, C:3, D:4, E:5, F:8, G:3, H:5, I:1, J:1, K:2, L:3, M:4, N:5, O:7, P:8, Q:1, R:2, S:3, T:4, U:6, V:6, W:6, X:6, Y:1, Z:7, 'Ç':8 };
+  const baseMap = (conv?.mapping as Record<string, number>) || FALLBACK;
+
+  const nm = String(name || '').trim();
+  const b = parseBirth(birthStr);
+  if (!b) throw new Error('Data de nascimento inválida');
+
+  const all = sumLetters(nm, baseMap);
+  const vow = sumLetters(nm, baseMap, (ch: string) => VOWELS.has(ch));
+  const cons = sumLetters(nm, baseMap, (ch: string) => !VOWELS.has(ch));
+
+  const expressao = reduce(all);
+  const motivacao = reduce(vow);
+  const impressao = reduce(cons);
+  const destino = reduce(sumBirth(b));
+  const numero_psiquico = reduce(b.d);
+  const dia_nascimento_natural = b.d;
+  const dia_nascimento_reduzido = reduce(b.d);
+  const grau_ascensao = reduce(expressao + destino);
+
+  const ano = yearRef ?? new Date().getFullYear();
+  const ano_pessoal = reduce(b.d + b.m + ano);
+
+  // Buscar todos os textos
+  const { data: todosTextos } = await supabase
+    .from('numerology_texts')
+    .select('section, key_number, title, body')
+    .eq('lang', 'pt-BR');
+  const textosMap = (todosTextos || []).reduce((acc: any, t: any) => {
+    acc[`${t.section}_${t.key_number}`] = t;
+    return acc;
+  }, {} as Record<string, any>);
+
+  const getText = (section: string, key: number, fallbackTitle: string) =>
+    textosMap[`${section}_${key}`] || { title: `${fallbackTitle} ${key}`, body: 'Conteúdo em desenvolvimento.' };
+
+  const textos: any = {
+    motivacao: getText('motivacao', motivacao, 'Motivação'),
+    expressao: getText('expressao', expressao, 'Expressão'),
+    impressao: getText('impressao', impressao, 'Impressão'),
+    destino: getText('destino', destino, 'Destino'),
+    ano_pessoal: getText('ano_pessoal', ano_pessoal, 'Ano Pessoal'),
+    numero_psiquico: getText('Número Psíquico', numero_psiquico, 'Número Psíquico'),
+    dia_nascimento: getText('Dia do Nascimento', dia_nascimento_natural, 'Dia do Nascimento'),
+    grau_ascensao: getText('Grau de Ascensão', grau_ascensao, 'Grau de Ascensão'),
+  };
+
+  return {
+    header: {
+      name,
+      birth: birthStr,
+      anoReferencia: ano,
+      dataGeracao: new Date().toISOString(),
+    },
+    numeros: {
+      expressao, motivacao, impressao, destino, ano_pessoal,
+      numero_psiquico, dia_nascimento_natural, dia_nascimento_reduzido, grau_ascensao,
+    },
+    textos,
+  } as MapaData;
+}
+
 export default function MapGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
@@ -81,20 +229,36 @@ export default function MapGenerator() {
       };
       console.log('📤 Enviando request:', requestBody);
       
-      const { data: result, error } = await supabase.functions.invoke('generate-map', {
-        body: requestBody,
-      });
+      // Timeout de 10s para a função edge
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout ao chamar a função')), 10000));
+
+      let result: any = null;
+      let error: any = null;
+      try {
+        const resp: any = await Promise.race([
+          supabase.functions.invoke('generate-map', { body: requestBody }),
+          timeoutPromise,
+        ]);
+        if (resp && 'data' in resp) {
+          result = resp.data;
+          error = resp.error;
+        } else {
+          error = resp;
+        }
+      } catch (e) {
+        error = e;
+      }
 
       console.log('📥 Resposta recebida:', { result, error });
 
-      if (error) {
-        console.error('❌ Erro da função:', error);
-        throw error;
-      }
-
-      if (!result) {
-        console.error('❌ Resultado vazio');
-        throw new Error('Nenhum resultado retornado');
+      if (error || !result) {
+        console.warn('⚠️ Falha na função edge, usando fallback no cliente...', error);
+        const fallback = await computeOnClient(data.name, birthString, data.yearRef);
+        setMapaData(fallback);
+        setEditedTextos(fallback.textos || {});
+        setIsEditing(false);
+        toast({ title: 'Mapa gerado (modo offline)', description: 'Usamos cálculo local como fallback.' });
+        return;
       }
 
       console.log('✅ Mapa gerado com sucesso:', result);
