@@ -1,8 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { Menu, X } from "lucide-react";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Menu, X, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 
 export const Navbar = () => {
+  const { user, profile, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
@@ -40,12 +43,38 @@ export const Navbar = () => {
           
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              Entrar
-            </Button>
-            <Button variant="cosmic" size="sm">
-              Começar Agora
-            </Button>
+            {user ? (
+              <>
+                <Link to="/dashboard">
+                  <Button variant="ghost" size="sm">
+                    <User className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
+                </Button>
+                {profile?.name && (
+                  <span className="text-sm text-muted-foreground">
+                    {profile.name}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost" size="sm">
+                    Entrar
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button variant="cosmic" size="sm">
+                    Começar Agora
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
           
           {/* Mobile Menu Button */}
@@ -74,12 +103,38 @@ export const Navbar = () => {
                 </a>
               ))}
               <div className="px-4 py-2 space-y-2">
-                <Button variant="outline" className="w-full" size="sm">
-                  Entrar
-                </Button>
-                <Button variant="cosmic" className="w-full" size="sm">
-                  Começar Agora
-                </Button>
+                {user ? (
+                  <>
+                    <Link to="/dashboard">
+                      <Button variant="outline" className="w-full" size="sm">
+                        <User className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                    <Button variant="outline" className="w-full" size="sm" onClick={signOut}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sair
+                    </Button>
+                    {profile?.name && (
+                      <div className="px-2 py-1 text-sm text-muted-foreground text-center">
+                        {profile.name}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Link to="/auth">
+                      <Button variant="outline" className="w-full" size="sm">
+                        Entrar
+                      </Button>
+                    </Link>
+                    <Link to="/auth">
+                      <Button variant="cosmic" className="w-full" size="sm">
+                        Começar Agora
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -1,1 +1,4 @@
 project_id = "vbrhjptkfwugeheqmvlz"
+
+[functions.calculate-numerology]
+verify_jwt = true
