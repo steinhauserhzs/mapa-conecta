@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Numerology from "./pages/Numerology";
+import MapGenerator from "./pages/MapGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Numerology />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/map-generator"
+                element={
+                  <ProtectedRoute>
+                    <MapGenerator />
                   </ProtectedRoute>
                 }
               />

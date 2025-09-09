@@ -297,6 +297,42 @@ export type Database = {
           },
         ]
       }
+      numerology_texts: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          key_number: number
+          lang: string
+          section: string
+          title: string
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          key_number: number
+          lang?: string
+          section: string
+          title: string
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          key_number?: number
+          lang?: string
+          section?: string
+          title?: string
+          updated_at?: string
+          version?: string
+        }
+        Relationships: []
+      }
       plans: {
         Row: {
           active: boolean

@@ -17,7 +17,8 @@ export const Navbar = () => {
   ];
 
   const userLinks = user ? [
-    { name: "Calculadora", href: "/numerology" }
+    { name: "Calculadora", href: "/numerology" },
+    { name: "Gerador de Mapas", href: "/map-generator" }
   ] : [];
 
   return (
