@@ -248,7 +248,7 @@ export default function MapGenerator() {
                   <EnhancedDatePicker
                     date={form.watch('birth')}
                     onDateChange={(date) => form.setValue('birth', date)}
-                    placeholder="Selecione a data de nascimento"
+                    placeholder="Selecione a data"
                     className="mt-1 w-full"
                   />
                   {form.formState.errors.birth && (

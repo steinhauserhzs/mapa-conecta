@@ -23,7 +23,7 @@ const months = [
 export function EnhancedDatePicker({ 
   date, 
   onDateChange, 
-  placeholder = "Selecione uma data",
+  placeholder = "Escolha uma data",
   className 
 }: EnhancedDatePickerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -61,13 +61,15 @@ export function EnhancedDatePicker({
         <Button
           variant="outline"
           className={cn(
-            "w-full justify-start text-left font-normal",
+            "w-full justify-start text-left font-normal text-sm",
             !date && "text-muted-foreground",
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "dd/MM/yyyy") : placeholder}
+          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+          <span className="truncate">
+            {date ? format(date, "dd/MM/yyyy") : placeholder}
+          </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
