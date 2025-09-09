@@ -15,6 +15,7 @@ import AdminUsers from "./pages/AdminUsers";
 import MapGenerator from "./pages/MapGenerator";
 import Clientes from "./pages/Clientes";
 import Relatorios from "./pages/Relatorios";
+import PlanilhaEquivalencia from "./pages/PlanilhaEquivalencia";
 import Analises from "./pages/Analises";
 import AnaliseTelefone from "./pages/AnaliseTelefone";
 import AnaliseEndereco from "./pages/AnaliseEndereco";
@@ -87,6 +88,16 @@ const App = () => (
                   }
                 >
                   <Route index element={<Relatorios />} />
+                </Route>
+                <Route
+                  path="/planilha-equivalencia"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<PlanilhaEquivalencia />} />
                 </Route>
                 <Route
                   path="/analises"

@@ -12,6 +12,7 @@ import {
   Car,
   Edit,
   TrendingUp,
+  Table,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -53,6 +54,11 @@ const navigation = [
     title: 'Relatórios',
     url: '/relatorios',
     icon: FileText,
+  },
+  {
+    title: 'Planilha de Equivalência',
+    url: '/planilha-equivalencia',
+    icon: Table,
   },
   {
     title: 'Análises',
