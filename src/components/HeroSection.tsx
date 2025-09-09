@@ -20,8 +20,8 @@ export const HeroSection = () => {
       <div className="relative z-10 container mx-auto px-4 text-center">
         <div className="max-w-4xl mx-auto">
           {/* Main heading */}
-          <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 bg-cosmic bg-clip-text text-transparent float">
-            Jé Fêrraz Numerologia
+          <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 bg-cosmic bg-clip-text text-transparent">
+            Numerologia Cabalística
           </h1>
           
           {/* Subtitle */}
@@ -80,10 +80,6 @@ export const HeroSection = () => {
         </div>
       </div>
       
-      {/* Floating elements */}
-      <div className="absolute top-20 left-10 text-6xl text-primary/20 float animation-delay-1000">11</div>
-      <div className="absolute top-40 right-20 text-4xl text-secondary/20 float animation-delay-2000">22</div>
-      <div className="absolute bottom-32 left-20 text-5xl text-accent/20 float animation-delay-3000">33</div>
     </section>
   );
 };
