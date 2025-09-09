@@ -429,7 +429,11 @@ const Dashboard = () => {
                     <CardDescription>Gerenciar usuários do sistema</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button className="w-full" variant="outline">
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      onClick={() => window.location.href = '/admin/users'}
+                    >
                       <Users className="h-4 w-4 mr-2" />
                       Gerenciar Usuários
                     </Button>
