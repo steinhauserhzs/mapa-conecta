@@ -190,24 +190,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signOut = async () => {
     try {
+      console.log('Starting logout process...');
+      setLoading(true);
+      
       const { error } = await supabase.auth.signOut();
+      console.log('Supabase signOut result:', error);
+      
       if (error) {
+        console.error('Logout error:', error);
         toast({
           title: "Erro ao sair",
           description: error.message,
           variant: "destructive",
         });
       } else {
+        console.log('Logout successful, clearing state...');
         setUser(null);
         setProfile(null);
         setSession(null);
+        
         toast({
           title: "Logout realizado com sucesso!",
           description: "Você foi desconectado.",
         });
+        
+        console.log('Redirecting to home...');
+        // Force redirect to home page
+        window.location.href = '/';
       }
     } catch (error) {
-      console.error('Error in signOut:', error);
+      console.error('Unexpected error in signOut:', error);
+      toast({
+        title: "Erro inesperado",
+        description: "Ocorreu um erro durante o logout.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 

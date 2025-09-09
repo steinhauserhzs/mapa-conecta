@@ -90,15 +90,34 @@ serve(async (req) => {
             throw new Error("User ID is required");
           }
 
-          const banUntil = action === "ban" ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString() : "none";
+          console.log(`Admin ${user.id} attempting to ${action} user ${userId}`);
           
-          const { error: banError } = await supabase.auth.admin.updateUserById(userId, {
-            ban_duration: banUntil
-          });
-
-          if (banError) throw banError;
-
-          console.log(`User ${userId} ${action === "ban" ? "banned" : "unbanned"} by admin ${user.id}`);
+          if (action === "ban") {
+            // Ban user for 30 days
+            const banUntil = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            const { error: banError } = await supabase.auth.admin.updateUserById(userId, {
+              banned_until: banUntil
+            });
+            
+            if (banError) {
+              console.error('Error banning user:', banError);
+              throw banError;
+            }
+            
+            console.log(`User ${userId} banned until ${banUntil}`);
+          } else {
+            // Unban user by setting banned_until to null
+            const { error: unbanError } = await supabase.auth.admin.updateUserById(userId, {
+              banned_until: null
+            });
+            
+            if (unbanError) {
+              console.error('Error unbanning user:', unbanError);
+              throw unbanError;
+            }
+            
+            console.log(`User ${userId} unbanned`);
+          }
 
           return new Response(
             JSON.stringify({ 
@@ -110,6 +129,8 @@ serve(async (req) => {
               status: 200,
             }
           );
+        } else {
+          throw new Error("Invalid action. Use 'ban' or 'unban'");
         }
         break;
 
