@@ -66,19 +66,36 @@ export default function MapGenerator() {
 
   const onSubmit = async (data: FormData) => {
     setIsGenerating(true);
+    console.log('🔄 Iniciando geração do mapa no cliente...', data);
+    
     try {
       const birthString = format(data.birth, 'yyyy-MM-dd');
+      console.log('📅 Data formatada:', birthString);
+      
+      const requestBody = {
+        name: data.name,
+        birth: birthString,
+        yearRef: data.yearRef,
+      };
+      console.log('📤 Enviando request:', requestBody);
       
       const { data: result, error } = await supabase.functions.invoke('generate-map', {
-        body: {
-          name: data.name,
-          birth: birthString,
-          yearRef: data.yearRef,
-        },
+        body: requestBody,
       });
 
-      if (error) throw error;
+      console.log('📥 Resposta recebida:', { result, error });
 
+      if (error) {
+        console.error('❌ Erro da função:', error);
+        throw error;
+      }
+
+      if (!result) {
+        console.error('❌ Resultado vazio');
+        throw new Error('Nenhum resultado retornado');
+      }
+
+      console.log('✅ Mapa gerado com sucesso:', result);
       setMapaData(result);
       setEditedTextos(result.textos);
       setIsEditing(false);
@@ -88,7 +105,7 @@ export default function MapGenerator() {
         description: 'Seu mapa numerológico está pronto.',
       });
     } catch (error: any) {
-      console.error('Erro ao gerar mapa:', error);
+      console.error('💥 Erro completo ao gerar mapa:', error);
       toast({
         title: 'Erro ao gerar mapa',
         description: error.message || 'Tente novamente.',

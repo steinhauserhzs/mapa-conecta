@@ -119,12 +119,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Iniciando geração do mapa...');
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     const { name, birth, yearRef } = await req.json();
+    console.log('📊 Dados recebidos:', { name, birth, yearRef });
 
     if (!name || !birth) {
       throw new Error("Nome e data de nascimento são obrigatórios");
@@ -132,6 +134,7 @@ serve(async (req) => {
 
     // Cálculos básicos
     const base = calcularBasico({ name, birth });
+    console.log('🧮 Números calculados:', base);
 
     // Cálculo do Ano Pessoal
     const ano = yearRef ?? new Date().getFullYear();
@@ -142,17 +145,22 @@ serve(async (req) => {
       const anoPessoalRaw = birthObj.d + birthObj.m + ano;
       anoPessoal = reduce(anoPessoalRaw);
     }
+    console.log('📅 Ano pessoal calculado:', anoPessoal, 'para ano', ano);
 
     // Buscar textos oficiais
+    const numbersToSearch = [base.motivacao, base.expressao, base.impressao, base.destino, anoPessoal];
+    console.log('🔍 Buscando textos para números:', numbersToSearch);
+    
     const { data: textos, error: textError } = await supabase
       .from('numerology_texts')
       .select('section, key_number, title, body')
       .in('section', ['motivacao', 'expressao', 'impressao', 'destino', 'ano_pessoal'])
-      .in('key_number', [base.motivacao, base.expressao, base.impressao, base.destino, anoPessoal])
+      .in('key_number', numbersToSearch)
       .eq('lang', 'pt-BR');
 
+    console.log('📚 Textos encontrados:', textos?.length || 0);
     if (textError) {
-      console.error('Erro ao buscar textos:', textError);
+      console.error('❌ Erro ao buscar textos:', textError);
     }
 
     // Organizar textos por seção
@@ -185,6 +193,8 @@ serve(async (req) => {
       },
       debug: base.debug
     };
+
+    console.log('✅ Mapa gerado com sucesso!', JSON.stringify(resultado, null, 2));
 
     return new Response(JSON.stringify(resultado), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
