@@ -12,10 +12,12 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { profile, isAdmin } = useAuth();
   const { demoFlag } = useAppStore();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -55,7 +57,10 @@ const Dashboard = () => {
               <span className="font-semibold">Plano Premium</span>
             </div>
           )}
-          <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
+          <Button 
+            onClick={() => navigate('/mapas')}
+            className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Novo Mapa
           </Button>
@@ -120,8 +125,11 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/mapas')}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -138,36 +146,19 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <Card className="cursor-pointer hover:shadow-lg transition-shadow opacity-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Clientes
             </CardTitle>
             <CardDescription>
-              Gerencie seu cadastro de clientes
+              Gerencie seu cadastro de clientes (em breve)
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
-              Gerenciar Clientes
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Relatórios
-            </CardTitle>
-            <CardDescription>
-              Visualize estatísticas e gere relatórios
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">
-              Ver Relatórios
+            <Button variant="outline" className="w-full" disabled>
+              Em Desenvolvimento
             </Button>
           </CardContent>
         </Card>
@@ -213,7 +204,10 @@ const Dashboard = () => {
               <p className="text-muted-foreground mb-4">
                 Comece criando seu primeiro mapa numerológico
               </p>
-              <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
+              <Button 
+                onClick={() => navigate('/mapas')}
+                className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Criar Mapa
               </Button>

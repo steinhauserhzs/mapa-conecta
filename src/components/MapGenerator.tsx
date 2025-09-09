@@ -8,7 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Download, FileText, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { CalendarIcon, Download, FileText, Loader2, Edit3, RotateCcw, Save } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -54,6 +56,8 @@ export default function MapGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [mapaData, setMapaData] = useState<MapaData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTextos, setEditedTextos] = useState<MapaData['textos'] | null>(null);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -79,6 +83,8 @@ export default function MapGenerator() {
       if (error) throw error;
 
       setMapaData(result);
+      setEditedTextos(result.textos);
+      setIsEditing(false);
       
       toast({
         title: 'Mapa gerado com sucesso!',
@@ -109,10 +115,12 @@ export default function MapGenerator() {
         filename: `mapa-numerologico-${mapaData.header.name.replace(/\s+/g, '-')}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-          scale: 2,
+          scale: 1.5,
           useCORS: true,
           letterRendering: true,
-          allowTaint: false
+          allowTaint: false,
+          scrollX: 0,
+          scrollY: 0
         },
         jsPDF: { 
           unit: 'mm', 
@@ -158,13 +166,52 @@ export default function MapGenerator() {
     });
   };
 
+  const startEditing = () => {
+    setIsEditing(true);
+  };
+
+  const endEditing = () => {
+    setIsEditing(false);
+  };
+
+  const restoreOriginals = () => {
+    if (mapaData) {
+      setEditedTextos(mapaData.textos);
+      toast({
+        title: 'Textos restaurados',
+        description: 'Os textos originais foram restaurados.',
+      });
+    }
+  };
+
+  const saveChanges = () => {
+    toast({
+      title: 'Alterações salvas',
+      description: 'As modificações foram aplicadas no preview.',
+    });
+  };
+
+  const updateEditedText = (section: keyof MapaData['textos'], field: 'title' | 'body', value: string) => {
+    if (editedTextos) {
+      setEditedTextos({
+        ...editedTextos,
+        [section]: {
+          ...editedTextos[section],
+          [field]: value
+        }
+      });
+    }
+  };
+
+  const currentTextos = editedTextos || mapaData?.textos;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2">Gerador de Mapa Numerológico</h1>
-          <p className="text-muted-foreground text-lg">
-            Sistema completo de geração de mapas cabalísticos profissionais
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Mapas Numerológicos</h1>
+          <p className="text-muted-foreground">
+            Gere e edite mapas numerológicos personalizados
           </p>
         </div>
 
@@ -257,56 +304,160 @@ export default function MapGenerator() {
               </CardContent>
             </Card>
 
-            {/* Botões de Export */}
+            {/* Controles de Edição e Export */}
             {mapaData && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="w-5 h-5" />
-                    Exportar
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    onClick={exportToPDF} 
-                    className="w-full" 
-                    variant="default"
-                    disabled={isExportingPDF}
-                  >
-                    {isExportingPDF ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Gerando PDF...
-                      </>
+              <>
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Edit3 className="w-5 h-5" />
+                      Edição de Conteúdo
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {!isEditing ? (
+                      <Button 
+                        onClick={startEditing} 
+                        className="w-full" 
+                        variant="outline"
+                      >
+                        <Edit3 className="mr-2 h-4 w-4" />
+                        Ativar Edição
+                      </Button>
                     ) : (
-                      'Baixar PDF'
+                      <>
+                        <Button 
+                          onClick={saveChanges} 
+                          className="w-full"
+                        >
+                          <Save className="mr-2 h-4 w-4" />
+                          Salvar Alterações
+                        </Button>        
+                        <Button 
+                          onClick={restoreOriginals} 
+                          className="w-full" 
+                          variant="outline"
+                        >
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Restaurar Originais
+                        </Button>
+                        <Button 
+                          onClick={endEditing} 
+                          className="w-full" 
+                          variant="secondary"
+                        >
+                          Finalizar Edição
+                        </Button>
+                      </>
                     )}
-                  </Button>
-                  <Button 
-                    onClick={exportToJSON} 
-                    className="w-full" 
-                    variant="outline"
-                  >
-                    Baixar JSON
-                  </Button>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Download className="w-5 h-5" />
+                      Exportar
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      onClick={exportToPDF} 
+                      className="w-full" 
+                      variant="default"
+                      disabled={isExportingPDF}
+                    >
+                      {isExportingPDF ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Gerando PDF...
+                        </>
+                      ) : (
+                        'Baixar PDF'
+                      )}
+                    </Button>
+                    <Button 
+                      onClick={exportToJSON} 
+                      className="w-full" 
+                      variant="outline"
+                    >
+                      Baixar JSON
+                    </Button>
+                  </CardContent>
+                </Card>
+              </>
             )}
           </div>
 
-          {/* Preview do Mapa */}
+          {/* Preview do Mapa e Editor */}
           <div className="lg:col-span-2">
             {mapaData ? (
-              <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-                <div className="p-4 border-b">
-                  <h3 className="font-semibold">Preview do Mapa</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Role para ver o mapa completo ou exporte em PDF
-                  </p>
-                </div>
-                <div className="max-h-[800px] overflow-y-auto">
-                  <div className="transform scale-50 origin-top-left" style={{ width: '200%' }}>
-                    <MapaPDF data={mapaData} />
+              <div className="space-y-6">
+                {/* Editor de Textos */}
+                {isEditing && currentTextos && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Edit3 className="w-5 h-5" />
+                        Editor de Conteúdo
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Tabs defaultValue="motivacao" className="w-full">
+                        <TabsList className="grid w-full grid-cols-5">
+                          <TabsTrigger value="motivacao">Motivação</TabsTrigger>
+                          <TabsTrigger value="expressao">Expressão</TabsTrigger>
+                          <TabsTrigger value="impressao">Impressão</TabsTrigger>
+                          <TabsTrigger value="destino">Destino</TabsTrigger>
+                          <TabsTrigger value="ano_pessoal">Ano Pessoal</TabsTrigger>
+                        </TabsList>
+                        
+                        {Object.entries(currentTextos).map(([key, value]) => (
+                          <TabsContent key={key} value={key} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor={`${key}-title`}>Título</Label>
+                              <Input
+                                id={`${key}-title`}
+                                value={value.title}
+                                onChange={(e) => updateEditedText(key as keyof MapaData['textos'], 'title', e.target.value)}
+                                placeholder="Título da seção"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`${key}-body`}>Conteúdo</Label>
+                              <Textarea
+                                id={`${key}-body`}
+                                value={value.body}
+                                onChange={(e) => updateEditedText(key as keyof MapaData['textos'], 'body', e.target.value)}
+                                placeholder="Conteúdo da seção"
+                                rows={8}
+                                className="resize-none"
+                              />
+                            </div>
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Preview */}
+                <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold">Preview do Mapa</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {isEditing ? 'Modo de edição ativo - alterações são refletidas em tempo real' : 'Role para ver o mapa completo ou exporte em PDF'}
+                    </p>
+                  </div>
+                  <div className="max-h-[800px] overflow-y-auto">
+                    <div className="transform scale-50 origin-top-left" style={{ width: '200%' }}>
+                      <MapaPDF 
+                        data={{
+                          ...mapaData,
+                          textos: currentTextos || mapaData.textos
+                        }} 
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
+import MapGenerator from "./pages/MapGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,16 @@ const App = () => (
                   }
                 >
                   <Route index element={<Dashboard />} />
+                </Route>
+                <Route
+                  path="/mapas"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<MapGenerator />} />
                 </Route>
                 <Route
                   path="/admin/users"
