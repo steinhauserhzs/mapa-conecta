@@ -16,6 +16,7 @@ import MapGenerator from "./pages/MapGenerator";
 import Clientes from "./pages/Clientes";
 import Relatorios from "./pages/Relatorios";
 import PlanilhaEquivalencia from "./pages/PlanilhaEquivalencia";
+import TabelaConversao from "./pages/TabelaConversao";
 import Analises from "./pages/Analises";
 import AnaliseTelefone from "./pages/AnaliseTelefone";
 import AnaliseEndereco from "./pages/AnaliseEndereco";
@@ -98,6 +99,16 @@ const App = () => (
                   }
                 >
                   <Route index element={<PlanilhaEquivalencia />} />
+                </Route>
+                <Route
+                  path="/tabela-conversao"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<TabelaConversao />} />
                 </Route>
                 <Route
                   path="/analises"

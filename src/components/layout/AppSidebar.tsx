@@ -13,6 +13,7 @@ import {
   Edit,
   TrendingUp,
   Table,
+  Calculator,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -59,6 +60,11 @@ const navigation = [
     title: 'Planilha de Equivalência',
     url: '/planilha-equivalencia',
     icon: Table,
+  },
+  {
+    title: 'Tabela de Conversão',
+    url: '/tabela-conversao',
+    icon: Calculator,
   },
   {
     title: 'Análises',
