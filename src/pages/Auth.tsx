@@ -7,8 +7,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2, Star } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
+  const { toast } = useToast();
   const { signIn, signUp, user, loading } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -18,6 +21,7 @@ const Auth = () => {
     password: '',
     name: '',
   });
+  const [seeding, setSeeding] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -252,10 +256,31 @@ const Auth = () => {
           {/* Demo Admin Credentials */}
           <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20 max-w-md w-full">
             <h3 className="text-sm font-medium text-primary mb-2">Acesso Admin (Demonstração):</h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mb-3">
               <strong>Email:</strong> steinhauser.haira@gmail.com<br />
               <strong>Senha:</strong> Je110500@
             </p>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={seeding}
+              onClick={async () => {
+                try {
+                  setSeeding(true);
+                  const { data, error } = await supabase.functions.invoke('seed-admin', {
+                    body: { email: 'steinhauser.haira@gmail.com', password: 'Je110500@', name: 'Admin' }
+                  });
+                  if (error) throw error;
+                  toast({ title: 'Admin pronto', description: 'Conta admin verificada e criada (se necessário).' });
+                } catch (e: any) {
+                  toast({ title: 'Falha ao preparar admin', description: e.message, variant: 'destructive' });
+                } finally {
+                  setSeeding(false);
+                }
+              }}
+            >
+              {seeding ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Preparando...</>) : 'Preparar acesso admin'}
+            </Button>
           </div>
         </div>
       </div>
