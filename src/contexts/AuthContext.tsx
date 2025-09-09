@@ -21,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   signUp: (email: string, password: string, name?: string) => Promise<{ error?: any }>;
+  demoSignIn: () => Promise<{ error?: any }>;
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }
@@ -188,6 +189,46 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const demoSignIn = async () => {
+    try {
+      setLoading(true);
+      console.log('Starting demo login...');
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: 'steinhauser.haira@gmail.com',
+        password: 'Je110500@',
+      });
+
+      if (error) {
+        console.error('Demo login error:', error);
+        toast({
+          title: "Erro no login DEMO",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      console.log('Demo login successful!');
+      toast({
+        title: "Login DEMO realizado!",
+        description: "Bem-vindo ao sistema de demonstração.",
+      });
+
+      return { error: null };
+    } catch (error) {
+      console.error('Unexpected error in demoSignIn:', error);
+      toast({
+        title: "Erro inesperado",
+        description: "Erro durante o login DEMO.",
+        variant: "destructive",
+      });
+      return { error };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const signOut = async () => {
     try {
       console.log('Starting logout process...');
@@ -239,6 +280,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     loading,
     signIn,
     signUp,
+    demoSignIn,
     signOut,
     isAdmin,
   };

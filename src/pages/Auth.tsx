@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const { toast } = useToast();
-  const { signIn, signUp, user, loading } = useAuth();
+  const { signIn, signUp, demoSignIn, user, loading } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -57,6 +57,15 @@ const Auth = () => {
     
     if (!error) {
       // User will be redirected after email confirmation
+    }
+    setIsLoading(false);
+  };
+
+  const handleDemoSignIn = async () => {
+    setIsLoading(true);
+    const { error } = await demoSignIn();
+    if (!error) {
+      navigate('/dashboard');
     }
     setIsLoading(false);
   };
@@ -280,6 +289,23 @@ const Auth = () => {
               }}
             >
               {seeding ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Preparando...</>) : 'Preparar acesso admin'}
+            </Button>
+            
+            <Button
+              className="w-full mt-3 bg-gradient-to-r from-accent-gold to-primary hover:from-accent-gold/90 hover:to-primary/90 text-white font-semibold"
+              disabled={isLoading}
+              onClick={handleDemoSignIn}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando como DEMO...
+                </>
+              ) : (
+                <>
+                  🎭 Entrar como DEMO
+                </>
+              )}
             </Button>
           </div>
         </div>
