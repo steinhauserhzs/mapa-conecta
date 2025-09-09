@@ -18,13 +18,13 @@ export const Navbar = () => {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-primary/20">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="text-2xl">🔮</div>
-            <span className="text-xl font-bold bg-cosmic bg-clip-text text-transparent">
-              Jé Fêrraz Numerologia
+            <div className="text-xl sm:text-2xl">🔮</div>
+            <span className="text-base sm:text-lg lg:text-xl font-bold bg-cosmic bg-clip-text text-transparent">
+              <span className="hidden xs:inline">Jé Fêrraz </span>Numerologia
             </span>
           </div>
           

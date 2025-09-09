@@ -56,28 +56,28 @@ export const FeaturesSection = () => {
     <section className="py-24 relative">
       <div className="absolute inset-0 starfield opacity-20"></div>
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold font-heading mb-6 bg-cosmic bg-clip-text text-transparent">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="text-center mb-12 sm:mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-4 sm:mb-6 bg-cosmic bg-clip-text text-transparent">
             Recursos Completos
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
             Nossa plataforma oferece todas as ferramentas necessárias para análises numerológicas precisas e profissionais.
           </p>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {features.map((feature, index) => (
             <Card 
               key={feature.title}
-              className="p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-mystical hover:scale-105 group"
+              className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-mystical hover:scale-105 group"
             >
-              <CardHeader className="pb-4">
-                <div className="text-4xl mb-2 group-hover:scale-110 transition-mystical">
+              <CardHeader className="pb-3 sm:pb-4">
+                <div className="text-3xl sm:text-4xl mb-2 group-hover:scale-110 transition-mystical">
                   {feature.icon}
                 </div>
-                <CardTitle className="text-lg">{feature.title}</CardTitle>
-                <CardDescription className="text-sm">
+                <CardTitle className="text-base sm:text-lg">{feature.title}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   {feature.description}
                 </CardDescription>
               </CardHeader>

@@ -146,20 +146,20 @@ const Dashboard = () => {
       <div className="stars2"></div>
       <div className="stars3"></div>
       
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
                 Dashboard
               </h1>
-              <div className="flex items-center gap-2">
-                <p className="text-muted-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <p className="text-muted-foreground text-sm sm:text-base">
                   Bem-vindo, {profile?.name || user.email}
                 </p>
                 {isAdmin && (
-                  <Badge variant="default" className="bg-accent-gold text-black">
+                  <Badge variant="default" className="bg-accent-gold text-black w-fit">
                     <Crown className="h-3 w-3 mr-1" />
                     Admin
                   </Badge>
@@ -167,30 +167,30 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-3 sm:px-4 py-2 rounded-lg border border-primary/20 text-sm">
                 <Crown className="h-4 w-4 text-accent-gold" />
                 <span className="font-semibold">Plano Premium</span>
               </div>
               <Button 
-                className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+                className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 min-h-[44px]"
                 onClick={() => setShowCreateModal(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Novo Mapa
+                <span className="hidden xs:inline">Novo </span>Mapa
               </Button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <CreateMapModal 
-        open={showCreateModal} 
-        onOpenChange={setShowCreateModal}
-        onMapCreated={fetchUserData}
-      />
-    </div>
+        <CreateMapModal 
+          open={showCreateModal} 
+          onOpenChange={setShowCreateModal}
+          onMapCreated={fetchUserData}
+        />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-background/80 backdrop-blur-sm border-primary/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Mapas Criados</CardTitle>
@@ -245,28 +245,28 @@ const Dashboard = () => {
         </div>
 
         {/* Main Content */}
-        <Tabs defaultValue="maps" className="space-y-6">
-          <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full lg:w-auto bg-background/80 backdrop-blur-sm">
-            <TabsTrigger value="maps">Mapas</TabsTrigger>
-            <TabsTrigger value="analyses">Análises</TabsTrigger>
-            <TabsTrigger value="subscription">Assinatura</TabsTrigger>
-            {isAdmin && <TabsTrigger value="admin">Admin</TabsTrigger>}
+        <Tabs defaultValue="maps" className="space-y-4 sm:space-y-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-4 w-full lg:w-auto bg-background/80 backdrop-blur-sm h-auto p-1">
+            <TabsTrigger value="maps" className="text-xs sm:text-sm">Mapas</TabsTrigger>
+            <TabsTrigger value="analyses" className="text-xs sm:text-sm">Análises</TabsTrigger>
+            <TabsTrigger value="subscription" className="text-xs sm:text-sm">Assinatura</TabsTrigger>
+            {isAdmin && <TabsTrigger value="admin" className="text-xs sm:text-sm">Admin</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="maps" className="space-y-6">
+          <TabsContent value="maps" className="space-y-4 sm:space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold mb-2">Meus Mapas Numerológicos</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-lg sm:text-xl font-semibold mb-2">Meus Mapas Numerológicos</h2>
+                <p className="text-muted-foreground text-sm sm:text-base">
                   Gerencie e crie novos mapas numerológicos
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" className="bg-background/50">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" className="bg-background/50 text-xs sm:text-sm min-h-[40px]">
                   <FileText className="h-4 w-4 mr-2" />
                   Pessoal
                 </Button>
-                <Button variant="outline" className="bg-background/50">
+                <Button variant="outline" className="bg-background/50 text-xs sm:text-sm min-h-[40px]">
                   <Users className="h-4 w-4 mr-2" />
                   Empresarial
                 </Button>
@@ -281,7 +281,7 @@ const Dashboard = () => {
                   <p className="text-muted-foreground text-center mb-6 max-w-md">
                     Comece criando seu primeiro mapa numerológico para desvendar os mistérios dos números
                   </p>
-                  <Button className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
+                  <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 min-h-[48px]">
                     <Plus className="h-4 w-4 mr-2" />
                     Criar Primeiro Mapa
                   </Button>
@@ -291,22 +291,22 @@ const Dashboard = () => {
               <div className="grid gap-4">
                 {maps.map((map) => (
                   <Card key={map.id} className="bg-background/80 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-colors">
-                    <CardContent className="flex items-center justify-between p-6">
+                    <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="font-semibold">{map.title}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                          <h3 className="font-semibold text-sm sm:text-base">{map.title}</h3>
                           {getStatusBadge(map.status)}
                         </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                           <span>Tipo: {getMapTypeLabel(map.type)}</span>
                           <span>Criado: {new Date(map.created_at).toLocaleDateString('pt-BR')}</span>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <Button variant="outline" size="sm" className="min-h-[40px] text-xs">
                           Editar
                         </Button>
-                        <Button variant="default" size="sm">
+                        <Button variant="default" size="sm" className="min-h-[40px] text-xs">
                           Ver Relatório
                         </Button>
                       </div>

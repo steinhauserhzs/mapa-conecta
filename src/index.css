@@ -206,4 +206,48 @@
     from { box-shadow: 0 0 20px hsl(266 83% 58% / 0.3); }
     to { box-shadow: 0 0 30px hsl(266 83% 58% / 0.6); }
   }
+
+  /* Mobile-optimized containers */
+  .container-mobile {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Touch-friendly buttons */
+  .btn-touch {
+    @apply min-h-[44px] min-w-[44px];
+  }
+
+  /* Responsive text scales */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-base sm:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-lg sm:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-xl sm:text-2xl;
+  }
+
+  /* Mobile spacing utilities */
+  .space-mobile {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  .gap-mobile {
+    @apply gap-4 sm:gap-6;
+  }
+  
+  .p-mobile {
+    @apply p-4 sm:p-6;
+  }
 }
