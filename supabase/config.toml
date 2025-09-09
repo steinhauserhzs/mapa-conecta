@@ -6,6 +6,12 @@ verify_jwt = false
 [functions.generate-map]
 verify_jwt = false
 
+[functions.gerar-pdf]
+verify_jwt = false
+
+[functions.webhook-demo]
+verify_jwt = false
+
 [functions.seed-admin]
 verify_jwt = false
 

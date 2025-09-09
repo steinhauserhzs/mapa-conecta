@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAppStore } from '@/store/useAppStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2, Star } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
-  const { toast } = useToast();
   const { signIn, signUp, demoSignIn, user, loading } = useAuth();
+  const { setDemoFlag } = useAppStore();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +20,6 @@ const Auth = () => {
     password: '',
     name: '',
   });
-  const [seeding, setSeeding] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -63,6 +61,7 @@ const Auth = () => {
 
   const handleDemoSignIn = async () => {
     setIsLoading(true);
+    setDemoFlag(true); // Ativar modo demo
     const { error } = await demoSignIn();
     if (!error) {
       navigate('/dashboard');
@@ -262,51 +261,33 @@ const Auth = () => {
             </CardFooter>
           </Card>
 
-          {/* Demo Admin Credentials */}
-          <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20 max-w-md w-full">
-            <h3 className="text-sm font-medium text-primary mb-2">Acesso Admin (Demonstração):</h3>
-            <p className="text-xs text-muted-foreground mb-3">
-              <strong>Email:</strong> steinhauser.haira@gmail.com<br />
-              <strong>Senha:</strong> Je110500@
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={seeding}
-              onClick={async () => {
-                try {
-                  setSeeding(true);
-                  const { data, error } = await supabase.functions.invoke('seed-admin', {
-                    body: { email: 'steinhauser.haira@gmail.com', password: 'Je110500@', name: 'Admin' }
-                  });
-                  if (error) throw error;
-                  toast({ title: 'Admin pronto', description: 'Conta admin verificada e criada (se necessário).' });
-                } catch (e: any) {
-                  toast({ title: 'Falha ao preparar admin', description: e.message, variant: 'destructive' });
-                } finally {
-                  setSeeding(false);
-                }
-              }}
-            >
-              {seeding ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Preparando...</>) : 'Preparar acesso admin'}
-            </Button>
-            
-            <Button
-              className="w-full mt-3 bg-gradient-to-r from-accent-gold to-primary hover:from-accent-gold/90 hover:to-primary/90 text-white font-semibold"
-              disabled={isLoading}
-              onClick={handleDemoSignIn}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando como DEMO...
-                </>
-              ) : (
-                <>
-                  🎭 Entrar como DEMO
-                </>
-              )}
-            </Button>
+          {/* Demo Section */}
+          <div className="mt-6 p-4 bg-muted/50 rounded-lg border max-w-md w-full">
+            <div className="flex flex-col space-y-3">
+              <p className="text-sm text-muted-foreground text-center font-medium">
+                Modo Demonstração
+              </p>
+              <p className="text-xs text-muted-foreground text-center px-2">
+                Experimente todas as funcionalidades do sistema com dados de exemplo
+              </p>
+              
+              <Button
+                className="w-full bg-gradient-to-r from-accent-gold to-primary hover:from-accent-gold/90 hover:to-primary/90 text-white font-semibold"
+                disabled={isLoading}
+                onClick={handleDemoSignIn}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Entrando como DEMO...
+                  </>
+                ) : (
+                  <>
+                    🎭 Entrar como DEMO
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

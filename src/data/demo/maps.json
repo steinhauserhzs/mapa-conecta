@@ -1,0 +1,54 @@
+[
+  {
+    "id": "demo-map-1",
+    "title": "Mapa de Maria Silva",
+    "client_name": "Maria Silva",
+    "status": "ready",
+    "created_at": "2024-01-15T10:30:00Z",
+    "pdf_url": "/demo-map-1.pdf",
+    "input_json": {
+      "name": "Maria Silva",
+      "birthDate": "1990-03-15",
+      "yearRef": 2024
+    },
+    "result_json": {
+      "expression": 7,
+      "motivation": 3,
+      "impression": 4,
+      "personalYear": 8
+    }
+  },
+  {
+    "id": "demo-map-2", 
+    "title": "Mapa de João Santos",
+    "client_name": "João Santos",
+    "status": "processing",
+    "created_at": "2024-01-16T14:20:00Z",
+    "pdf_url": null,
+    "input_json": {
+      "name": "João Santos",
+      "birthDate": "1985-07-22",
+      "yearRef": 2024
+    },
+    "result_json": {}
+  },
+  {
+    "id": "demo-map-3",
+    "title": "Mapa de Ana Costa", 
+    "client_name": "Ana Costa",
+    "status": "ready",
+    "created_at": "2024-01-14T09:15:00Z",
+    "pdf_url": "/demo-map-3.pdf",
+    "input_json": {
+      "name": "Ana Costa",
+      "birthDate": "1992-11-08",
+      "yearRef": 2024
+    },
+    "result_json": {
+      "expression": 5,
+      "motivation": 9,
+      "impression": 1,
+      "personalYear": 6
+    }
+  }
+]
