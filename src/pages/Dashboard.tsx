@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +42,7 @@ interface Analysis {
 
 const Dashboard = () => {
   const { user, profile, loading, isAdmin } = useAuth();
+  const { manageSubscription, loading: subscriptionLoading } = useSubscription();
   const { toast } = useToast();
   const [maps, setMaps] = useState<Map[]>([]);
   const [analyses, setAnalyses] = useState<Analysis[]>([]);
@@ -167,8 +169,8 @@ const Dashboard = () => {
             
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-lg border border-primary/20">
-                <Coins className="h-4 w-4 text-accent-gold" />
-                <span className="font-semibold">{profile?.credits || 0} créditos</span>
+                <Crown className="h-4 w-4 text-accent-gold" />
+                <span className="font-semibold">Plano Premium</span>
               </div>
               <Button 
                 className="bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
@@ -230,13 +232,13 @@ const Dashboard = () => {
 
           <Card className="bg-background/80 backdrop-blur-sm border-primary/20">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Créditos</CardTitle>
-              <Coins className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">Status</CardTitle>
+              <Crown className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{profile?.credits || 0}</div>
+              <div className="text-2xl font-bold">Premium</div>
               <p className="text-xs text-muted-foreground">
-                Mapas disponíveis
+                Acesso ilimitado
               </p>
             </CardContent>
           </Card>
@@ -402,16 +404,20 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between">
                     <span>Plano Atual:</span>
                     <Badge variant="default" className="bg-accent-gold text-black">
-                      Gratuito
+                      Premium
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span>Créditos Disponíveis:</span>
-                    <span className="font-semibold">{profile?.credits || 0}</span>
+                    <span>Status:</span>
+                    <span className="font-semibold text-green-600">Ativo</span>
                   </div>
                   <div className="pt-4">
-                    <Button className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90">
-                      Upgrade para Pro
+                    <Button 
+                      className="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90"
+                      onClick={manageSubscription}
+                      disabled={subscriptionLoading}
+                    >
+                      {subscriptionLoading ? "Carregando..." : "Gerenciar Assinatura"}
                     </Button>
                   </div>
                 </div>

@@ -337,7 +337,6 @@ export type Database = {
         Row: {
           auth_user_id: string
           created_at: string
-          credits: number
           email: string
           id: string
           name: string | null
@@ -348,7 +347,6 @@ export type Database = {
         Insert: {
           auth_user_id: string
           created_at?: string
-          credits?: number
           email: string
           id?: string
           name?: string | null
@@ -359,7 +357,6 @@ export type Database = {
         Update: {
           auth_user_id?: string
           created_at?: string
-          credits?: number
           email?: string
           id?: string
           name?: string | null
@@ -418,6 +415,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          stripe_customer_id: string | null
+          subscribed: boolean
+          subscription_end: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          stripe_customer_id?: string | null
+          subscribed?: boolean
+          subscription_end?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {

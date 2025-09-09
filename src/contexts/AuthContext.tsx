@@ -9,7 +9,6 @@ interface Profile {
   email: string;
   name?: string;
   role: 'admin' | 'user';
-  credits: number;
   stripe_customer_id?: string;
   created_at: string;
   updated_at: string;
