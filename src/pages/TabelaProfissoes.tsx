@@ -197,12 +197,12 @@ export default function TabelaProfissoes() {
 
   const renderNumbers = (numeros: number[]) => {
     return (
-      <div className="flex flex-wrap gap-1">
+      <div className="flex flex-wrap gap-2">
         {numeros.map((numero, index) => (
           <Badge 
             key={index} 
             variant="outline" 
-            className="bg-primary/10 text-primary border-primary/20"
+            className="bg-primary/10 text-primary border-primary/20 px-3 py-1.5 text-base font-semibold min-w-[40px] justify-center"
           >
             {numero}
           </Badge>
@@ -282,10 +282,10 @@ export default function TabelaProfissoes() {
             </CardHeader>
             <CardContent>
               {/* Versão Desktop */}
-              <div className="hidden md:block space-y-3">
+              <div className="hidden md:block space-y-4">
                 {filteredAreas.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="font-medium">{item.area}</div>
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="font-medium text-base">{item.area}</div>
                     <div>{renderNumbers(item.numeros)}</div>
                   </div>
                 ))}
@@ -297,8 +297,8 @@ export default function TabelaProfissoes() {
                   <Card key={index}>
                     <CardContent className="p-4">
                       <div className="space-y-3">
-                        <h4 className="font-medium">{item.area}</h4>
-                        <div className="flex flex-wrap gap-1">
+                        <h4 className="font-medium text-base">{item.area}</h4>
+                        <div className="flex flex-wrap gap-2 justify-center">
                           {renderNumbers(item.numeros)}
                         </div>
                       </div>
@@ -330,10 +330,10 @@ export default function TabelaProfissoes() {
             </CardHeader>
             <CardContent>
               {/* Versão Desktop */}
-              <div className="hidden md:block space-y-3">
+              <div className="hidden md:block space-y-4">
                 {filteredProfissoes.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="font-medium">{item.profissao}</div>
+                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="font-medium text-base">{item.profissao}</div>
                     <div>{renderNumbers(item.numeros)}</div>
                   </div>
                 ))}
@@ -345,8 +345,8 @@ export default function TabelaProfissoes() {
                   <Card key={index}>
                     <CardContent className="p-4">
                       <div className="space-y-3">
-                        <h4 className="font-medium">{item.profissao}</h4>
-                        <div className="flex flex-wrap gap-1">
+                        <h4 className="font-medium text-base">{item.profissao}</h4>
+                        <div className="flex flex-wrap gap-2 justify-center">
                           {renderNumbers(item.numeros)}
                         </div>
                       </div>
