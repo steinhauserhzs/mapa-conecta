@@ -12,7 +12,7 @@ const conversionData = [
   {
     numero: 2,
     letras: ['B', 'K', 'R'],
-    observacao: "' +2 (APÓSTROFO), .. x2"
+    observacao: "' +2 (APÓSTROFO) / .. x2"
   },
   {
     numero: 3,
@@ -37,7 +37,7 @@ const conversionData = [
   {
     numero: 7,
     letras: ['O', 'Z'],
-    observacao: '^ +7, ° +7'
+    observacao: '^ +7 / ° +7'
   },
   {
     numero: 8,
@@ -101,7 +101,7 @@ export default function TabelaConversao() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center font-bold bg-primary/10">Número</TableHead>
-                  <TableHead className="text-center font-bold">Letras</TableHead>
+                  <TableHead className="text-left font-bold">Letras</TableHead>
                   <TableHead className="text-center font-bold">Observações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -111,8 +111,8 @@ export default function TabelaConversao() {
                     <TableCell className="text-center font-bold text-2xl text-primary bg-primary/5">
                       {item.numero}
                     </TableCell>
-                    <TableCell className="text-center">
-                      <div className="flex flex-wrap justify-center gap-2">
+                    <TableCell className="text-left pl-6">
+                      <div className="flex flex-wrap gap-2">
                         {item.letras.map((letra, index) => (
                           <span 
                             key={index}
