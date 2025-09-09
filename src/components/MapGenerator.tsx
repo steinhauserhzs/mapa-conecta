@@ -10,11 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { EnhancedDatePicker } from '@/components/ui/enhanced-date-picker';
 import MapaPDF from './MapaPDF';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/hooks/use-toast';
@@ -231,96 +227,56 @@ export default function MapGenerator() {
               <CardTitle>Dados para o Mapa</CardTitle>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nome Completo</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="Digite o nome completo"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Nome Completo</Label>
+                  <Input
+                    id="name"
+                    {...form.register('name')}
+                    placeholder="Digite o nome completo"
+                    className="mt-1"
                   />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-destructive mt-1">
+                      {form.formState.errors.name.message}
+                    </p>
+                  )}
+                </div>
 
-                  <FormField
-                    control={form.control}
-                    name="birth"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Data de Nascimento</FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !field.value && "text-muted-foreground"
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, "dd/MM/yyyy")
-                                ) : (
-                                  <span>Selecione a data de nascimento</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={field.value}
-                              onSelect={field.onChange}
-                              disabled={(date) =>
-                                date > new Date() || date < new Date("1900-01-01")
-                              }
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <div>
+                  <Label htmlFor="birth">Data de Nascimento</Label>
+                  <EnhancedDatePicker
+                    date={form.watch('birth')}
+                    onDateChange={(date) => form.setValue('birth', date)}
+                    placeholder="Selecione a data de nascimento"
+                    className="mt-1 w-full"
                   />
+                  {form.formState.errors.birth && (
+                    <p className="text-sm text-destructive mt-1">
+                      {form.formState.errors.birth.message}
+                    </p>
+                  )}
+                </div>
 
-                  <FormField
-                    control={form.control}
-                    name="yearRef"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Ano de Referência (Opcional)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder={new Date().getFullYear().toString()}
-                            {...field}
-                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <div>
+                  <Label htmlFor="yearRef">Ano de Referência (Opcional)</Label>
+                  <Input
+                    id="yearRef"
+                    type="number"
+                    {...form.register('yearRef', { valueAsNumber: true })}
+                    placeholder={new Date().getFullYear().toString()}
+                    className="mt-1"
                   />
+                </div>
 
-                  <Button 
-                    type="submit" 
-                    disabled={isGenerating}
-                    className="w-full"
-                  >
-                    {isGenerating ? 'Gerando Mapa...' : 'Gerar Mapa Numerológico'}
-                  </Button>
-                </form>
-              </Form>
+                <Button 
+                  type="submit" 
+                  disabled={isGenerating}
+                  className="w-full"
+                >
+                  {isGenerating ? 'Gerando Mapa...' : 'Gerar Mapa Numerológico'}
+                </Button>
+              </form>
             </CardContent>
           </Card>
 
