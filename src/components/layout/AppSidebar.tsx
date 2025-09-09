@@ -7,6 +7,11 @@ import {
   Settings,
   HelpCircle,
   Map,
+  Phone,
+  MapPin,
+  Car,
+  Edit,
+  TrendingUp,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -39,6 +44,53 @@ const navigation = [
     url: '/mapas',
     icon: Map,
   },
+  {
+    title: 'Clientes',
+    url: '/clientes',
+    icon: Users,
+  },
+  {
+    title: 'Relatórios',
+    url: '/relatorios',
+    icon: FileText,
+  },
+  {
+    title: 'Análises',
+    url: '/analises',
+    icon: TrendingUp,
+    subItems: [
+      {
+        title: 'Telefones',
+        url: '/analises/telefone',
+        icon: Phone,
+      },
+      {
+        title: 'Endereços',
+        url: '/analises/endereco',
+        icon: MapPin,
+      },
+      {
+        title: 'Placas',
+        url: '/analises/placa',
+        icon: Car,
+      },
+      {
+        title: 'Correção de Assinatura',
+        url: '/analises/assinatura',
+        icon: Edit,
+      },
+    ],
+  },
+  {
+    title: 'Ajustes',
+    url: '/ajustes',
+    icon: Settings,
+  },
+  {
+    title: 'Ajuda',
+    url: '/ajuda',
+    icon: HelpCircle,
+  },
 ];
 
 export function AppSidebar() {
@@ -57,19 +109,52 @@ export function AppSidebar() {
             <SidebarMenu>
               {navigation.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        isActive
-                          ? 'bg-accent text-accent-foreground font-medium'
-                          : 'hover:bg-accent/50'
-                      }
-                    >
-                      {item.icon && <item.icon />}
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
+                  {item.subItems ? (
+                    <Collapsible>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip={item.title}>
+                          {item.icon && <item.icon />}
+                          <span>{item.title}</span>
+                          <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.subItems.map((subItem) => (
+                            <SidebarMenuSubItem key={subItem.title}>
+                              <SidebarMenuSubButton asChild>
+                                <NavLink
+                                  to={subItem.url}
+                                  className={({ isActive }) =>
+                                    isActive
+                                      ? 'bg-accent text-accent-foreground font-medium'
+                                      : 'hover:bg-accent/50'
+                                  }
+                                >
+                                  {subItem.icon && <subItem.icon />}
+                                  <span>{subItem.title}</span>
+                                </NavLink>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  ) : (
+                    <SidebarMenuButton asChild tooltip={item.title}>
+                      <NavLink
+                        to={item.url}
+                        className={({ isActive }) =>
+                          isActive
+                            ? 'bg-accent text-accent-foreground font-medium'
+                            : 'hover:bg-accent/50'
+                        }
+                      >
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

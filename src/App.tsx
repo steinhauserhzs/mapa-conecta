@@ -13,6 +13,15 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import MapGenerator from "./pages/MapGenerator";
+import Clientes from "./pages/Clientes";
+import Relatorios from "./pages/Relatorios";
+import Analises from "./pages/Analises";
+import AnaliseTelefone from "./pages/AnaliseTelefone";
+import AnaliseEndereco from "./pages/AnaliseEndereco";
+import AnalisePlaca from "./pages/AnalisePlaca";
+import CorrecaoAssinatura from "./pages/CorrecaoAssinatura";
+import Ajustes from "./pages/Ajustes";
+import Ajuda from "./pages/Ajuda";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +67,96 @@ const App = () => (
                   }
                 >
                   <Route index element={<MapGenerator />} />
+                </Route>
+                <Route
+                  path="/clientes"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Clientes />} />
+                </Route>
+                <Route
+                  path="/relatorios"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Relatorios />} />
+                </Route>
+                <Route
+                  path="/analises"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Analises />} />
+                </Route>
+                <Route
+                  path="/analises/telefone"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AnaliseTelefone />} />
+                </Route>
+                <Route
+                  path="/analises/endereco"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AnaliseEndereco />} />
+                </Route>
+                <Route
+                  path="/analises/placa"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<AnalisePlaca />} />
+                </Route>
+                <Route
+                  path="/analises/assinatura"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<CorrecaoAssinatura />} />
+                </Route>
+                <Route
+                  path="/ajustes"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Ajustes />} />
+                </Route>
+                <Route
+                  path="/ajuda"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Ajuda />} />
                 </Route>
                 <Route
                   path="/admin/users"

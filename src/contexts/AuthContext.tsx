@@ -246,18 +246,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
       } else {
         console.log('Logout successful, clearing state...');
+        
+        // Clear auth state
         setUser(null);
         setProfile(null);
         setSession(null);
+        
+        // Clear Zustand store state
+        if (typeof window !== 'undefined') {
+          // Clear app store
+          const { useAppStore } = await import('@/store/useAppStore');
+          const { setUser: setAppUser, setDemoFlag } = useAppStore.getState();
+          setAppUser(null);
+          setDemoFlag(false);
+          
+          // Clear localStorage for app-store
+          localStorage.removeItem('app-store');
+        }
         
         toast({
           title: "Logout realizado com sucesso!",
           description: "Você foi desconectado.",
         });
         
-        console.log('Redirecting to home...');
-        // Force redirect to home page
-        window.location.href = '/';
+        console.log('Redirecting to auth...');
+        // Force redirect to auth page
+        window.location.href = '/auth';
       }
     } catch (error) {
       console.error('Unexpected error in signOut:', error);
