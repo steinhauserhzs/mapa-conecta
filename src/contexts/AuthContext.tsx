@@ -52,10 +52,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .from('profiles')
         .select('*')
         .eq('auth_user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching profile:', error);
+        return;
+      }
+
+      if (!data) {
+        // Ensure profile exists via edge function, then try again
+        try {
+          const { error: fnError } = await supabase.functions.invoke('ensure-profile', {
+            headers: { Authorization: `Bearer ${session?.access_token ?? ''}` }
+          });
+          if (fnError) {
+            console.error('Error ensuring profile:', fnError);
+            return;
+          }
+          const { data: data2, error: error2 } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('auth_user_id', userId)
+            .maybeSingle();
+          if (!error2 && data2) {
+            setProfile(data2);
+          }
+        } catch (err) {
+          console.error('Error invoking ensure-profile:', err);
+        }
         return;
       }
 
