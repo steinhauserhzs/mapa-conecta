@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { Navigate } from 'react-router-dom';
@@ -22,6 +22,8 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CreateMapModal } from '@/components/CreateMapModal';
+import { DashboardSkeleton, MapCardSkeleton } from '@/components/ui/loading-skeleton';
+import { MapCard } from '@/components/MapCard';
 
 interface Map {
   id: string;
@@ -49,13 +51,7 @@ const Dashboard = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  useEffect(() => {
-    if (user && profile) {
-      fetchUserData();
-    }
-  }, [user, profile]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoadingData(true);
       
@@ -89,22 +85,29 @@ const Dashboard = () => {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [profile?.id, toast]);
 
-  const getMapTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      personal: 'Pessoal',
-      business: 'Empresarial',
-      baby: 'Bebê/Criança',
-      marriage: 'Casamento',
-      phone: 'Telefone',
-      address: 'Endereço',
-      license_plate: 'Placa'
-    };
-    return types[type] || type;
-  };
+  useEffect(() => {
+    if (user && profile) {
+      fetchUserData();
+    }
+  }, [user, profile, fetchUserData]);
 
-  const getStatusBadge = (status: string) => {
+  const mapTypeLabels = useMemo(() => ({
+    personal: 'Pessoal',
+    business: 'Empresarial',
+    baby: 'Bebê/Criança',
+    marriage: 'Casamento',
+    phone: 'Telefone',
+    address: 'Endereço',
+    license_plate: 'Placa'
+  }), []);
+
+  const getMapTypeLabel = useCallback((type: string) => {
+    return mapTypeLabels[type as keyof typeof mapTypeLabels] || type;
+  }, [mapTypeLabels]);
+
+  const getStatusBadge = useCallback((status: string) => {
     const variants: Record<string, any> = {
       draft: 'secondary',
       ready: 'default',
@@ -122,16 +125,17 @@ const Dashboard = () => {
         {labels[status] || status}
       </Badge>
     );
-  };
+  }, []);
 
-  if (loading || loadingData) {
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
+
+  if (loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-mystical">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-gold mx-auto mb-4"></div>
-          <p className="text-primary-light">Carregando dashboard...</p>
-        </div>
-      </div>
+      <Suspense fallback={<DashboardSkeleton />}>
+        <DashboardSkeleton />
+      </Suspense>
     );
   }
 
@@ -290,28 +294,12 @@ const Dashboard = () => {
             ) : (
               <div className="grid gap-4">
                 {maps.map((map) => (
-                  <Card key={map.id} className="bg-background/80 backdrop-blur-sm border-primary/20 hover:border-primary/40 transition-colors">
-                    <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 gap-4">
-                      <div className="flex-1">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                          <h3 className="font-semibold text-sm sm:text-base">{map.title}</h3>
-                          {getStatusBadge(map.status)}
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                          <span>Tipo: {getMapTypeLabel(map.type)}</span>
-                          <span>Criado: {new Date(map.created_at).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <Button variant="outline" size="sm" className="min-h-[40px] text-xs">
-                          Editar
-                        </Button>
-                        <Button variant="default" size="sm" className="min-h-[40px] text-xs">
-                          Ver Relatório
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <MapCard 
+                    key={map.id}
+                    map={map}
+                    getMapTypeLabel={getMapTypeLabel}
+                    getStatusBadge={getStatusBadge}
+                  />
                 ))}
               </div>
             )}

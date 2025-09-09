@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,9 +32,28 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
   const [loading, setLoading] = useState(false);
   const { user, session } = useAuth();
   const { toast } = useToast();
+  
+  // Cache management
+  const cacheRef = useRef<{
+    data: { subscribed: boolean; subscription_end: string | null } | null;
+    timestamp: number;
+  }>({ data: null, timestamp: 0 });
+  
+  const debounceRef = useRef<NodeJS.Timeout>();
 
-  const checkSubscription = async () => {
+  const checkSubscription = useCallback(async (force = false) => {
     if (!session?.access_token) return;
+
+    // Check cache first (5 minutes TTL)
+    const now = Date.now();
+    const cacheAge = now - cacheRef.current.timestamp;
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+    if (!force && cacheRef.current.data && cacheAge < CACHE_TTL) {
+      setSubscribed(cacheRef.current.data.subscribed);
+      setSubscriptionEnd(cacheRef.current.data.subscription_end);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -49,14 +68,25 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
         return;
       }
 
-      setSubscribed(data.subscribed || false);
-      setSubscriptionEnd(data.subscription_end || null);
+      const subscriptionData = {
+        subscribed: data.subscribed || false,
+        subscription_end: data.subscription_end || null
+      };
+
+      // Update cache
+      cacheRef.current = {
+        data: subscriptionData,
+        timestamp: now
+      };
+
+      setSubscribed(subscriptionData.subscribed);
+      setSubscriptionEnd(subscriptionData.subscription_end);
     } catch (error) {
       console.error('Error in checkSubscription:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.access_token]);
 
   const createCheckout = async () => {
     if (!session?.access_token) {
@@ -142,15 +172,33 @@ export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) =>
     }
   };
 
-  // Check subscription on auth state change
-  useEffect(() => {
-    if (user && session) {
-      checkSubscription();
-    } else {
-      setSubscribed(false);
-      setSubscriptionEnd(null);
+  // Debounced subscription check
+  const debouncedCheckSubscription = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
     }
-  }, [user, session]);
+    
+    debounceRef.current = setTimeout(() => {
+      if (user && session) {
+        checkSubscription();
+      } else {
+        setSubscribed(false);
+        setSubscriptionEnd(null);
+        cacheRef.current = { data: null, timestamp: 0 };
+      }
+    }, 500);
+  }, [user, session, checkSubscription]);
+
+  // Check subscription on auth state change with debounce
+  useEffect(() => {
+    debouncedCheckSubscription();
+    
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [debouncedCheckSubscription]);
 
   const value: SubscriptionContextType = {
     subscribed,

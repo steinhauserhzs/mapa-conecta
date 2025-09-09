@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-numerology.jpg";
 
 export const HeroSection = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Starfield background */}
@@ -59,9 +63,35 @@ export const HeroSection = () => {
           
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4">
-            <Button variant="hero" size="hero" className="w-full sm:w-auto text-base sm:text-lg min-h-[48px]">
-              🌟 Criar Meu Primeiro Mapa
-            </Button>
+            {user ? (
+              <Button 
+                variant="hero" 
+                size="hero" 
+                className="w-full sm:w-auto text-base sm:text-lg min-h-[48px]"
+                onClick={() => navigate('/dashboard')}
+              >
+                🌟 Ir ao Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="hero" 
+                  size="hero" 
+                  className="w-full sm:w-auto text-base sm:text-lg min-h-[48px]"
+                  onClick={() => navigate('/auth')}
+                >
+                  🌟 Criar Meu Primeiro Mapa
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="w-full sm:w-auto border-primary/30 hover:border-primary min-h-[48px]"
+                  onClick={() => navigate('/auth')}
+                >
+                  Entrar
+                </Button>
+              </>
+            )}
             <Button variant="outline" size="lg" className="w-full sm:w-auto border-primary/30 hover:border-primary min-h-[48px]">
               Ver Planos e Preços
             </Button>
