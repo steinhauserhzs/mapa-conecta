@@ -88,7 +88,7 @@ function letterValue(ch: string, baseMap: Record<string, number>) {
   if (!info) return null;
   const base = baseMap[info.baseChar as keyof typeof baseMap];
   if (!base) return null;
-  return { ...info, base, value: applyMods(base, info.marks), raw: ch };
+  return { ...info, base, value: base, raw: ch };
 }
 
 function sumLetters(str: string, baseMap: Record<string, number>, filter: (ch: string) => boolean = () => true) {
