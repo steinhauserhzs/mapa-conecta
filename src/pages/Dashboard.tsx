@@ -9,7 +9,15 @@ import {
   BarChart3, 
   Crown,
   Plus,
-  AlertCircle
+  AlertCircle,
+  User,
+  Building2,
+  Heart,
+  Baby,
+  Phone,
+  MapPin,
+  Car,
+  PenTool
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
@@ -122,6 +130,156 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Acesso Rápido */}
+      <div>
+        <h2 className="text-xl font-semibold mb-4 text-foreground">Acesso Rápido</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Mapas Pessoais */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/mapas')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Mapas Pessoais</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Análise da personalidade, destino e números cabalísticos
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Mapas Empresariais */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Mapas Empresariais</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Energia de marcas e nomes comerciais para negócios
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
+            </CardContent>
+          </Card>
+
+          {/* Harmonia Conjugal */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Heart className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Harmonia Conjugal</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Compatibilidade entre casais e análise de relacionamento
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
+            </CardContent>
+          </Card>
+
+          {/* Mapas Infantis */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Baby className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Mapas Infantis</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Escolha o melhor nome para bebês analisando potenciais
+                </p>
+              </div>
+              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
+            </CardContent>
+          </Card>
+
+          {/* Análise de Telefones */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/analise-telefone')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Phone className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Análise de Telefones</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Verifique se seu número traz energias positivas
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Análise de Endereços */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/analise-endereco')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <MapPin className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Análise de Endereços</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Como seu endereço influencia sua vida e relacionamentos
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Análise de Placas */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/analise-placa')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Car className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Análise de Placas</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Harmonia da placa do veículo com sua numerologia pessoal
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Correção de Assinatura */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/correcao-assinatura')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <PenTool className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Correção de Assinatura</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Otimize sua assinatura para atrair sucesso e prosperidade
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       {/* Quick Actions */}
