@@ -2,265 +2,267 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Numerology Platform Design System - Mystical & Professional */
-
 @layer base {
   :root {
-    /* Core mystical color palette */
-    --background: 240 15% 6%;
-    --foreground: 42 87% 88%;
-
-    --card: 240 12% 8%;
-    --card-foreground: 42 87% 88%;
-
-    --popover: 240 15% 6%;
-    --popover-foreground: 42 87% 88%;
-
-    /* Primary: Deep mystical purple */
-    --primary: 266 83% 58%;
-    --primary-foreground: 42 87% 95%;
-    --primary-glow: 266 100% 75%;
-
-    /* Secondary: Cosmic gold */
-    --secondary: 42 87% 65%;
-    --secondary-foreground: 240 15% 15%;
-
-    /* Muted cosmic tones */
-    --muted: 240 8% 15%;
-    --muted-foreground: 42 20% 65%;
-
-    /* Accent: Celestial blue */
-    --accent: 228 100% 70%;
-    --accent-foreground: 240 15% 10%;
-
+    --background: 0 0% 100%;
+    --foreground: 25 40% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 25 40% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 40% 20%;
+    --primary: 42 87% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 42 100% 70%;
+    --secondary: 25 30% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 42 20% 96%;
+    --muted-foreground: 25 25% 45%;
+    --accent: 42 20% 96%;
+    --accent-foreground: 25 40% 20%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 240 8% 20%;
-    --input: 240 8% 15%;
-    --ring: 266 83% 58%;
-
+    --destructive-foreground: 0 0% 100%;
+    --border: 42 30% 90%;
+    --input: 42 30% 90%;
+    --ring: 42 87% 55%;
     --radius: 0.75rem;
-
-    /* Gradients for mystical effects */
-    --gradient-cosmic: linear-gradient(135deg, hsl(266 83% 58%), hsl(228 100% 70%));
-    --gradient-gold: linear-gradient(135deg, hsl(42 87% 65%), hsl(42 87% 75%));
-    --gradient-background: linear-gradient(135deg, hsl(240 15% 6%), hsl(240 12% 8%));
-    --gradient-card: linear-gradient(135deg, hsl(240 12% 8%), hsl(240 10% 10%));
     
-    /* Sacred geometry shadows */
-    --shadow-mystical: 0 10px 40px -10px hsl(266 83% 58% / 0.3);
-    --shadow-gold: 0 8px 32px -8px hsl(42 87% 65% / 0.2);
-    --shadow-cosmic: 0 0 50px hsl(266 100% 75% / 0.15);
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 25 40% 20%;
+    --sidebar-primary: 42 87% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 42 20% 96%;
+    --sidebar-accent-foreground: 25 40% 20%;
+    --sidebar-border: 42 30% 90%;
+    --sidebar-ring: 42 87% 55%;
     
-    /* Smooth transitions */
-    --transition-mystical: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-    /* Typography */
-    --font-heading: 'Inter', -apple-system, sans-serif;
-    --font-body: 'Inter', -apple-system, sans-serif;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Numapp colors */
+    --gold: 42 87% 55%;
+    --gold-light: 42 100% 70%;
+    --gold-dark: 35 80% 45%;
+    --brown: 25 30% 45%;
+    --brown-light: 25 40% 65%;
+    --brown-dark: 25 50% 25%;
+    
+    /* Gradients */
+    --gradient-gold: linear-gradient(135deg, hsl(42 87% 55%), hsl(42 100% 70%));
+    --gradient-brown: linear-gradient(135deg, hsl(25 30% 45%), hsl(25 40% 65%));
+    --gradient-background: linear-gradient(180deg, hsl(0 0% 100%), hsl(42 20% 98%));
+    --gradient-subtle: linear-gradient(135deg, hsl(42 20% 98%), hsl(0 0% 100%));
+    
+    /* Shadows */
+    --shadow-gold: 0 10px 30px -10px hsl(42 87% 55% / 0.25);
+    --shadow-elegant: 0 4px 20px -5px hsl(25 30% 45% / 0.15);
+    --shadow-soft: 0 2px 10px -3px hsl(42 30% 70% / 0.2);
+    
+    /* Font configurations */
+    --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Transitions */
+    --transition-elegant: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 25 20% 8%;
+    --foreground: 42 20% 90%;
+    --card: 25 15% 10%;
+    --card-foreground: 42 20% 90%;
+    --popover: 25 15% 10%;
+    --popover-foreground: 42 20% 90%;
+    --primary: 42 87% 55%;
+    --primary-foreground: 25 20% 8%;
+    --primary-glow: 42 100% 70%;
+    --secondary: 25 25% 15%;
+    --secondary-foreground: 42 20% 90%;
+    --muted: 25 25% 15%;
+    --muted-foreground: 25 15% 60%;
+    --accent: 25 25% 15%;
+    --accent-foreground: 42 20% 90%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 25 25% 15%;
+    --input: 25 25% 15%;
+    --ring: 42 87% 55%;
+    
+    /* Sidebar colors for dark */
+    --sidebar-background: 25 15% 10%;
+    --sidebar-foreground: 42 20% 90%;
+    --sidebar-primary: 42 87% 55%;
+    --sidebar-primary-foreground: 25 20% 8%;
+    --sidebar-accent: 25 25% 15%;
+    --sidebar-accent-foreground: 42 20% 90%;
+    --sidebar-border: 25 25% 15%;
+    --sidebar-ring: 42 87% 55%;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
+* {
+  border-color: hsl(var(--border));
+}
 
-  body {
-    @apply bg-background text-foreground font-body;
-    background: var(--gradient-background);
-  }
+body {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  background-image: var(--gradient-background);
+  font-family: var(--font-body);
+  transition: var(--transition-elegant);
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
-  }
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: hsl(var(--foreground));
 }
 
 @layer components {
-  /* Mystical effects */
-  .cosmic-glow {
-    box-shadow: var(--shadow-cosmic);
-  }
-  
-  .mystical-shadow {
-    box-shadow: var(--shadow-mystical);
-  }
-  
-  .gold-shadow {
-    box-shadow: var(--shadow-gold);
-  }
-
-  /* Gradient backgrounds */
-  .bg-cosmic {
-    background: var(--gradient-cosmic);
-  }
-  
+  /* Numapp gradient classes */
   .bg-gold {
     background: var(--gradient-gold);
   }
   
+  .bg-brown {
+    background: var(--gradient-brown);
+  }
+  
   .bg-card-gradient {
-    background: var(--gradient-card);
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.95) 100%);
   }
-
-  /* Sacred geometry patterns - optimized */
-  .sacred-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3Ccircle cx='30' cy='0' r='0.5'/%3E%3Ccircle cx='0' cy='30' r='0.5'/%3E%3Ccircle cx='60' cy='30' r='0.5'/%3E%3Ccircle cx='30' cy='60' r='0.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    animation: sacred-pulse 12s ease-in-out infinite;
-    will-change: opacity;
+  
+  .bg-elegant {
+    background: var(--gradient-subtle);
   }
-
-  /* Smooth transitions */
-  .transition-mystical {
-    transition: var(--transition-mystical);
+  
+  /* Elegant shadow effects */
+  .gold-shadow {
+    box-shadow: var(--shadow-gold);
   }
-
-  /* Starfield animation - optimized for performance */
-  .starfield {
-    background: 
-      radial-gradient(1px 1px at 20px 30px, rgba(255,255,255,0.8), transparent),
-      radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.6), transparent),
-      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.4), transparent);
+  
+  .elegant-shadow {
+    box-shadow: var(--shadow-elegant);
+  }
+  
+  .soft-shadow {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  /* Animation classes */
+  .transition-elegant {
+    transition: var(--transition-elegant);
+  }
+  
+  /* Elegant pattern overlay */
+  .elegant-pattern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(circle at 20% 20%, hsl(42 87% 55% / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, hsl(25 30% 45% / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 40% 60%, hsl(42 100% 70% / 0.03) 0%, transparent 50%);
+    animation: elegant-float 20s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  /* Golden sparkle effect */
+  .golden-sparkle::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      radial-gradient(1px 1px at 20px 30px, hsl(var(--gold)), transparent),
+      radial-gradient(1px 1px at 40px 70px, hsl(var(--gold-light)), transparent),
+      radial-gradient(1px 1px at 90px 40px, hsl(var(--gold)), transparent),
+      radial-gradient(1px 1px at 130px 80px, hsl(var(--gold-light)), transparent);
     background-repeat: repeat;
     background-size: 200px 100px;
-    animation: starfield-float 30s linear infinite;
-    will-change: transform;
+    animation: sparkle 25s linear infinite;
+    opacity: 0.4;
+    pointer-events: none;
   }
-
-  /* Animation keyframes - optimized */
-  @keyframes starfield-float {
-    from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-100px, -100px, 0); }
-  }
-
-  @keyframes sacred-pulse {
-    0%, 100% { opacity: 0.1; }
-    50% { opacity: 0.3; }
-  }
-
+  
   /* Floating animation */
   .float {
     animation: float 6s ease-in-out infinite;
   }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-  }
-
-  /* Pulse glow effect */
-  .pulse-glow {
-    animation: pulse-glow 2s ease-in-out infinite alternate;
-  }
-
-  @keyframes pulse-glow {
-    from { box-shadow: 0 0 20px hsl(266 83% 58% / 0.3); }
-    to { box-shadow: 0 0 30px hsl(266 83% 58% / 0.6); }
-  }
-
-  /* Mobile-optimized containers */
-  .container-mobile {
-    @apply container mx-auto px-4 sm:px-6 lg:px-8;
-  }
-
-  /* Touch-friendly buttons */
-  .btn-touch {
-    @apply min-h-[44px] min-w-[44px];
-  }
-
-  /* Responsive text scales */
-  .text-responsive-xs {
-    @apply text-xs sm:text-sm;
-  }
   
-  .text-responsive-sm {
-    @apply text-sm sm:text-base;
+  /* Gold glow animation */
+  .gold-glow {
+    animation: gold-glow 3s ease-in-out infinite;
   }
-  
-  .text-responsive-base {
-    @apply text-base sm:text-lg;
-  }
-  
-  .text-responsive-lg {
-    @apply text-lg sm:text-xl;
-  }
-  
-  .text-responsive-xl {
-    @apply text-xl sm:text-2xl;
-  }
+}
 
-  /* Performance optimizations */
-  .stars, .stars2, .stars3 {
-    will-change: transform;
-    animation-fill-mode: forwards;
+@keyframes elegant-float {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.2;
   }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+    opacity: 0.4;
+  }
+}
 
-  /* Reduce motion for users who prefer it */
-  @media (prefers-reduced-motion: reduce) {
-    .starfield,
-    .sacred-pattern,
-    .float,
-    .pulse-glow,
-    .stars,
-    .stars2,
-    .stars3 {
-      animation: none;
-    }
+@keyframes sparkle {
+  0% {
+    transform: translateY(0);
   }
+  100% {
+    transform: translateY(-200px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+@keyframes gold-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px hsl(var(--gold) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px hsl(var(--gold-light) / 0.5), 0 0 45px hsl(var(--gold) / 0.2);
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .elegant-pattern,
+  .golden-sparkle,
+  .float,
+  .gold-glow {
+    animation: none;
+  }
+}
+
+/* Responsive text utilities */
+.text-responsive-xs {
+  @apply text-xs sm:text-sm;
+}
+
+.text-responsive-sm {
+  @apply text-sm sm:text-base;
+}
+
+.text-responsive-base {
+  @apply text-base sm:text-lg;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl;
+}
+
+.text-responsive-xl {
+  @apply text-xl sm:text-2xl;
 }

@@ -23,8 +23,8 @@ export const Navbar = () => {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="text-xl sm:text-2xl">🔮</div>
-            <span className="text-base sm:text-lg lg:text-xl font-bold bg-cosmic bg-clip-text text-transparent">
-              <span className="hidden xs:inline">Jé Fêrraz </span>Numerologia
+            <span className="text-base sm:text-lg lg:text-xl font-bold bg-gold bg-clip-text text-transparent">
+              Numapp
             </span>
           </div>
           
@@ -34,7 +34,7 @@ export const Navbar = () => {
               <a
                 key={link.name}
                 href={link.href}
-                className="text-muted-foreground hover:text-primary transition-mystical hover:scale-105"
+                className="text-muted-foreground hover:text-primary transition-elegant hover:scale-105"
               >
                 {link.name}
               </a>
@@ -69,7 +69,7 @@ export const Navbar = () => {
                   </Button>
                 </Link>
                 <Link to="/auth">
-                  <Button variant="cosmic" size="sm">
+                  <Button variant="gold" size="sm">
                     Começar Agora
                   </Button>
                 </Link>
@@ -96,7 +96,7 @@ export const Navbar = () => {
                 <a
                   key={link.name}
                   href={link.href}
-                  className="block px-4 py-2 text-muted-foreground hover:text-primary transition-mystical"
+                  className="block px-4 py-2 text-muted-foreground hover:text-primary transition-elegant"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.name}
@@ -129,7 +129,7 @@ export const Navbar = () => {
                       </Button>
                     </Link>
                     <Link to="/auth">
-                      <Button variant="cosmic" className="w-full" size="sm">
+                      <Button variant="gold" className="w-full" size="sm">
                         Começar Agora
                       </Button>
                     </Link>

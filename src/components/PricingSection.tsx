@@ -7,11 +7,11 @@ export const PricingSection = () => {
   const { createCheckout, loading } = useSubscription();
   return (
     <section className="py-24 relative">
-      <div className="absolute inset-0 sacred-pattern opacity-5"></div>
+      <div className="absolute inset-0 elegant-pattern opacity-5"></div>
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-12 sm:mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-4 sm:mb-6 bg-cosmic bg-clip-text text-transparent">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-heading mb-4 sm:mb-6 bg-gold bg-clip-text text-transparent">
             Plano Premium
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto px-4">
@@ -20,9 +20,9 @@ export const PricingSection = () => {
         </div>
         
         <div className="max-w-md mx-auto px-4">
-          <Card className="relative p-4 sm:p-6 bg-card-gradient border-primary mystical-shadow ring-2 ring-primary/20">
+          <Card className="relative p-4 sm:p-6 bg-card-gradient border-primary elegant-shadow ring-2 ring-primary/20">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-cosmic px-3 sm:px-4 py-1 text-xs sm:text-sm">
+              <Badge className="bg-gold px-3 sm:px-4 py-1 text-xs sm:text-sm">
                 Mais Popular
               </Badge>
             </div>
@@ -82,7 +82,7 @@ export const PricingSection = () => {
             <CardFooter>
               <Button 
                 className="w-full min-h-[48px]" 
-                variant="cosmic"
+                variant="gold"
                 size="lg"
                 onClick={createCheckout}
                 disabled={loading}

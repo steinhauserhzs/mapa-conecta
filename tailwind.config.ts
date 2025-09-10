@@ -39,7 +39,6 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
-          gold: "hsl(42 87% 65%)",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -59,21 +58,32 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Numapp color palette
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+          dark: "hsl(var(--gold-dark))",
+        },
+        brown: {
+          DEFAULT: "hsl(var(--brown))",
+          light: "hsl(var(--brown-light))",
+          dark: "hsl(var(--brown-dark))",
+        },
       },
       fontFamily: {
         heading: "var(--font-heading)",
         body: "var(--font-body)",
       },
       backgroundImage: {
-        'gradient-cosmic': 'var(--gradient-cosmic)',
-        'gradient-gold': 'var(--gradient-gold)', 
+        'gradient-gold': 'var(--gradient-gold)',
+        'gradient-brown': 'var(--gradient-brown)', 
         'gradient-background': 'var(--gradient-background)',
-        'gradient-mystical': 'linear-gradient(135deg, hsl(240 15% 6%), hsl(240 12% 8%))',
+        'gradient-subtle': 'var(--gradient-subtle)',
       },
       boxShadow: {
-        'mystical': 'var(--shadow-mystical)',
-        'cosmic': 'var(--shadow-cosmic)',
+        'elegant': 'var(--shadow-elegant)',
         'gold': 'var(--shadow-gold)',
+        'soft': 'var(--shadow-soft)',
       },
       screens: {
         'xs': '475px',

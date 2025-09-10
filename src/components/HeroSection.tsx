@@ -9,8 +9,8 @@ export const HeroSection = () => {
   const navigate = useNavigate();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Starfield background */}
-      <div className="absolute inset-0 starfield opacity-30"></div>
+      {/* Golden sparkle background */}
+      <div className="absolute inset-0 golden-sparkle opacity-30"></div>
       
       {/* Hero background image */}
       <div 
@@ -18,14 +18,14 @@ export const HeroSection = () => {
         style={{ backgroundImage: `url(${heroImage})` }}
       ></div>
       
-      {/* Sacred geometry pattern overlay */}
-      <div className="absolute inset-0 sacred-pattern opacity-10"></div>
+      {/* Elegant pattern overlay */}
+      <div className="absolute inset-0 elegant-pattern opacity-10"></div>
       
       <div className="relative z-10 container mx-auto px-4 sm:px-6 text-center">
         <div className="max-w-4xl mx-auto">
           {/* Main heading */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold font-heading mb-4 sm:mb-6 bg-cosmic bg-clip-text text-transparent">
-            Numerologia Cabalística
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold font-heading mb-4 sm:mb-6 bg-gold bg-clip-text text-transparent">
+            Numapp
           </h1>
           
           {/* Subtitle */}
@@ -36,7 +36,7 @@ export const HeroSection = () => {
           
           {/* Feature highlights */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-mystical">
+            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-elegant">
               <div className="text-2xl sm:text-3xl mb-3 sm:mb-4">✨</div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Mapas Completos</h3>
               <p className="text-muted-foreground text-xs sm:text-sm">
@@ -44,7 +44,7 @@ export const HeroSection = () => {
               </p>
             </Card>
             
-            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-mystical">
+            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-elegant">
               <div className="text-2xl sm:text-3xl mb-3 sm:mb-4">🔮</div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">Análises Precisas</h3>
               <p className="text-muted-foreground text-xs sm:text-sm">
@@ -52,7 +52,7 @@ export const HeroSection = () => {
               </p>
             </Card>
             
-            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-mystical sm:col-span-2 lg:col-span-1">
+            <Card className="p-4 sm:p-6 bg-card-gradient border-primary/20 hover:border-primary/40 transition-elegant sm:col-span-2 lg:col-span-1">
               <div className="text-2xl sm:text-3xl mb-3 sm:mb-4">📄</div>
               <h3 className="text-base sm:text-lg font-semibold mb-2">PDFs Profissionais</h3>
               <p className="text-muted-foreground text-xs sm:text-sm">
