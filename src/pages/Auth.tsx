@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff, Loader2, Star } from 'lucide-react';
 
 const Auth = () => {
@@ -15,11 +16,21 @@ const Auth = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberUser, setRememberUser] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: '',
   });
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('rememberedEmail');
+    if (savedEmail) {
+      setFormData(prev => ({ ...prev, email: savedEmail }));
+      setRememberUser(true);
+    }
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -38,6 +49,13 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    
+    // Save or remove email based on remember checkbox
+    if (rememberUser) {
+      localStorage.setItem('rememberedEmail', formData.email);
+    } else {
+      localStorage.removeItem('rememberedEmail');
+    }
     
     const { error } = await signIn(formData.email, formData.password);
     
@@ -156,6 +174,20 @@ const Auth = () => {
                           )}
                         </Button>
                       </div>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="remember-user"
+                        checked={rememberUser}
+                        onCheckedChange={(checked) => setRememberUser(!!checked)}
+                      />
+                      <Label
+                        htmlFor="remember-user"
+                        className="text-sm text-muted-foreground cursor-pointer"
+                      >
+                        Lembrar usuário
+                      </Label>
                     </div>
 
                     <Button
