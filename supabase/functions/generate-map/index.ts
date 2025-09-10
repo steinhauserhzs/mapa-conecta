@@ -174,16 +174,17 @@ serve(async (req) => {
     const numeros = calcularCompleto({ name, birth }, baseMap);
     console.log('🧮 Números calculados:', numeros);
 
-    // Cálculo do Ano Pessoal
+    // Cálculo do Ano Pessoal (Jé Fêrraz: ano_pessoal = reduce(soma_dígitos(ano_ref) + destino))
     const ano = yearRef ?? new Date().getFullYear();
     const birthObj = parseBirth(birth);
     if (!birthObj) {
       throw new Error("Data de nascimento inválida");
     }
     
-    const anoPessoalRaw = birthObj.d + birthObj.m + ano;
-    const anoPessoal = reduce(anoPessoalRaw);
-    console.log('📅 Ano pessoal calculado:', anoPessoal, 'para ano', ano);
+    // Soma dos dígitos do ano de referência
+    const anoDigitos = String(ano).split('').reduce((a, d) => a + Number(d), 0);
+    const anoPessoal = reduce(anoDigitos + numeros.destino);
+    console.log('📅 Ano pessoal calculado:', anoPessoal, 'para ano', ano, '(dígitos ano:', anoDigitos, '+ destino:', numeros.destino, ')');
 
     // Definir seções e números para buscar
     const secoes = [

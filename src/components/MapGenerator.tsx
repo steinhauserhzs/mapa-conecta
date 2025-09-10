@@ -157,7 +157,9 @@ async function computeOnClient(name: string, birthStr: string, yearRef?: number)
   const grau_ascensao = reduce(expressao + destino);
 
   const ano = yearRef ?? new Date().getFullYear();
-  const ano_pessoal = reduce(b.d + b.m + ano);
+  // Ano Pessoal correto: reduce(soma_dígitos(ano_ref) + destino)
+  const anoDigitos = String(ano).split('').reduce((a, d) => a + Number(d), 0);
+  const ano_pessoal = reduce(anoDigitos + destino);
 
   // Buscar todos os textos
   const { data: todosTextos } = await supabase
