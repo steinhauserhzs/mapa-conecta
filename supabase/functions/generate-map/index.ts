@@ -46,13 +46,13 @@ function applyMods(v: number, m: any) {
   return val;
 }
 
-function letterValue(ch: string, baseMap: Record<string, number>) {
-  const upperCh = ch.toUpperCase();
-  const value = baseMap[upperCh];
-  if (value !== undefined) {
-    return { baseChar: upperCh, marks: [], base: value, value, raw: ch };
-  }
-  return null;
+function letterValue(raw: string, baseMap: Record<string, number>) {
+  const analyzed = analyzeChar(raw);
+  if (!analyzed) return null;
+  const base = baseMap[analyzed.baseChar];
+  if (base === undefined) return null;
+  const value = applyMods(base, analyzed.marks);
+  return { baseChar: analyzed.baseChar, marks: analyzed.marks, base, value, raw };
 }
 
 function sumLetters(str: string, baseMap: Record<string, number>, filter = () => true) {
@@ -61,9 +61,9 @@ function sumLetters(str: string, baseMap: Record<string, number>, filter = () =>
   for (const ch of [...str]) {
     const lv = letterValue(ch, baseMap);
     if (!lv) continue;
-    if (filter(lv.baseChar)) { 
-      total += lv.value; 
-      list.push(lv); 
+    if (typeof filter === 'function' ? filter(lv.baseChar) : true) {
+      total += lv.value;
+      list.push(lv);
     }
   }
   return { total, list };

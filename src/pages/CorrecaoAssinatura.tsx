@@ -11,21 +11,60 @@ export default function CorrecaoAssinatura() {
   const [assinaturaAtual, setAssinaturaAtual] = useState("");
   const [sugestoes, setSugestoes] = useState<string[]>([]);
 
-  const calcularLetraNumero = (letra: string): number => {
-    const valores: { [key: string]: number } = {
-      'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5, 'F': 6, 'G': 7, 'H': 8, 'I': 9,
-      'J': 1, 'K': 2, 'L': 3, 'M': 4, 'N': 5, 'O': 6, 'P': 7, 'Q': 8, 'R': 9,
-      'S': 1, 'T': 2, 'U': 3, 'V': 4, 'W': 5, 'X': 6, 'Y': 7, 'Z': 8
-    };
-    return valores[letra.toUpperCase()] || 0;
-  };
+const FALLBACK_BASE_MAP: Record<string, number> = { A:1, B:2, C:3, D:4, E:5, F:8, G:3, H:5, I:1, J:1, K:2, L:3, M:4, N:5, O:7, P:8, Q:1, R:2, S:3, T:4, U:6, V:6, W:6, X:6, Y:1, Z:7, 'Ç':8 };
+const MASTER = new Set([11,22]);
 
-  const reduzirNumero = (num: number): number => {
-    while (num > 9) {
-      num = num.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+function analyzeChar(raw: string) {
+  if (!raw) return null;
+  const nfd = raw.normalize('NFD');
+  const m = nfd.toUpperCase().match(/[A-Z]|Ç/);
+  if (!m) return null;
+  const baseChar = m[0];
+  return {
+    baseChar,
+    marks: {
+      apostrophe: /['']/.test(raw),
+      circumflex: /[\u0302]|\^/.test(nfd),
+      ring: /[\u030A]|\u02DA/.test(nfd),
+      tilde: /[\u0303]|~/.test(nfd),
+      diaeresis: /[\u0308]|\u00A8/.test(nfd),
+      grave: /[\u0300]|`/.test(nfd)
     }
-    return num;
   };
+}
+
+function applyMods(v: number, m: any) {
+  let val = v;
+  if (m.apostrophe) val += 2;
+  if (m.circumflex) val += 7;
+  if (m.ring) val += 7;
+  if (m.tilde) val += 3;
+  if (m.diaeresis) val *= 2;
+  if (m.grave) val *= 2;
+  return val;
+}
+
+function reduce(n: number): number {
+  if (n <= 0) return 0;
+  if (MASTER.has(n)) return n;
+  while (n > 9 && !MASTER.has(n)) {
+    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
+    if (MASTER.has(n)) return n;
+  }
+  return n;
+}
+
+function expressaoNumero(nome: string) {
+  let total = 0;
+  for (const ch of [...(nome || '')]) {
+    const analyzed = analyzeChar(ch);
+    if (!analyzed) continue;
+    const base = FALLBACK_BASE_MAP[analyzed.baseChar];
+    if (base === undefined) continue;
+    total += applyMods(base, analyzed.marks);
+  }
+  return reduce(total);
+}
 
   const analisarAssinatura = () => {
     if (!nomeCompleto) return;
@@ -35,9 +74,7 @@ export default function CorrecaoAssinatura() {
     const ultimoNome = nomes[nomes.length - 1];
     
     // Calcular número do nome completo
-    const numeroNomeCompleto = reduzirNumero(
-      nomeCompleto.replace(/\s/g, '').split('').reduce((acc, letra) => acc + calcularLetraNumero(letra), 0)
-    );
+const numeroNomeCompleto = expressaoNumero(nomeCompleto);
     
     const novasSugestoes = [
       `Seu número de expressão é ${numeroNomeCompleto}. Considere assinar sempre com o nome completo para manifestar toda sua energia.`,

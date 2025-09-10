@@ -83,13 +83,13 @@ function applyMods(v: number, m: any) {
   return val;
 }
 
-function letterValue(ch: string, baseMap: Record<string, number>) {
-  const upperCh = ch.toUpperCase();
-  const value = baseMap[upperCh];
-  if (value !== undefined) {
-    return { baseChar: upperCh, marks: [], base: value, value, raw: ch };
-  }
-  return null;
+function letterValue(raw: string, baseMap: Record<string, number>) {
+  const analyzed = analyzeChar(raw);
+  if (!analyzed) return null;
+  const base = baseMap[analyzed.baseChar];
+  if (base === undefined) return null;
+  const value = applyMods(base, analyzed.marks);
+  return { baseChar: analyzed.baseChar, marks: analyzed.marks, base, value, raw };
 }
 
 function sumLetters(str: string, baseMap: Record<string, number>, filter: (ch: string) => boolean = () => true) {
@@ -230,8 +230,8 @@ export default function MapGenerator() {
       };
       console.log('📤 Enviando request:', requestBody);
       
-      // Timeout de 10s para a função edge
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout ao chamar a função')), 10000));
+// Timeout de 20s para a função edge (funcções podem demorar mais ao buscar textos)
+const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout ao chamar a função')), 20000));
 
       let result: any = null;
       let error: any = null;
