@@ -256,6 +256,7 @@ export type Database = {
       maps: {
         Row: {
           calculation_rule_id: string | null
+          client_id: string | null
           conversion_table_id: string | null
           created_at: string
           id: string
@@ -273,6 +274,7 @@ export type Database = {
         }
         Insert: {
           calculation_rule_id?: string | null
+          client_id?: string | null
           conversion_table_id?: string | null
           created_at?: string
           id?: string
@@ -290,6 +292,7 @@ export type Database = {
         }
         Update: {
           calculation_rule_id?: string | null
+          client_id?: string | null
           conversion_table_id?: string | null
           created_at?: string
           id?: string
@@ -311,6 +314,13 @@ export type Database = {
             columns: ["calculation_rule_id"]
             isOneToOne: false
             referencedRelation: "calculation_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maps_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -487,6 +497,57 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          map_id: string | null
+          service_data: Json
+          service_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          map_id?: string | null
+          service_data?: Json
+          service_type: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          map_id?: string | null
+          service_data?: Json
+          service_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_map_id_fkey"
+            columns: ["map_id"]
+            isOneToOne: false
+            referencedRelation: "maps"
             referencedColumns: ["id"]
           },
         ]

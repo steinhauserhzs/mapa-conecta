@@ -3,26 +3,38 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EnhancedDatePicker } from '@/components/ui/enhanced-date-picker';
 import MapaPDF from './MapaPDF';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/hooks/use-toast';
+import { User } from 'lucide-react';
 
 // Schema de validação
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   birth: z.date({ required_error: 'Data de nascimento é obrigatória' }),
   yearRef: z.number().optional(),
+  clientId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
+
+interface Client {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  birth_date?: string;
+}
 
 interface MapaData {
   header: {
@@ -206,16 +218,128 @@ export default function MapGenerator() {
   const [mapaData, setMapaData] = useState<MapaData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTextos, setEditedTextos] = useState<Record<string, { title: string; body: string }>>({});
+  const [clients, setClients] = useState<Client[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const { toast } = useToast();
+  const location = useLocation();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
       yearRef: new Date().getFullYear(),
+      clientId: '',
     },
   });
+
+  useEffect(() => {
+    fetchClients();
+    // Check if client was pre-selected from navigation
+    const preSelectedClient = location.state?.selectedClient;
+    if (preSelectedClient) {
+      setSelectedClient(preSelectedClient);
+      form.setValue('clientId', preSelectedClient.id);
+      form.setValue('name', preSelectedClient.name);
+      if (preSelectedClient.birth_date) {
+        form.setValue('birth', new Date(preSelectedClient.birth_date));
+      }
+    }
+  }, [location.state]);
+
+  const fetchClients = async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (!profile) return;
+
+      const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, email, phone, birth_date')
+        .eq('user_id', profile.id)
+        .order('name');
+
+      if (error) throw error;
+      setClients(data || []);
+    } catch (error) {
+      console.error('Erro ao buscar clientes:', error);
+    }
+  };
+
+  const handleClientSelect = (clientId: string) => {
+    const client = clients.find(c => c.id === clientId);
+    if (client) {
+      setSelectedClient(client);
+      form.setValue('name', client.name);
+      if (client.birth_date) {
+        form.setValue('birth', new Date(client.birth_date));
+      }
+    } else {
+      setSelectedClient(null);
+      form.setValue('name', '');
+    }
+  };
+
+  const saveMapToDatabase = async (mapData: MapaData, clientId?: string) => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('auth_user_id', (await supabase.auth.getUser()).data.user?.id)
+        .single();
+
+      if (!profile) throw new Error('Perfil não encontrado');
+
+      // Save map
+      const { data: mapResult, error: mapError } = await supabase
+        .from('maps')
+        .insert({
+          user_id: profile.id,
+          client_id: clientId || null,
+          title: `Mapa de ${mapData.header.name}`,
+          type: 'personal' as const,
+          status: 'completed' as const,
+          input: {
+            name: mapData.header.name,
+            birth: mapData.header.birth,
+            yearRef: mapData.header.anoReferencia
+          } as any,
+          result: mapData as any
+        })
+        .select('id')
+        .single();
+
+      if (mapError) throw mapError;
+
+      // Save service record
+      if (clientId && mapResult) {
+        await supabase
+          .from('services')
+          .insert({
+            user_id: profile.id,
+            client_id: clientId,
+            map_id: mapResult.id,
+            service_type: 'map_generation',
+            service_data: {
+              mapTitle: `Mapa de ${mapData.header.name}`,
+              mapType: 'personal'
+            }
+          });
+      }
+
+      toast({
+        title: "Mapa salvo automaticamente",
+        description: clientId ? "Mapa vinculado ao cliente e registrado no histórico." : "Mapa salvo no seu histórico.",
+      });
+    } catch (error) {
+      console.error('Erro ao salvar mapa:', error);
+      // Don't show error toast as this is automatic saving
+    }
+  };
 
   const onSubmit = async (data: FormData) => {
     setIsGenerating(true);
@@ -269,9 +393,12 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
       setEditedTextos(result.textos || {});
       setIsEditing(false);
 
+      // Save automatically to database
+      await saveMapToDatabase(result, data.clientId);
+
       toast({
         title: 'Mapa gerado com sucesso!',
-        description: 'Seu mapa numerológico está pronto.',
+        description: data.clientId ? "Mapa salvo e vinculado ao cliente." : "Mapa gerado e salvo automaticamente.",
       });
     } catch (error: any) {
       console.error('💥 Erro completo ao gerar mapa:', error);
@@ -396,6 +523,35 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
             <CardContent>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div>
+                  <Label htmlFor="clientId" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Cliente (opcional)
+                  </Label>
+                  <Select 
+                    value={form.watch('clientId')} 
+                    onValueChange={(value) => {
+                      form.setValue('clientId', value);
+                      handleClientSelect(value);
+                    }}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Selecione um cliente ou deixe em branco" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Nenhum cliente selecionado</SelectItem>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Selecione um cliente para vincular o mapa automaticamente
+                  </p>
+                </div>
+
+                <div>
                   <Label htmlFor="name">Nome Completo</Label>
                   <Input
                     id="name"
@@ -441,7 +597,9 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
                   disabled={isGenerating}
                   className="w-full"
                 >
-                  {isGenerating ? 'Gerando Mapa...' : 'Gerar Mapa Numerológico'}
+                  {isGenerating ? 'Gerando Mapa...' : (
+                    selectedClient ? `Gerar Mapa para ${selectedClient.name}` : 'Gerar Mapa Numerológico'
+                  )}
                 </Button>
               </form>
             </CardContent>
