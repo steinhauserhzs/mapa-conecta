@@ -302,7 +302,7 @@ export default function MapGenerator() {
           client_id: clientId || null,
           title: `Mapa de ${mapData.header.name}`,
           type: 'personal' as const,
-          status: 'completed' as const,
+          status: 'ready' as const,
           input: {
             name: mapData.header.name,
             birth: mapData.header.birth,
