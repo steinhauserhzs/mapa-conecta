@@ -211,7 +211,7 @@ const Dashboard = () => {
           {/* Análise de Telefones */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
-            onClick={() => navigate('/analise-telefone')}
+            onClick={() => navigate('/analises/telefone')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -229,7 +229,7 @@ const Dashboard = () => {
           {/* Análise de Endereços */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
-            onClick={() => navigate('/analise-endereco')}
+            onClick={() => navigate('/analises/endereco')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -247,7 +247,7 @@ const Dashboard = () => {
           {/* Análise de Placas */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
-            onClick={() => navigate('/analise-placa')}
+            onClick={() => navigate('/analises/placa')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -265,7 +265,7 @@ const Dashboard = () => {
           {/* Correção de Assinatura */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
-            onClick={() => navigate('/correcao-assinatura')}
+            onClick={() => navigate('/analises/assinatura')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
