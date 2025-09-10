@@ -93,13 +93,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          // Use setTimeout to defer async operation
+          setTimeout(() => {
+            fetchProfile(session.user.id);
+          }, 0);
         } else {
           setProfile(null);
         }
@@ -259,9 +262,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           const { setUser: setAppUser, setDemoFlag } = useAppStore.getState();
           setAppUser(null);
           setDemoFlag(false);
-          
-          // Clear localStorage for app-store
-          localStorage.removeItem('app-store');
         }
         
         toast({
@@ -270,8 +270,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         });
         
         console.log('Redirecting to auth...');
-        // Force redirect to auth page
-        window.location.href = '/auth';
+        // Force redirect to auth page without keeping history
+        window.location.replace('/auth');
       }
     } catch (error) {
       console.error('Unexpected error in signOut:', error);

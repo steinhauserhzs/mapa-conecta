@@ -18,6 +18,8 @@ export function AppLayout() {
         name: profile.name || '',
         role: profile.role as 'admin' | 'editor' | 'viewer'
       });
+    } else {
+      setUser(null);
     }
   }, [profile, setUser]);
 
