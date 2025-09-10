@@ -84,11 +84,12 @@ function applyMods(v: number, m: any) {
 }
 
 function letterValue(ch: string, baseMap: Record<string, number>) {
-  const info = analyzeChar(ch);
-  if (!info) return null;
-  const base = baseMap[info.baseChar as keyof typeof baseMap];
-  if (!base) return null;
-  return { ...info, base, value: base, raw: ch };
+  const upperCh = ch.toUpperCase();
+  const value = baseMap[upperCh];
+  if (value !== undefined) {
+    return { baseChar: upperCh, marks: [], base: value, value, raw: ch };
+  }
+  return null;
 }
 
 function sumLetters(str: string, baseMap: Record<string, number>, filter: (ch: string) => boolean = () => true) {
