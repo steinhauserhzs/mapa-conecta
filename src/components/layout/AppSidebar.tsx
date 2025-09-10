@@ -15,8 +15,10 @@ import {
   Table,
   Calculator,
   Briefcase,
+  Download,
 } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 
 import {
   Sidebar,
@@ -115,8 +117,43 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { user } = useAppStore();
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [canInstall, setCanInstall] = useState(false);
 
   const isCollapsed = state === 'collapsed';
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setCanInstall(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setCanInstall(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallPWA = async () => {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setCanInstall(false);
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -178,6 +215,22 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {canInstall && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Aplicativo</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={handleInstallPWA} tooltip="Instalar Aplicativo">
+                    <Download />
+                    <span>Instalar App</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
     </Sidebar>
   );
