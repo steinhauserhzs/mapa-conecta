@@ -394,11 +394,12 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
       setIsEditing(false);
 
       // Save automatically to database
-      await saveMapToDatabase(result, data.clientId);
+      const actualClientId = data.clientId === "none" ? null : data.clientId;
+      await saveMapToDatabase(result, actualClientId);
 
       toast({
         title: 'Mapa gerado com sucesso!',
-        description: data.clientId ? "Mapa salvo e vinculado ao cliente." : "Mapa gerado e salvo automaticamente.",
+        description: actualClientId ? "Mapa salvo e vinculado ao cliente." : "Mapa gerado e salvo automaticamente.",
       });
     } catch (error: any) {
       console.error('💥 Erro completo ao gerar mapa:', error);
@@ -538,7 +539,7 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
                       <SelectValue placeholder="Selecione um cliente ou deixe em branco" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum cliente selecionado</SelectItem>
+                      <SelectItem value="none">Nenhum cliente selecionado</SelectItem>
                       {clients.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name}
