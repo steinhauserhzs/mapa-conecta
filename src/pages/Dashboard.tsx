@@ -156,7 +156,8 @@ const Dashboard = () => {
 
           {/* Mapas Empresariais */}
           <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/mapas-empresariais')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -168,13 +169,13 @@ const Dashboard = () => {
                   Energia de marcas e nomes comerciais para negócios
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
             </CardContent>
           </Card>
 
           {/* Harmonia Conjugal */}
           <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/harmonia-conjugal')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -186,13 +187,13 @@ const Dashboard = () => {
                   Compatibilidade entre casais e análise de relacionamento
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
             </CardContent>
           </Card>
 
           {/* Mapas Infantis */}
           <Card 
-            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40 opacity-60"
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/mapas-infantis')}
           >
             <CardContent className="p-6 text-center space-y-3">
               <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -204,7 +205,6 @@ const Dashboard = () => {
                   Escolha o melhor nome para bebês analisando potenciais
                 </p>
               </div>
-              <Badge variant="secondary" className="text-xs">Em Breve</Badge>
             </CardContent>
           </Card>
 
@@ -304,19 +304,22 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:shadow-lg transition-shadow opacity-50">
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate('/clientes')}
+        >
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Clientes
             </CardTitle>
             <CardDescription>
-              Gerencie seu cadastro de clientes (em breve)
+              Gerencie seu cadastro de clientes
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full" disabled>
-              Em Desenvolvimento
+            <Button variant="outline" className="w-full">
+              Gerenciar Clientes
             </Button>
           </CardContent>
         </Card>

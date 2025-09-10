@@ -13,6 +13,9 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import MapGenerator from "./pages/MapGenerator";
+import MapasEmpresariais from "./pages/MapasEmpresariais";
+import HarmoniaConjugal from "./pages/HarmoniaConjugal";
+import MapasInfantis from "./pages/MapasInfantis";
 import Clientes from "./pages/Clientes";
 import Relatorios from "./pages/Relatorios";
 import PlanilhaEquivalencia from "./pages/PlanilhaEquivalencia";
@@ -70,6 +73,36 @@ const App = () => (
                   }
                 >
                   <Route index element={<MapGenerator />} />
+                </Route>
+                <Route
+                  path="/mapas-empresariais"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<MapasEmpresariais />} />
+                </Route>
+                <Route
+                  path="/harmonia-conjugal"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<HarmoniaConjugal />} />
+                </Route>
+                <Route
+                  path="/mapas-infantis"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<MapasInfantis />} />
                 </Route>
                 <Route
                   path="/clientes"
