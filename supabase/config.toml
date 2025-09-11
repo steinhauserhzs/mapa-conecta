@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.gerar-pdf]
 verify_jwt = false
 
+[functions.generate-gamma-pdf]
+verify_jwt = false
+
 [functions.webhook-demo]
 verify_jwt = false
 
