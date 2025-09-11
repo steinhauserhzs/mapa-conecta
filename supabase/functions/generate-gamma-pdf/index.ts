@@ -191,48 +191,22 @@ function getAnjoByDate(dateStr: string) {
 }
 
 async function formatMapDataForGamma(map: any, supabase: any): Promise<string> {
-  const { title, result, input } = map;
+  const { title, result, input, textos } = map;
   const { nome, data } = input;
+  const numeros = result.numeros || result;
   
-  // Fetch numerology texts from database
-  const { data: texts, error: textsError } = await supabase
-    .from('numerology_texts')
-    .select('section, key_number, title, body')
-    .eq('lang', 'pt-BR');
-
-  if (textsError) {
-    console.error('Error fetching numerology texts:', textsError);
-  }
-
-  // Create lookup for texts
-  const textLookup = {};
-  if (texts) {
-    texts.forEach(text => {
-      const key = `${text.section}_${text.key_number}`;
-      textLookup[key] = text;
-    });
-  }
-
   // Get anjo cabalístico
   const anjo = getAnjoByDate(data);
 
-  // Calculate current year values
-  const currentYear = new Date().getFullYear();
-  const [day, month] = data.split('/');
-  const anoPersonal = ((parseInt(day) + parseInt(month) + currentYear) % 9) + 1;
-  const currentMonth = new Date().getMonth() + 1;
-  const mesPersonal = ((anoPersonal + currentMonth) % 9) + 1;
-  const currentDay = new Date().getDate();
-  const diaPersonal = ((mesPersonal + currentDay) % 9) + 1;
-
   // Helper function to get text content
-  const getText = (section: string, number: number) => {
-    const key = `${section}_${number}`;
-    const text = textLookup[key];
-    return text ? text.body : `Interpretação para ${section} ${number} será desenvolvida.`;
+  const getTexto = (key: string) => {
+    if (textos && textos[key]) {
+      return textos[key].body || textos[key].title || `Conteúdo para ${key} será desenvolvido.`;
+    }
+    return `Interpretação para ${key} será desenvolvida.`;
   };
 
-  // Create comprehensive content using the user's detailed prompt structure
+  // Create comprehensive content
   let content = `VOCÊ É UM NUMERÓLOGO CABALÍSTICO EXPERIENTE
 
 Gere um mapa numerológico COMPLETO e PROFISSIONAL para o seguinte nome e data de nascimento:
@@ -248,23 +222,29 @@ Todos os acentos foram removidos seguindo as regras cabalísticas tradicionais.
 
 ## NÚMEROS PRINCIPAIS CALCULADOS
 
-### **MOTIVAÇÃO (INTERIOR): ${result.motivacao || 'N/A'}**
-${result.motivacao ? getText('motivacao', result.motivacao) : 'Cálculo baseado nas vogais do nome completo.'}
+### **MOTIVAÇÃO (INTERIOR): ${numeros.motivacao || 'N/A'}**
+${getTexto('motivacao')}
 
-### **IMPRESSÃO (PERSONALIDADE): ${result.impressao || 'N/A'}**
-${result.impressao ? getText('impressao', result.impressao) : 'Cálculo baseado nas consoantes do nome completo.'}
+### **IMPRESSÃO (PERSONALIDADE): ${numeros.impressao || 'N/A'}**
+${getTexto('impressao')}
 
-### **EXPRESSÃO (NÚMERO DO NOME): ${result.expressao || 'N/A'}**
-${result.expressao ? getText('expressao', result.expressao) : 'Cálculo baseado em todas as letras do nome completo.'}
+### **EXPRESSÃO (NÚMERO DO NOME): ${numeros.expressao || 'N/A'}**
+${getTexto('expressao')}
 
-### **DESTINO (CAMINHO DE VIDA): ${result.destino || 'N/A'}**
-${result.destino ? getText('destino', result.destino) : 'Cálculo baseado na data de nascimento completa.'}
+### **DESTINO (CAMINHO DE VIDA): ${numeros.destino || 'N/A'}**
+${getTexto('destino')}
 
-### **MISSÃO (PROPÓSITO): ${result.missao || 'N/A'}**
-${result.missao ? getText('missao', result.missao) : 'Soma da Expressão com o Destino, reduzida.'}
+### **MISSÃO (PROPÓSITO): ${numeros.missao || 'N/A'}**
+${getTexto('missao')}
 
-### **NÚMERO PSÍQUICO: ${result.psiquico || 'N/A'}**
-${result.psiquico ? getText('Número Psíquico', result.psiquico) : `Baseado no dia de nascimento: ${day}`}
+### **NÚMERO PSÍQUICO: ${numeros.numero_psiquico || 'N/A'}**
+${getTexto('numero_psiquico')}
+
+### **DIA DO NASCIMENTO: ${numeros.dia_nascimento_natural || 'N/A'}**
+${getTexto('dia_nascimento')}
+
+### **GRAU DE ASCENSÃO: ${numeros.grau_ascensao || 'N/A'}**
+${getTexto('grau_ascensao')}
 
 ## SEU ANJO CABALÍSTICO
 
@@ -272,88 +252,71 @@ ${result.psiquico ? getText('Número Psíquico', result.psiquico) : `Baseado no 
 - **Categoria:** ${anjo.categoria}
 - **Horário de Invocação:** ${anjo.horario}
 - **Salmo:** ${anjo.salmo}
-- **Oração:** ${anjo.oração}
+- **Oração:** ${anjo.oracao}
 
 Este anjo é seu protetor e guia espiritual, baseado em sua data de nascimento. Invoque-o nos horários especificados para receber orientação e proteção divina.
 
 ## ANÁLISES AVANÇADAS
 
 ### **LIÇÕES CÁRMICAS**
-${result.licoesCarmicas && result.licoesCarmicas.length > 0 ? 
-  result.licoesCarmicas.map(num => `**Lição ${num}:** ${getText('licoes_carmicas', num)}`).join('\n\n') :
-  'Números ausentes no nome revelam lições que precisam ser aprendidas nesta encarnação.'}
+${getTexto('licoes_carmicas')}
 
 ### **DÍVIDAS CÁRMICAS**
-${result.dividasCarmicas && result.dividasCarmicas.length > 0 ? 
-  result.dividasCarmicas.map(num => `**Dívida ${num}:** Indica desafios cármicos específicos a serem superados.`).join('\n\n') :
-  'Não foram identificadas dívidas cármicas principais neste mapa.'}
+${getTexto('dividas_carmicas')}
 
 ### **TENDÊNCIAS OCULTAS**
-${result.tendenciasOcultas && Object.keys(result.tendenciasOcultas).length > 0 ?
-  Object.entries(result.tendenciasOcultas).map(([num, count]) => 
-    `**Número ${num} (${count}x):** ${getText('Tendências Ocultas', parseInt(num))}`
-  ).join('\n\n') :
-  'Números que se repetem com maior frequência no nome, revelando características ocultas da personalidade.'}
+${getTexto('tendencias_ocultas')}
 
-### **RESPOSTA SUBCONSCIENTE: ${result.respostaSubconsciente || 'N/A'}**
-${result.respostaSubconsciente ? 
-  `Esta é sua resposta instintiva em situações de emergência ou stress. Calculada através da análise dos números ausentes no nome.` :
-  'Indica como você reage subconscientemente a situações desafiadoras.'}
+### **RESPOSTA SUBCONSCIENTE: ${numeros.resposta_subconsciente || 'N/A'}**
+${getTexto('resposta_subconsciente')}
 
 ## CICLOS TEMPORAIS
 
 ### **CICLOS DE VIDA**
-${result.ciclosVida ? 
-  result.ciclosVida.map((ciclo, index) => {
-    const periodos = ['0-28 anos', '28-55 anos', '55+ anos'];
-    return `**${periodos[index]}: Ciclo ${ciclo}**\n${getText('Primeiro Ciclo de Vida', ciclo)}`;
-  }).join('\n\n') :
-  'Os ciclos mostram as diferentes fases da vida e suas características principais.'}
+${getTexto('ciclos_vida')}
 
 ### **DESAFIOS**
-${result.desafios ? 
-  result.desafios.map((desafio, index) => {
-    const periodos = ['Primeiro Desafio (0-28)', 'Segundo Desafio (28-55)', 'Desafio Principal (55+)'];
-    return `**${periodos[index]}: ${desafio}**\n${getText('desafios', desafio)}`;
-  }).join('\n\n') :
-  'Os desafios indicam as principais lições e obstáculos a serem superados em cada fase da vida.'}
+${getTexto('desafios')}
 
 ### **MOMENTOS DECISIVOS**
-${result.momentos ? 
-  result.momentos.map((momento, index) => {
-    const periodos = ['0-28 anos', '28-37 anos', '37-46 anos', '46+ anos'];
-    return `**${periodos[index]}: Momento ${momento}**\n${getText('Primeiro Momento Decisivo', momento)}`;
-  }).join('\n\n') :
-  'Os momentos decisivos revelam as oportunidades e mudanças importantes em cada período da vida.'}
+${getTexto('momentos_decisivos')}
 
 ## ANÁLISE TEMPORAL ATUAL
 
-### **ANO PESSOAL ${currentYear}: ${anoPersonal}**
-${getText('ano_pessoal', anoPersonal)}
+### **ANO PESSOAL ${result.header?.anoReferencia || new Date().getFullYear()}: ${numeros.ano_pessoal || 'N/A'}**
+${getTexto('ano_pessoal')}
 
-### **MÊS PESSOAL: ${mesPersonal}**
-${getText('mes_pessoal', mesPersonal)}
+${numeros.mes_pessoal ? `
+### **MÊS PESSOAL: ${numeros.mes_pessoal}**
+${getTexto('mes_pessoal')}
+` : ''}
 
-### **DIA PESSOAL: ${diaPersonal}**
-Energia do dia atual, indicando as melhores oportunidades e focos para hoje.
+${numeros.dia_pessoal ? `
+### **DIA PESSOAL: ${numeros.dia_pessoal}**
+${getTexto('dia_pessoal')}
+` : ''}
 
 ## INFORMAÇÕES COMPLEMENTARES
 
 ### **CORES FAVORÁVEIS**
-${result.expressao ? 
-  `Baseadas no seu número de Expressão ${result.expressao}: ${getText('Cores Favoráveis', result.expressao)}` :
-  'Cores que harmonizam com sua vibração numerológica pessoal.'}
+${getTexto('cores_favoraveis')}
+
+### **DIAS DO MÊS FAVORÁVEIS**
+${getTexto('dias_favoraveis')}
 
 ### **NÚMEROS HARMÔNICOS**
-${result.expressao && result.destino ? 
-  `Números que vibram em harmonia com você: ${result.expressao}, ${result.destino}, ${result.motivacao || 'N/A'}` :
-  'Números que trazem sorte e harmonia para sua vida.'}
+Números que vibram em harmonia com você: ${[numeros.expressao, numeros.destino, numeros.motivacao].filter(n => n).join(', ')}
 
-### **HARMONIA CONJUGAL**
-${result.expressao ? getText('harmonia_conjugal', result.expressao) : 'Compatibilidade numerológica para relacionamentos.'}
+## DETALHES DOS CÁLCULOS
 
-### **POTENCIALIDADE PROFISSIONAL**
-${result.expressao ? getText('Potencialidade Profissional', result.expressao) : 'Áreas profissionais mais favoráveis baseadas em seus números.'}
+${result.debug ? `
+**Somas obtidas:**
+- Todas as letras: ${result.debug.somas?.todas || 'N/A'}
+- Vogais: ${result.debug.somas?.vogais || 'N/A'} 
+- Consoantes: ${result.debug.somas?.consoantes || 'N/A'}
+
+**Data de nascimento analisada:** ${result.debug.nascimento?.d || 'N/A'}/${result.debug.nascimento?.m || 'N/A'}/${result.debug.nascimento?.y || 'N/A'}
+` : ''}
 
 ## CONCLUSÃO
 
@@ -366,7 +329,7 @@ Este mapa numerológico completo foi elaborado seguindo rigorosamente as tradiç
 
 **Nome analisado:** ${nome}
 **Data de nascimento:** ${data}
-**Data da análise:** ${new Date().toLocaleDateString('pt-BR')}
+**Data da análise:** ${result.header?.dataGeracao ? new Date(result.header.dataGeracao).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR')}
 **Sistema:** Numerologia Cabalística Tradicional
 
 ---
