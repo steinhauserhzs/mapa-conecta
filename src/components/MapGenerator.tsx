@@ -216,6 +216,7 @@ export default function MapGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [mapaData, setMapaData] = useState<MapaData | null>(null);
+  const [currentMapId, setCurrentMapId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTextos, setEditedTextos] = useState<Record<string, { title: string; body: string }>>({});
   const [clients, setClients] = useState<Client[]>([]);
@@ -314,6 +315,9 @@ export default function MapGenerator() {
         .single();
 
       if (mapError) throw mapError;
+
+      // Store the map ID for PDF generation
+      setCurrentMapId(mapResult.id);
 
       // Save service record
       if (clientId && mapResult) {
@@ -414,31 +418,44 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
   };
 
   const exportToPDF = async () => {
-    if (!mapaData) return;
+    if (!currentMapId) {
+      toast({
+        title: 'Erro ao exportar PDF',
+        description: 'É necessário gerar o mapa primeiro.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
     setIsExportingPDF(true);
     try {
-      const element = document.getElementById('mapa-para-pdf');
-      if (!element) throw new Error('Elemento do mapa não encontrado');
-
-      const opt = {
-        margin: 0.5,
-        filename: `mapa-numerologico-${mapaData.header.name.replace(/\s+/g, '-')}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-      };
-
-      await html2pdf().set(opt).from(element).save();
-      
       toast({
-        title: 'PDF exportado com sucesso!',
-        description: 'O arquivo foi baixado para seu computador.',
+        title: 'Gerando PDF...',
+        description: 'Estamos criando seu PDF profissional com Gamma AI. Isso pode levar alguns minutos.',
       });
-    } catch (error) {
+
+      const { data: response, error } = await supabase.functions.invoke('generate-gamma-pdf', {
+        body: { map_id: currentMapId }
+      });
+
+      if (error) throw error;
+
+      if (response?.ok && response?.pdf_url) {
+        // Open PDF in new tab for download
+        window.open(response.pdf_url, '_blank');
+        
+        toast({
+          title: 'PDF gerado com sucesso!',
+          description: 'Seu PDF profissional foi criado com Gamma AI.',
+        });
+      } else {
+        throw new Error(response?.error || 'Falha na geração do PDF');
+      }
+    } catch (error: any) {
+      console.error('Erro ao gerar PDF:', error);
       toast({
         title: 'Erro ao exportar PDF',
-        description: 'Tente novamente.',
+        description: error.message || 'Erro na geração do PDF via Gamma API. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
