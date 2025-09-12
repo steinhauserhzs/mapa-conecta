@@ -84,8 +84,10 @@ function sumLetters(str: string, baseMap: Record<string, number>, filter?: (ch: 
 }
 
 function reduce(n: number): number {
-  while (n > 9 && n !== 11 && n !== 22) {
-    n = Math.floor(n / 10) + (n % 10);
+  if (n === 11 || n === 22) return n;
+  while (n > 9) {
+    n = String(n).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
+    if (n === 11 || n === 22) return n;
   }
   return n;
 }
@@ -119,12 +121,7 @@ function parseBirth(b: string) {
 
 function sumBirth({ d, m, y }: { d: number, m: number, y: number }): number {
   const total = d + m + y;
-  let sum = total;
-  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
-    const digits = sum.toString().split('').map(Number);
-    sum = digits.reduce((a, b) => a + b, 0);
-  }
-  return sum;
+  return reduce(total);
 }
 
 // Função para calcular lições cármicas (números ausentes no nome)
@@ -290,6 +287,8 @@ serve(async (req) => {
     }
 
     console.log(`🚀 Gerando mapa completo para: ${name}, nascido em ${birth}`);
+    console.log(`📅 Ano de referência: ${anoReferencia}`);
+    console.log(`🔧 Usando tabela de conversão: ${convError ? 'FALLBACK' : 'SUPABASE'}`);
 
     // Buscar tabela de conversão
     const { data: conversionData, error: convError } = await supabase
@@ -304,6 +303,22 @@ serve(async (req) => {
 
     // Realizar cálculos numerológicos
     const result = calcularCompleto({ name, birth }, baseMap);
+    
+    console.log(`🔢 Números calculados:`, {
+      motivacao: result.motivacao,
+      impressao: result.impressao,
+      expressao: result.expressao,
+      destino: result.destino,
+      missao: result.missao,
+      psiquico: result.psiquico,
+      licoesCarmicas: result.licoesCarmicas,
+      dividasCarmicas: result.dividasCarmicas,
+      tendenciasOcultas: result.tendenciasOcultas,
+      respostaSubconsciente: result.respostaSubconsciente,
+      ciclosVida: result.ciclosVida,
+      desafios: result.desafios,
+      momentos: result.momentos
+    });
     
     // Calcular ano, mês e dia pessoal
     const { d, m, y } = parseBirth(birth);

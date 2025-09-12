@@ -359,10 +359,10 @@ export default function MapGenerator() {
         birth: birthString,
         yearRef: new Date().getFullYear(),
       };
-      console.log('📤 Enviando request:', requestBody);
+      console.log('📤 Enviando request para generate-map:', requestBody);
       
-// Timeout de 20s para a função edge (funcções podem demorar mais ao buscar textos)
-const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout ao chamar a função')), 20000));
+      // Timeout de 20s para a função edge (funções podem demorar mais ao buscar textos)
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout ao chamar a função')), 20000));
 
       let result: any = null;
       let error: any = null;
@@ -381,7 +381,26 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
         error = e;
       }
 
-      console.log('📥 Resposta recebida:', { result, error });
+      console.log('📥 Resposta da edge function recebida:', { 
+        hasResult: !!result, 
+        hasError: !!error, 
+        error: error ? (error.message || error) : null,
+        resultKeys: result ? Object.keys(result) : [],
+        resultHeader: result?.header,
+        resultNumbers: result?.numeros ? {
+          motivacao: result.numeros.motivacao,
+          impressao: result.numeros.impressao,
+          expressao: result.numeros.expressao,
+          destino: result.numeros.destino,
+          arrays: {
+            licoesCarmicas: result.numeros.licoesCarmicas,
+            ciclosVida: result.numeros.ciclosVida,
+            desafios: result.numeros.desafios,
+            momentos: result.numeros.momentos
+          }
+        } : null,
+        firstTextoKeys: result?.textos ? Object.keys(result.textos).slice(0, 5) : []
+      });
 
       if (error || !result) {
         console.warn('⚠️ Falha na função edge, usando fallback no cliente...', error);

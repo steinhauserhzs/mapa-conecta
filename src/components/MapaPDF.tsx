@@ -121,7 +121,19 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
     headerNome: data.header?.nome || data.header?.name,
     numerosKeys: data.numeros ? Object.keys(data.numeros) : [],
     textosKeys: data.textos ? Object.keys(data.textos) : [],
-    textsKeys: data.texts ? Object.keys(data.texts) : []
+    textsKeys: data.texts ? Object.keys(data.texts) : [],
+    numbersDetailed: data?.numeros ? {
+      motivacao: data.numeros.motivacao,
+      impressao: data.numeros.impressao, 
+      expressao: data.numeros.expressao,
+      destino: data.numeros.destino,
+      arrays: {
+        licoesCarmicas: Array.isArray(data.numeros.licoesCarmicas) ? data.numeros.licoesCarmicas : [],
+        ciclosVida: Array.isArray(data.numeros.ciclosVida) ? data.numeros.ciclosVida : [],
+        desafios: Array.isArray(data.numeros.desafios) ? data.numeros.desafios : [],
+        momentos: Array.isArray(data.numeros.momentos) ? data.numeros.momentos : []
+      }
+    } : null
   });
 
   const isV3Format = data.metadata?.version === 'v3.0' || data.textos?.motivacao;
