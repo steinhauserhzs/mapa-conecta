@@ -2,348 +2,421 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-const CANVA_CONTENT = `[CONTEÚDO NUMEROLÓGICO COMPLETO - Version 2.0]
-
-# NUMEROLOGIA APLICADA - GUIA COMPLETO
-
-## ASPECTOS BÁSICOS DA NUMEROLOGIA
-
-### NÚMEROS DE 1 A 9 - EXPRESSÃO/PERSONALIDADE
-
-**Número 1 - O PIONEIRO**
-Características: Liderança, iniciativa, independência, originalidade, determinação
-Personalidade: Pessoas nascidas para liderar, com forte senso de individualidade
-Profissões: Empresários, executivos, inventores, líderes políticos
-Desafios: Arrogância, impaciência, autoritarismo
-Relacionamentos: Precisa de parceiros que respeitem sua independência
-
-**Número 2 - O COOPERADOR**
-Características: Diplomacia, sensibilidade, cooperação, parceria, intuição
-Personalidade: Pessoas que buscam harmonia e trabalham melhor em equipe
-Profissões: Diplomatas, conselheiros, mediadores, artistas
-Desafios: Indecisão, dependência emocional, timidez
-Relacionamentos: Valoriza união e busca parceiro para toda vida
-
-**Número 3 - O COMUNICADOR**
-Características: Criatividade, comunicação, otimismo, expressão artística
-Personalidade: Pessoas alegres, criativas e comunicativas
-Profissões: Artistas, escritores, palestrantes, professores
-Desafios: Dispersão, superficialidade, falta de foco
-Relacionamentos: Busca parceiros que apreciem sua criatividade
-
-**Número 4 - O CONSTRUTOR**
-Características: Praticidade, organização, disciplina, trabalho duro, estabilidade
-Personalidade: Pessoas confiáveis, metódicas e trabalhadoras
-Profissões: Engenheiros, contadores, administradores, técnicos
-Desafios: Rigidez, teimosia, falta de flexibilidade
-Relacionamentos: Busca estabilidade e compromisso sério
-
-**Número 5 - O AVENTUREIRO**
-Características: Liberdade, versatilidade, curiosidade, mudança, aventura
-Personalidade: Pessoas que amam liberdade e novas experiências
-Profissões: Viajantes, jornalistas, vendedores, guias turísticos
-Desafios: Instabilidade, impulsividade, falta de compromisso
-Relacionamentos: Precisa de liberdade dentro do relacionamento
-
-**Número 6 - O CUIDADOR**
-Características: Responsabilidade, cuidado, família, serviço, compaixão
-Personalidade: Pessoas carinhosas que gostam de cuidar dos outros
-Profissões: Médicos, enfermeiros, professores, terapeutas
-Desafios: Excesso de proteção, sacrifício excessivo, controle
-Relacionamentos: Família é prioridade, parceiro dedicado
-
-**Número 7 - O BUSCADOR**
-Características: Espiritualidade, análise, introspecção, mistério, sabedoria
-Personalidade: Pessoas introspectivas que buscam conhecimento profundo
-Profissões: Pesquisadores, filósofos, psicólogos, místicos
-Desafios: Isolamento, pessimismo, falta de praticidade
-Relacionamentos: Precisa de parceiro que respeite sua necessidade de solidão
-
-**Número 8 - O EXECUTIVO**
-Características: Ambição, poder material, organização, justiça, autoridade
-Personalidade: Pessoas focadas no sucesso material e reconhecimento
-Profissões: Executivos, banqueiros, políticos, juízes
-Desafios: Materialismo, workaholismo, falta de flexibilidade
-Relacionamentos: Busca parceiro bem-sucedido e ambicioso
-
-**Número 9 - O HUMANITÁRIO**
-Características: Humanitarismo, compaixão, universalidade, sabedoria, generosidade
-Personalidade: Pessoas que se preocupam com o bem-estar da humanidade
-Profissões: Assistentes sociais, médicos, professores, filantropistas
-Desafios: Idealismo excessivo, mártir, dispersão emocional
-Relacionamentos: Busca parceiro que compartilhe ideais humanitários
-
-### NÚMEROS MESTRES
-
-**Número 11 - O ILUMINADO**
-Características: Intuição elevada, inspiração, liderança espiritual, sensibilidade
-Personalidade: Pessoas com grande intuição e capacidade de inspirar outros
-Missão: Trazer luz e inspiração ao mundo
-Desafios: Nervosismo, instabilidade emocional, pressão interna
-
-**Número 22 - O MESTRE CONSTRUTOR**
-Características: Visão grandiosa, capacidade de materializar sonhos, liderança
-Personalidade: Pessoas capazes de transformar visões em realidade
-Missão: Construir algo duradouro para a humanidade
-Desafios: Pressão interna, perfeccionismo, tendência ao esgotamento
-
-**Número 33 - O MESTRE PROFESSOR**
-Características: Amor incondicional, cura, ensino espiritual, compaixão
-Personalidade: Pessoas com grande capacidade de cura e ensino
-Missão: Ensinar através do exemplo e do amor incondicional
-Desafios: Sacrifício excessivo, tendência ao martírio
-
-### MOTIVAÇÃO (VOGAIS) - O QUE TE MOVE
-
-**Motivação 1**: Busca liderança, independência e reconhecimento
-**Motivação 2**: Busca harmonia, cooperação e relacionamentos
-**Motivação 3**: Busca expressão criativa e comunicação
-**Motivação 4**: Busca estabilidade, segurança e organização
-**Motivação 5**: Busca liberdade, aventura e variedade
-**Motivação 6**: Busca servir, cuidar e responsabilidade familiar
-**Motivação 7**: Busca conhecimento, espiritualidade e introspecção
-**Motivação 8**: Busca poder, sucesso material e reconhecimento
-**Motivação 9**: Busca servir a humanidade e fazer a diferença
-
-### IMPRESSÃO (CONSOANTES) - COMO OS OUTROS TE VEEM
-
-**Impressão 1**: Visto como líder natural, confiante e independente
-**Impressão 2**: Visto como diplomático, sensível e cooperativo
-**Impressão 3**: Visto como criativo, comunicativo e alegre
-**Impressão 4**: Visto como confiável, prático e organizado
-**Impressão 5**: Visto como aventureiro, versátil e livre
-**Impressão 6**: Visto como responsável, cuidadoso e familiar
-**Impressão 7**: Visto como misterioso, sábio e introspectivo
-**Impressão 8**: Visto como poderoso, ambicioso e bem-sucedido
-**Impressão 9**: Visto como humanitário, generoso e sábio
-
-### DESTINO (DATA DE NASCIMENTO) - SUA MISSÃO DE VIDA
-
-**Destino 1**: Missão de liderar, inovar e abrir caminhos
-**Destino 2**: Missão de cooperar, mediar e criar harmonia
-**Destino 3**: Missão de inspirar, criar e comunicar alegria
-**Destino 4**: Missão de construir, organizar e criar estabilidade
-**Destino 5**: Missão de explorar, ensinar e promover mudanças
-**Destino 6**: Missão de cuidar, servir e responsabilidade social
-**Destino 7**: Missão de pesquisar, ensinar e elevar consciência
-**Destino 8**: Missão de organizar, liderar e criar prosperidade
-**Destino 9**: Missão de servir humanidade e elevar consciência global
-
-### MISSÃO (EXPRESSÃO + DESTINO)
-
-A missão combina sua personalidade (Expressão) com sua missão de vida (Destino).
-
-**Cálculos de Missão:**
-- Soma-se o número da Expressão com o número do Destino
-- Reduz-se o resultado conforme regras numerológicas
-- O resultado indica como realizar sua missão de vida
-
-### PSÍQUICO (DIA DE NASCIMENTO) - SUA ESSÊNCIA
-
-**Psíquico 1**: Essência de liderança e pioneirismo
-**Psíquico 2**: Essência de cooperação e diplomacia
-**Psíquico 3**: Essência de criatividade e comunicação
-**Psíquico 4**: Essência de praticidade e organização
-**Psíquico 5**: Essência de liberdade e aventura
-**Psíquico 6**: Essência de cuidado e responsabilidade
-**Psíquico 7**: Essência de busca espiritual e conhecimento
-**Psíquico 8**: Essência de ambição e materialização
-**Psíquico 9**: Essência de humanitarismo e sabedoria
-
-### LIÇÕES CÁRMICAS - O QUE PRECISA APRENDER
-
-As lições cármicas são números ausentes no nome completo:
-
-**Lição 1**: Aprender liderança e independência
-**Lição 2**: Aprender cooperação e diplomacia
-**Lição 3**: Aprender expressão criativa e comunicação
-**Lição 4**: Aprender disciplina e organização
-**Lição 5**: Aprender liberdade construtiva e adaptabilidade
-**Lição 6**: Aprender responsabilidade e cuidado
-**Lição 7**: Aprender busca interior e espiritualidade
-**Lição 8**: Aprender autoridade e materialização ética
-**Lição 9**: Aprender compaixão e serviço universal
-
-### DÍVIDAS CÁRMICAS - DESAFIOS A SUPERAR
-
-**Dívida 13/4**: Relacionada à preguiça e irresponsabilidade em vidas passadas
-- Superação: Disciplina, trabalho duro e organização
-- Manifestação: Tendência à preguiça, dificuldade com disciplina
-
-**Dívida 14/5**: Relacionada ao abuso da liberdade em vidas passadas
-- Superação: Uso construtivo da liberdade, moderação
-- Manifestação: Vícios, excessos, irresponsabilidade
-
-**Dívida 16/7**: Relacionada ao ego e orgulho espiritual em vidas passadas
-- Superação: Humildade, busca genuína da espiritualidade
-- Manifestação: Quedas súbitas, lições humilhantes
-
-**Dívida 19/1**: Relacionada ao abuso de poder em vidas passadas
-- Superação: Liderança servil, uso correto do poder
-- Manifestação: Dificuldade com autoridade, obstáculos na liderança
-
-### TENDÊNCIAS OCULTAS - TALENTOS NATURAIS
-
-São números que aparecem mais vezes no nome completo:
-
-**Tendência 1**: Talento natural para liderança
-**Tendência 2**: Talento natural para mediação
-**Tendência 3**: Talento natural para comunicação
-**Tendência 4**: Talento natural para organização
-**Tendência 5**: Talento natural para adaptação
-**Tendência 6**: Talento natural para cuidado
-**Tendência 7**: Talento natural para análise
-**Tendência 8**: Talento natural para administração
-**Tendência 9**: Talento natural para compreensão
-
-### RESPOSTA SUBCONSCIENTE - REAÇÕES INSTINTIVAS
-
-**Resposta 1**: Reage com liderança e iniciativa
-**Resposta 2**: Reage buscando cooperação e harmonia
-**Resposta 3**: Reage com otimismo e criatividade
-**Resposta 4**: Reage com praticidade e organização
-**Resposta 5**: Reage buscando liberdade e mudança
-**Resposta 6**: Reage assumindo responsabilidades
-**Resposta 7**: Reage com análise e introspecção
-**Resposta 8**: Reage com autoridade e determinação
-**Resposta 9**: Reage com compreensão e compaixão
-
-### CICLOS DE VIDA - FASES DA EXISTÊNCIA
-
-**PRIMEIRO CICLO (0 aos 28-35 anos)**
-- Baseado no mês de nascimento
-- Fase de formação e desenvolvimento inicial
-- Influencia juventude e início da vida adulta
-
-**SEGUNDO CICLO (28-35 aos 52-60 anos)**
-- Baseado no dia de nascimento
-- Fase de produtividade e realização
-- Período de maior atividade profissional
-
-**TERCEIRO CICLO (52-60 anos em diante)**
-- Baseado no ano de nascimento
-- Fase de colheita e sabedoria
-- Período de maturidade e transmissão de conhecimento
-
-### DESAFIOS - OBSTÁCULOS A SUPERAR
-
-**PRIMEIRO DESAFIO (0 aos 28-35 anos)**
-**SEGUNDO DESAFIO (28-35 aos 52-60 anos)**  
-**TERCEIRO DESAFIO (52-60 anos em diante)**
-**DESAFIO PRINCIPAL (vida toda)**
-
-**Desafio 0**: Ausência de desafios - escolha livre
-**Desafio 1**: Superar dependência, desenvolver liderança
-**Desafio 2**: Superar timidez, desenvolver cooperação
-**Desafio 3**: Superar dispersão, focar criatividade
-**Desafio 4**: Superar rigidez, desenvolver flexibilidade
-**Desafio 5**: Superar instabilidade, encontrar foco
-**Desafio 6**: Superar excesso de proteção, equilibrar cuidado
-**Desafio 7**: Superar isolamento, compartilhar conhecimento
-**Desafio 8**: Superar materialismo, desenvolver compaixão
-
-### MOMENTOS DECISIVOS - PERÍODOS DE MUDANÇA
-
-**PRIMEIRO MOMENTO (nascimento aos 28-35 anos)**
-**SEGUNDO MOMENTO (28-35 aos 52-60 anos)**
-**TERCEIRO MOMENTO (52-60 aos 76-84 anos)**
-**QUARTO MOMENTO (76-84 anos em diante)**
-
-Cada momento indica as oportunidades e temas principais de cada fase da vida.
-
-### ANO PESSOAL - CICLO ANUAL DE 9 ANOS
-
-**Ano 1**: Novos começos, iniciativas, plantio de sementes
-**Ano 2**: Cooperação, parcerias, desenvolvimento lento
-**Ano 3**: Criatividade, comunicação, expressão pessoal
-**Ano 4**: Trabalho duro, construção de bases, organização
-**Ano 5**: Mudanças, liberdade, novas oportunidades
-**Ano 6**: Responsabilidades familiares, cuidado, serviço
-**Ano 7**: Introspecção, estudo, desenvolvimento espiritual
-**Ano 8**: Realização material, reconhecimento, colheita
-**Ano 9**: Conclusões, finalizações, preparação para novo ciclo
-
-### MÊS E DIA PESSOAL
-
-**Mês Pessoal**: Influência mensal dentro do ano pessoal
-**Dia Pessoal**: Influência diária dentro do mês pessoal
-
-### ANJO ESPECIAL - PROTEÇÃO ESPIRITUAL
-
-Cada pessoa tem um anjo especial baseado em cálculos específicos do nome e data de nascimento.
-
-### COMPATIBILIDADE AMOROSA
-
-**Números Compatíveis:**
-- 1 com 5, 7, 9
-- 2 com 4, 6, 8
-- 3 com 1, 5, 9
-- 4 com 2, 6, 8
-- 5 com 1, 3, 7, 9
-- 6 com 2, 4, 8
-- 7 com 1, 5, 9
-- 8 com 2, 4, 6
-- 9 com 1, 3, 5, 7
-
-### PROFISSÕES IDEAIS POR NÚMERO
-
-**Número 1**: Líder empresarial, CEO, político, inventor, pioneiro
-**Número 2**: Diplomata, mediador, conselheiro, assistente, cooperativo
-**Número 3**: Artista, escritor, ator, palestrante, professor criativo
-**Número 4**: Engenheiro, contador, administrador, técnico, construtor
-**Número 5**: Vendedor, jornalista, guia turístico, piloto, aventureiro
-**Número 6**: Médico, enfermeiro, professor, terapeuta, cuidador
-**Número 7**: Pesquisador, analista, filósofo, psicólogo, místico
-**Número 8**: Executivo, banqueiro, advogado, juiz, empreendedor
-**Número 9**: Assistente social, médico humanitário, professor, filantropo
-
-### SAÚDE E NÚMEROS
-
-**Número 1**: Tendência a problemas cardíacos, pressão alta
-**Número 2**: Sensibilidade digestiva, problemas emocionais
-**Número 3**: Problemas de garganta, tensão nervosa
-**Número 4**: Problemas ósseos, rigidez corporal
-**Número 5**: Problemas nervosos, acidentes
-**Número 6**: Problemas familiares afetam saúde
-**Número 7**: Problemas psicossomáticos, melancolia
-**Número 8**: Problemas de estresse, workaholic
-**Número 9**: Problemas de dispersão energética
-
-### CORES E NÚMEROS
-
-**Número 1**: Vermelho, laranja (cores de liderança)
-**Número 2**: Azul claro, prata (cores de harmonia)
-**Número 3**: Amarelo, dourado (cores de alegria)
-**Número 4**: Verde, marrom (cores de estabilidade)
-**Número 5**: Cores variadas, multicolorido (versatilidade)
-**Número 6**: Rosa, verde claro (cores de amor)
-**Número 7**: Roxo, violeta (cores místicas)
-**Número 8**: Preto, cinza (cores de poder)
-**Número 9**: Branco, todas as cores (universalidade)
-
-### PEDRAS E NÚMEROS
-
-**Número 1**: Rubi, granada (pedras de liderança)
-**Número 2**: Pérola, moonstone (pedras de intuição)
-**Número 3**: Topázio, âmbar (pedras de criatividade)
-**Número 4**: Esmeralda, jade (pedras de estabilidade)
-**Número 5**: Turquesa, aventurina (pedras de liberdade)
-**Número 6**: Rosa quartzo, jade rosa (pedras de amor)
-**Número 7**: Ametista, lápis lazúli (pedras místicas)
-**Número 8**: Diamante, hematita (pedras de poder)
-**Número 9**: Cristal transparente, opala (pedras universais)
-
-### DIAS DA SEMANA E NÚMEROS
-
-**Domingo**: Número 1 (dia do Sol, liderança)
-**Segunda**: Número 2 (dia da Lua, intuição)
-**Terça**: Números 1, 8 (dia de Marte, ação)
-**Quarta**: Números 3, 5 (dia de Mercúrio, comunicação)
-**Quinta**: Número 3 (dia de Júpiter, expansão)
-**Sexta**: Números 2, 6 (dia de Vênus, amor)
-**Sábado**: Números 4, 7, 8 (dia de Saturno, disciplina)
-
-Este é um guia completo da numerologia aplicada que deve ser usado como referência para todos os mapas numerológicos gerados. Cada seção contém informações detalhadas que devem ser aplicadas conforme os cálculos específicos de cada pessoa.`;
+const CANVA_CONTENT = `
+ESTUDO NUMEROLÓGICO COMPLETO - NUMEROLOGIA CABALÍSTICA
+
+CONTEÚDO COMPLETO EXTRAÍDO DO SITE CANVA
+
+MOTIVAÇÃO - O que te move interiormente
+
+Motivação 1 - INDIVIDUALIDADE E LIDERANÇA
+O número de Motivação descreve os motivos e as razões que movem as atitudes do ser humano. Revela o aspecto interior da personalidade que se reflete em atitudes e comportamentos. Deseja liderança, reconhecimento, independência. É pioneiro nato, com forte necessidade de ser o primeiro em tudo que faz. Motivado pela busca do sucesso pessoal e reconhecimento. Precisa desenvolver autoconfiança sem cair no egoísmo.
+
+Motivação 2 - COOPERAÇÃO E DIPLOMACIA
+Deseja harmonia, cooperação, parceria. É motivado pela necessidade de estar em equipe, de mediar conflitos e criar pontes entre pessoas. Busca relacionamentos harmoniosos e duradouros. Tem necessidade profunda de ser aceito e amado. Precisa desenvolver autoestima para não se anular pelos outros.
+
+Motivação 3 - EXPRESSÃO CRIATIVA
+Deseja comunicar-se, criar, expressar sua alegria de viver. É motivado pela necessidade de se expressar através das artes, palavras ou atividades criativas. Busca reconhecimento por seus talentos artísticos. Precisa focar sua energia criativa para não se dispersar.
+
+Motivação 4 - ESTABILIDADE E ORGANIZAÇÃO
+Deseja ordem, segurança, estabilidade. É motivado pela necessidade de construir algo sólido e duradouro. Busca segurança material e emocional através do trabalho organizado e metódico. Precisa ser mais flexível para não ficar rígido demais.
+
+Motivação 5 - LIBERDADE E AVENTURA
+Deseja liberdade, mudanças, novas experiências. É motivado pela necessidade de explorar, viajar, conhecer o novo. Busca variedade e não suporta rotina. Precisa aprender a ter compromisso sem perder sua liberdade essencial.
+
+Motivação 6 - RESPONSABILIDADE E CUIDADO
+Deseja cuidar, servir, assumir responsabilidades familiares. É motivado pela necessidade de proteger e nutrir outros. Busca criar um ambiente harmonioso para família e amigos. Precisa equilibrar o cuidado com os outros sem se esquecer de si mesmo.
+
+Motivação 7 - BUSCA ESPIRITUAL
+Deseja conhecimento profundo, espiritualidade, compreensão dos mistérios da vida. É motivado pela necessidade de entender o significado mais profundo das coisas. Busca sabedoria através do estudo e meditação. Precisa compartilhar seu conhecimento com outros.
+
+Motivação 8 - PODER MATERIAL
+Deseja sucesso material, poder, autoridade, reconhecimento social. É motivado pela necessidade de conquistar posição de destaque na sociedade. Busca prosperidade e influência. Precisa usar seu poder de forma ética e justa.
+
+Motivação 9 - HUMANITARISMO
+Deseja servir a humanidade, fazer a diferença no mundo. É motivado pela necessidade de contribuir para um mundo melhor. Busca causas nobres e universais. Precisa ser prático em seus ideais humanitários.
+
+Motivação 11 - INSPIRAÇÃO ELEVADA
+Deseja inspirar outros, ser canal de luz e sabedoria superior. É motivado por ideais elevados e visão espiritual ampliada. Busca elevar a consciência da humanidade. Precisa equilibrar sensibilidade com praticidade.
+
+Motivação 22 - CONSTRUÇÃO MUNDIAL
+Deseja construir algo grandioso para a humanidade. É motivado pela visão de projetos que beneficiem o mundo inteiro. Busca deixar um legado duradouro. Precisa manter os pés no chão enquanto persegue seus grandes sonhos.
+
+IMPRESSÃO - Como os outros te veem
+
+Impressão 1 - LÍDER NATURAL
+Aparenta ser uma pessoa segura de si, independente e determinada. Os outros veem alguém capaz de liderar e tomar iniciativas. Transmite confiança e autoridade natural. Pode parecer arrogante se não tomar cuidado.
+
+Impressão 2 - PESSOA DIPLOMÁTICA
+Aparenta ser gentil, cooperativa e sensível. Os outros veem alguém confiável para mediar conflitos e criar harmonia. Transmite paz e compreensão. Pode parecer fraco se não mostrar sua força interior.
+
+Impressão 3 - COMUNICADOR ALEGRE
+Aparenta ser criativo, comunicativo e alegre. Os outros veem alguém divertido e inspirador. Transmite otimismo e energia positiva. Pode parecer superficial se não mostrar sua profundidade.
+
+Impressão 4 - PESSOA CONFIÁVEL
+Aparenta ser organizado, prático e confiável. Os outros veem alguém em quem podem confiar para trabalhos sérios. Transmite estabilidade e competência. Pode parecer rígido se não mostrar flexibilidade.
+
+Impressão 5 - ESPÍRITO LIVRE
+Aparenta ser aventureiro, versátil e progressista. Os outros veem alguém interessante e cheio de vida. Transmite energia de mudança e novidade. Pode parecer instável se não mostrar compromisso.
+
+Impressão 6 - PESSOA CUIDADOSA
+Aparenta ser responsável, protetora e carinhosa. Os outros veem alguém em quem podem confiar questões familiares. Transmite calor humano e confiabilidade. Pode parecer controlador se exagerar no cuidado.
+
+Impressão 7 - PESSOA MISTERIOSA
+Aparenta ser sábia, reservada e profunda. Os outros veem alguém intelectual e espiritualizado. Transmite conhecimento e mistério. Pode parecer distante se não se abrir mais.
+
+Impressão 8 - PESSOA PODEROSA
+Aparenta ser ambiciosa, bem-sucedida e autoritária. Os outros veem alguém capaz de grandes realizações materiais. Transmite poder e competência executiva. Pode parecer materialista se não mostrar seu lado humano.
+
+Impressão 9 - PESSOA SÁBIA
+Aparenta ser generosa, compreensiva e humanitária. Os outros veem alguém capaz de ajudar em grandes questões. Transmite sabedoria e compaixão universal. Pode parecer idealista demais se não for prático.
+
+Impressão 11 - PESSOA INSPIRADORA
+Aparenta ser intuitiva, sensitiva e espiritualizada. Os outros veem alguém capaz de inspirar e elevar. Transmite luz espiritual e sabedoria superior. Pode parecer nervoso se não controlar a sensibilidade.
+
+EXPRESSÃO - Seus talentos e habilidades
+
+Expressão 1 - LIDERANÇA E PIONEIRISMO
+Possui talentos naturais para liderar, inovar e abrir novos caminhos. É original, determinado e independente. Trabalha melhor quando pode tomar suas próprias decisões. Profissões ideais: executivo, empresário, inventor, político.
+
+Expressão 2 - COOPERAÇÃO E MEDIAÇÃO
+Possui talentos para trabalhar em equipe, mediar conflitos e criar harmonia. É diplomático, sensível e intuitivo. Trabalha melhor em parceria ou apoiando outros. Profissões ideais: diplomata, conselheiro, mediador, assistente.
+
+Expressão 3 - COMUNICAÇÃO E ARTE
+Possui talentos artísticos, comunicativos e criativos. É expressivo, otimista e inspirador. Trabalha melhor quando pode expressar sua criatividade. Profissões ideais: artista, escritor, ator, palestrante, professor.
+
+Expressão 4 - ORGANIZAÇÃO E CONSTRUÇÃO
+Possui talentos para organizar, construir e sistematizar. É prático, confiável e trabalhador. Trabalha melhor com projetos de longo prazo e estruturados. Profissões ideais: engenheiro, administrador, contador, construtor.
+
+Expressão 5 - VERSATILIDADE E COMUNICAÇÃO
+Possui talentos para vender, comunicar e adaptar-se a mudanças. É versátil, progressista e aventureiro. Trabalha melhor com variedade e liberdade. Profissões ideais: vendedor, jornalista, guia turístico, representante comercial.
+
+Expressão 6 - CUIDADO E RESPONSABILIDADE
+Possui talentos para cuidar, ensinar e assumir responsabilidades. É protetor, conselheiro e responsável. Trabalha melhor ajudando e servindo outros. Profissões ideais: médico, professor, enfermeiro, terapeuta, conselheiro familiar.
+
+Expressão 7 - ANÁLISE E PESQUISA
+Possui talentos para pesquisar, analisar e compreender mistérios. É investigativo, intuitivo e sábio. Trabalha melhor sozinho ou com pesquisas profundas. Profissões ideais: pesquisador, analista, cientista, filósofo, psicólogo.
+
+Expressão 8 - ADMINISTRAÇÃO E PODER
+Possui talentos para administrar, organizar grandes projetos e exercer autoridade. É ambicioso, eficiente e poderoso. Trabalha melhor com responsabilidades executivas. Profissões ideais: executivo, banqueiro, político, juiz, empresário.
+
+Expressão 9 - HUMANITARISMO E ARTE
+Possui talentos artísticos e humanitários. É generoso, compassivo e sábio. Trabalha melhor servindo causas maiores que si mesmo. Profissões ideais: artista, professor, médico humanitário, assistente social, filantropo.
+
+Expressão 11 - INSPIRAÇÃO E INTUIÇÃO
+Possui talentos intuitivos e inspiradores elevados. É sensitivo, visionário e espiritualizado. Trabalha melhor inspirando e elevando outros. Profissões ideais: líder espiritual, artista inspirado, conselheiro intuitivo, curador.
+
+Expressão 22 - CONSTRUÇÃO GRANDIOSA
+Possui talentos para construir projetos grandiosos que beneficiem a humanidade. É visionário prático, organizador mundial. Trabalha melhor com projetos de grande escala. Profissões ideais: construtor mundial, líder internacional, organizador de grandes projetos.
+
+DESTINO - Sua missão de vida
+
+Destino 1 - LIDERAR E INOVAR
+Veio para abrir novos caminhos, liderar e ser pioneiro em sua área. Deve desenvolver independência, originalidade e coragem para assumir a liderança quando necessário.
+
+Destino 2 - COOPERAR E HARMONIZAR
+Veio para aprender a trabalhar em equipe, mediar conflitos e criar harmonia. Deve desenvolver diplomacia, paciência e habilidades de cooperação.
+
+Destino 3 - INSPIRAR E CRIAR
+Veio para expressar criatividade, comunicar alegria e inspirar outros. Deve desenvolver seus talentos artísticos e comunicativos.
+
+Destino 4 - CONSTRUIR E ORGANIZAR
+Veio para construir bases sólidas, organizar e criar estabilidade. Deve desenvolver disciplina, praticidade e perseverança.
+
+Destino 5 - EXPLORAR E ENSINAR
+Veio para explorar novas fronteiras, promover mudanças progressivas e ensinar através da experiência. Deve desenvolver adaptabilidade e comunicação.
+
+Destino 6 - SERVIR E CUIDAR
+Veio para cuidar da família e comunidade, assumir responsabilidades e servir outros. Deve desenvolver compaixão, responsabilidade e capacidade de nutrir.
+
+Destino 7 - PESQUISAR E ESPIRITUALIZAR
+Veio para buscar conhecimento profundo, desenvolver espiritualidade e compartilhar sabedoria. Deve desenvolver intuição, análise e compreensão espiritual.
+
+Destino 8 - ORGANIZAR E PROSPERAR
+Veio para organizar recursos materiais, exercer liderança executiva e criar prosperidade. Deve desenvolver senso de justiça, organização e autoridade ética.
+
+Destino 9 - SERVIR A HUMANIDADE
+Veio para servir causas humanitárias, elevar a consciência e contribuir para um mundo melhor. Deve desenvolver compaixão universal, sabedoria e desapego.
+
+MISSÃO - Como realizar seu destino
+
+Missão 1 - LIDERANÇA INOVADORA
+Realizar o destino através da liderança pioneira, abrindo novos caminhos e inspirando outros a seguir.
+
+Missão 2 - MEDIAÇÃO HARMONIOSA
+Realizar o destino através da cooperação, criando pontes entre pessoas e situações conflitantes.
+
+Missão 3 - EXPRESSÃO INSPIRADORA
+Realizar o destino através da expressão criativa, comunicando alegria e beleza ao mundo.
+
+Missão 4 - CONSTRUÇÃO SÓLIDA
+Realizar o destino através da construção de bases firmes e organizações duradouras.
+
+Missão 5 - COMUNICAÇÃO PROGRESSIVA
+Realizar o destino através da comunicação de ideias progressivas e promoção de mudanças positivas.
+
+Missão 6 - SERVIÇO AMOROSO
+Realizar o destino através do serviço dedicado à família, comunidade e causas humanitárias.
+
+Missão 7 - SABEDORIA ESPIRITUAL
+Realizar o destino através da busca e compartilhamento da sabedoria espiritual e conhecimento profundo.
+
+Missão 8 - ORGANIZAÇÃO PRÓSPERA
+Realizar o destino através da organização eficiente de recursos e criação de prosperidade justa.
+
+Missão 9 - SERVIÇO UNIVERSAL
+Realizar o destino através do serviço desinteressado à humanidade e elevação da consciência coletiva.
+
+NÚMERO PSÍQUICO - Sua essência pelo dia de nascimento
+
+Psíquico 1 - ESSÊNCIA DE LIDERANÇA
+Nasceu com essência de líder, independente e pioneiro. Naturalmente assume comando e inicia projetos.
+
+Psíquico 2 - ESSÊNCIA DE COOPERAÇÃO
+Nasceu com essência cooperativa, sensível e diplomática. Naturalmente busca harmonia e trabalha em equipe.
+
+Psíquico 3 - ESSÊNCIA CRIATIVA
+Nasceu com essência criativa, comunicativa e alegre. Naturalmente expressa-se através das artes e comunicação.
+
+Psíquico 4 - ESSÊNCIA PRÁTICA
+Nasceu com essência prática, organizada e trabalhadora. Naturalmente constrói e organiza tudo ao seu redor.
+
+Psíquico 5 - ESSÊNCIA DE LIBERDADE
+Nasceu com essência livre, aventureira e versátil. Naturalmente busca experiências variadas e mudanças.
+
+Psíquico 6 - ESSÊNCIA DE CUIDADO
+Nasceu com essência cuidadora, responsável e protetora. Naturalmente assume responsabilidades familiares.
+
+Psíquico 7 - ESSÊNCIA ESPIRITUAL
+Nasceu com essência espiritual, analítica e sábia. Naturalmente busca conhecimento profundo e compreensão.
+
+Psíquico 8 - ESSÊNCIA DE PODER
+Nasceu com essência poderosa, ambiciosa e organizadora. Naturalmente busca sucesso material e reconhecimento.
+
+Psíquico 9 - ESSÊNCIA HUMANITÁRIA
+Nasceu com essência humanitária, generosa e sábia. Naturalmente serve causas maiores que si mesmo.
+
+LIÇÕES CÁRMICAS - O que precisa aprender
+
+Lição Cármica 1 - APRENDER LIDERANÇA
+Precisa desenvolver independência, iniciativa e capacidade de liderança. Deve superar dependência excessiva dos outros.
+
+Lição Cármica 2 - APRENDER COOPERAÇÃO
+Precisa desenvolver diplomacia, paciência e habilidade de trabalhar em equipe. Deve superar tendências autoritárias.
+
+Lição Cármica 3 - APRENDER EXPRESSÃO
+Precisa desenvolver criatividade, comunicação e capacidade de inspirar outros. Deve superar timidez e auto-crítica excessiva.
+
+Lição Cármica 4 - APRENDER DISCIPLINA
+Precisa desenvolver organização, disciplina e perseverança. Deve superar tendência à dispersão e falta de foco.
+
+Lição Cármica 5 - APRENDER LIBERDADE CONSTRUTIVA
+Precisa desenvolver adaptabilidade e progressividade equilibradas. Deve superar rigidez e medo de mudanças.
+
+Lição Cármica 6 - APRENDER RESPONSABILIDADE
+Precisa desenvolver senso de responsabilidade, cuidado e capacidade de nutrir. Deve superar egoísmo e individualismo excessivo.
+
+Lição Cármica 7 - APRENDER ESPIRITUALIDADE
+Precisa desenvolver busca interior, análise profunda e sabedoria espiritual. Deve superar materialismo e superficialidade.
+
+Lição Cármica 8 - APRENDER AUTORIDADE ÉTICA
+Precisa desenvolver liderança material ética e senso de justiça. Deve superar tendências à injustiça e abuso de poder.
+
+Lição Cármica 9 - APRENDER COMPAIXÃO
+Precisa desenvolver compaixão universal, generosidade e sabedoria. Deve superar preconceitos e visão limitada.
+
+DÍVIDAS CÁRMICAS - Desafios específicos a superar
+
+Dívida Cármica 13/4 - PREGUIÇA PASSADA
+Em vidas anteriores foi preguiçoso e irresponsável. Nesta vida deve trabalhar com disciplina e organização. Manifesta-se como dificuldades com trabalho duro e tendência à preguiça.
+
+Dívida Cármica 14/5 - ABUSO DA LIBERDADE
+Em vidas anteriores abusou da liberdade e foi irresponsável. Nesta vida deve aprender liberdade com responsabilidade. Manifesta-se como tendência a vícios e excessos.
+
+Dívida Cármica 16/7 - ORGULHO ESPIRITUAL
+Em vidas anteriores foi orgulhoso espiritualmente e abusou de conhecimentos. Nesta vida deve aprender humildade espiritual. Manifesta-se como quedas súbitas e lições humilhantes.
+
+Dívida Cármica 19/1 - ABUSO DE PODER
+Em vidas anteriores abusou do poder e foi tirano. Nesta vida deve aprender liderança serviçal. Manifesta-se como dificuldades com autoridade e obstáculos na liderança.
+
+TENDÊNCIAS OCULTAS - Talentos naturais inconscientes
+
+Tendência Oculta 1 - TALENTO DE LIDERANÇA NATURAL
+Possui talento inconsciente para liderar e tomar iniciativas. Este talento se manifesta espontaneamente em situações que requerem liderança.
+
+Tendência Oculta 2 - TALENTO DE MEDIAÇÃO NATURAL
+Possui talento inconsciente para mediar conflitos e criar harmonia. Este talento se manifesta quando há necessidade de diplomacia.
+
+Tendência Oculta 3 - TALENTO CRIATIVO NATURAL
+Possui talento inconsciente para criar e comunicar. Este talento se manifesta através de expressões artísticas espontâneas.
+
+Tendência Oculta 4 - TALENTO ORGANIZACIONAL NATURAL
+Possui talento inconsciente para organizar e estruturar. Este talento se manifesta quando há necessidade de ordem e sistema.
+
+Tendência Oculta 5 - TALENTO DE ADAPTAÇÃO NATURAL
+Possui talento inconsciente para se adaptar e promover mudanças. Este talento se manifesta em situações que requerem flexibilidade.
+
+Tendência Oculta 6 - TALENTO DE CUIDADO NATURAL
+Possui talento inconsciente para cuidar e nutrir outros. Este talento se manifesta quando há necessidade de proteção e cuidado.
+
+Tendência Oculta 7 - TALENTO ANALÍTICO NATURAL
+Possui talento inconsciente para analisar e compreender profundamente. Este talento se manifesta quando há mistérios a serem desvendados.
+
+Tendência Oculta 8 - TALENTO ADMINISTRATIVO NATURAL
+Possui talento inconsciente para administrar e organizar recursos. Este talento se manifesta em situações que requerem eficiência executiva.
+
+Tendência Oculta 9 - TALENTO HUMANITÁRIO NATURAL
+Possui talento inconsciente para compreender e servir a humanidade. Este talento se manifesta quando há necessidade de compaixão e sabedoria.
+
+RESPOSTA SUBCONSCIENTE - Como reage instintivamente
+
+Resposta 1 - REAÇÃO DE LIDERANÇA
+Em situações de crise, reage automaticamente assumindo a liderança e tomando iniciativas para resolver problemas.
+
+Resposta 2 - REAÇÃO DE MEDIAÇÃO
+Em situações de crise, reage automaticamente buscando harmonizar e mediar conflitos para restaurar a paz.
+
+Resposta 3 - REAÇÃO CRIATIVA
+Em situações de crise, reage automaticamente buscando soluções criativas e comunicando otimismo.
+
+Resposta 4 - REAÇÃO ORGANIZADORA
+Em situações de crise, reage automaticamente organizando e estruturando para resolver problemas práticos.
+
+Resposta 5 - REAÇÃO DE MUDANÇA
+Em situações de crise, reage automaticamente promovendo mudanças e adaptações necessárias.
+
+Resposta 6 - REAÇÃO PROTETORA
+Em situações de crise, reage automaticamente protegendo e cuidando de outros, assumindo responsabilidades.
+
+Resposta 7 - REAÇÃO ANALÍTICA
+Em situações de crise, reage automaticamente analisando profundamente a situação antes de agir.
+
+Resposta 8 - REAÇÃO EXECUTIVA
+Em situações de crise, reage automaticamente organizando recursos e exercendo autoridade para resolver problemas.
+
+Resposta 9 - REAÇÃO COMPASSIVA
+Em situações de crise, reage automaticamente com compreensão e busca soluções que beneficiem a todos.
+
+CICLOS DE VIDA - Fases evolutivas principais
+
+Primeiro Ciclo (0 aos 28-35 anos) - FORMAÇÃO
+Baseado no mês de nascimento. Período de formação da personalidade, aprendizado básico e desenvolvimento de habilidades fundamentais.
+
+Segundo Ciclo (28-35 aos 52-60 anos) - PRODUÇÃO
+Baseado no dia de nascimento. Período de maior produtividade, realização profissional e construção do lugar no mundo.
+
+Terceiro Ciclo (52-60 anos em diante) - COLHEITA
+Baseado no ano de nascimento. Período de colheita dos esforços anteriores, transmissão de conhecimento e sabedoria.
+
+DESAFIOS - Obstáculos a superar em cada fase
+
+Primeiro Desafio (0 aos 28-35 anos) - FORMAÇÃO
+Obstáculos relacionados ao desenvolvimento da personalidade e aprendizado básico de vida.
+
+Segundo Desafio (28-35 aos 52-60 anos) - PRODUÇÃO
+Obstáculos relacionados à realização profissional e construção do lugar no mundo.
+
+Terceiro Desafio (52-60 anos em diante) - COLHEITA
+Obstáculos relacionados à aceitação da idade madura e transmissão de conhecimento.
+
+Desafio Principal (vida toda) - CONSTANTE
+Obstáculo principal que perpassa toda a vida e deve ser constantemente trabalhado.
+
+MOMENTOS DECISIVOS - Idades de mudanças importantes
+
+Primeiro Momento Decisivo
+Idade calculada que marca uma mudança importante na juventude.
+
+Segundo Momento Decisivo
+Idade calculada que marca uma mudança importante na vida adulta.
+
+Terceiro Momento Decisivo
+Idade calculada que marca uma mudança importante na maturidade.
+
+Quarto Momento Decisivo
+Idade calculada que marca uma mudança importante na velhice.
+
+ANO PESSOAL - Influências anuais cíclicas
+
+Ano Pessoal 1 - NOVOS COMEÇOS
+Ano para iniciar projetos, tomar iniciativas e plantar sementes para o futuro. Energia de pioneirismo e liderança.
+
+Ano Pessoal 2 - DESENVOLVIMENTO
+Ano para desenvolver projetos iniciados, cooperar e ser paciente. Energia de colaboração e crescimento lento.
+
+Ano Pessoal 3 - EXPRESSÃO
+Ano para expressar criatividade, comunicar-se e expandir socialmente. Energia de alegria e inspiração.
+
+Ano Pessoal 4 - CONSTRUÇÃO
+Ano para trabalhar duro, organizar e construir bases sólidas. Energia de disciplina e organização.
+
+Ano Pessoal 5 - MUDANÇAS
+Ano para fazer mudanças, explorar novas oportunidades e buscar liberdade. Energia de transformação e aventura.
+
+Ano Pessoal 6 - RESPONSABILIDADES
+Ano para assumir responsabilidades familiares, cuidar de outros e servir. Energia de amor e cuidado.
+
+Ano Pessoal 7 - INTROSPECÇÃO
+Ano para buscar conhecimento interior, estudar e desenvolver espiritualidade. Energia de análise e sabedoria.
+
+Ano Pessoal 8 - REALIZAÇÕES
+Ano para colher frutos do trabalho, alcançar sucesso material e reconhecimento. Energia de conquista e poder.
+
+Ano Pessoal 9 - CONCLUSÕES
+Ano para finalizar ciclos, se despedir do desnecessário e se preparar para novo começo. Energia de compaixão e finalização.
+
+MÊS PESSOAL - Influências mensais
+
+Cada mês dentro do ano pessoal tem sua vibração específica que modifica a energia anual.
+
+DIA PESSOAL - Influências diárias
+
+Cada dia tem sua vibração específica calculada com base no mês pessoal.
+
+ANJOS CABALÍSTICOS - Proteção espiritual
+
+Cada pessoa tem um anjo protetor específico baseado em cálculos cabalísticos do nome e data de nascimento.
+
+HARMONIA CONJUGAL - Compatibilidade amorosa
+
+Análise da compatibilidade entre números para relacionamentos amorosos e parcerias.
+
+CORES HARMÔNICAS - Cores que vibram com cada número
+
+Número 1: Vermelho, laranja - cores de liderança e energia
+Número 2: Azul claro, prata - cores de harmonia e paz
+Número 3: Amarelo, dourado - cores de alegria e criatividade
+Número 4: Verde, marrom - cores de estabilidade e natureza
+Número 5: Multicolorido, turquesa - cores de liberdade e movimento
+Número 6: Rosa, verde claro - cores de amor e cuidado
+Número 7: Violeta, púrpura - cores místicas e espirituais
+Número 8: Preto, cinza escuro - cores de poder e autoridade
+Número 9: Branco, todas as cores - cores universais e sabedoria
+
+PROFISSÕES IDEAIS - Atividades mais adequadas
+
+Número 1: Executivo, empresário, líder, inventor, pioneiro
+Número 2: Diplomata, mediador, conselheiro, assistente, colaborador
+Número 3: Artista, comunicador, escritor, ator, palestrante
+Número 4: Administrador, engenheiro, contador, construtor, organizador
+Número 5: Vendedor, jornalista, guia turístico, piloto, aventureiro
+Número 6: Médico, professor, enfermeiro, terapeuta, cuidador
+Número 7: Pesquisador, analista, científista, filósofo, místico
+Número 8: Banqueiro, juiz, executivo, político, empresário
+Número 9: Humanitário, artista, professor, médico social, filantropo
+
+ORIENTAÇÕES DE SAÚDE - Cuidados específicos
+
+Número 1: Cuidar do coração e sistema circulatório, evitar estresse excessivo
+Número 2: Cuidar do sistema digestivo e nervoso, buscar equilíbrio emocional
+Número 3: Cuidar da garganta e sistema respiratório, expressar-se adequadamente
+Número 4: Cuidar das articulações e ossos, fazer exercícios regulares
+Número 5: Cuidar do sistema nervoso, evitar excessos e vícios
+Número 6: Cuidar do coração e sistema reprodutivo, equilibrar emoções
+Número 7: Cuidar da mente e sistema nervoso, praticar meditação
+Número 8: Cuidar da pressão arterial e estresse, equilibrar trabalho e descanso
+Número 9: Cuidar de todo o organismo, praticar altruísmo e evitar dispersão energética
+`;
 
 export function useContentSync() {
   const [isUpdating, setIsUpdating] = useState(false);
@@ -390,7 +463,7 @@ export function useContentSync() {
       }
 
       const currentVersion = data[0]?.version || 'v1.0';
-      if (currentVersion !== 'v2.0') {
+      if (currentVersion !== 'v3.0') {
         console.log('Versão desatualizada detectada, atualizando conteúdo...');
         return updateContent();
       }

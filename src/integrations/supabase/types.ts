@@ -94,6 +94,45 @@ export type Database = {
           },
         ]
       }
+      cabalistic_angels: {
+        Row: {
+          category: string
+          created_at: string
+          domain_description: string
+          id: string
+          invocation_time_1: string | null
+          invocation_time_2: string | null
+          name: string
+          negative_influence: string | null
+          psalm_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          domain_description: string
+          id?: string
+          invocation_time_1?: string | null
+          invocation_time_2?: string | null
+          name: string
+          negative_influence?: string | null
+          psalm_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          domain_description?: string
+          id?: string
+          invocation_time_1?: string | null
+          invocation_time_2?: string | null
+          name?: string
+          negative_influence?: string | null
+          psalm_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calculation_rules: {
         Row: {
           config: Json
@@ -217,6 +256,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      love_compatibility: {
+        Row: {
+          compatibility_score: number | null
+          compatibility_text: string
+          created_at: string
+          id: string
+          number_1: number
+          number_2: number
+        }
+        Insert: {
+          compatibility_score?: number | null
+          compatibility_text: string
+          created_at?: string
+          id?: string
+          number_1: number
+          number_2: number
+        }
+        Update: {
+          compatibility_score?: number | null
+          compatibility_text?: string
+          created_at?: string
+          id?: string
+          number_1?: number
+          number_2?: number
+        }
+        Relationships: []
       }
       map_versions: {
         Row: {
@@ -348,34 +414,73 @@ export type Database = {
       }
       numerology_texts: {
         Row: {
+          angel_category: string | null
+          angel_invocation_time: string | null
+          angel_name: string | null
+          angel_psalm: string | null
           body: string
+          category: string | null
+          color_associations: string[] | null
           created_at: string
+          health_associations: string[] | null
           id: string
+          is_master_number: boolean | null
           key_number: number
+          keywords: string[] | null
           lang: string
+          priority: number | null
+          profession_associations: string[] | null
           section: string
+          stone_associations: string[] | null
+          subcategory: string | null
           title: string
           updated_at: string
           version: string
         }
         Insert: {
+          angel_category?: string | null
+          angel_invocation_time?: string | null
+          angel_name?: string | null
+          angel_psalm?: string | null
           body: string
+          category?: string | null
+          color_associations?: string[] | null
           created_at?: string
+          health_associations?: string[] | null
           id?: string
+          is_master_number?: boolean | null
           key_number: number
+          keywords?: string[] | null
           lang?: string
+          priority?: number | null
+          profession_associations?: string[] | null
           section: string
+          stone_associations?: string[] | null
+          subcategory?: string | null
           title: string
           updated_at?: string
           version?: string
         }
         Update: {
+          angel_category?: string | null
+          angel_invocation_time?: string | null
+          angel_name?: string | null
+          angel_psalm?: string | null
           body?: string
+          category?: string | null
+          color_associations?: string[] | null
           created_at?: string
+          health_associations?: string[] | null
           id?: string
+          is_master_number?: boolean | null
           key_number?: number
+          keywords?: string[] | null
           lang?: string
+          priority?: number | null
+          profession_associations?: string[] | null
           section?: string
+          stone_associations?: string[] | null
+          subcategory?: string | null
           title?: string
           updated_at?: string
           version?: string
