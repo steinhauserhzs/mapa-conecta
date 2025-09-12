@@ -195,7 +195,7 @@ export function AppSidebar() {
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton 
                           tooltip={item.title}
-                          className="group relative rounded-xl mx-1 my-0.5 transition-all duration-200 hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:shadow-sm"
+                          className="group relative rounded-xl mx-1 my-0.5 transition-all duration-200 text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-sidebar-foreground hover:shadow-sm"
                         >
                           {item.icon && (
                             <div className="w-5 h-5 flex items-center justify-center">
@@ -217,7 +217,7 @@ export function AppSidebar() {
                                     `group relative rounded-lg transition-all duration-200 ${
                                       isActive
                                         ? 'bg-gradient-to-r from-primary/15 to-primary/10 text-primary font-semibold border-l-3 border-primary shadow-sm'
-                                        : 'hover:bg-gradient-to-r hover:from-sidebar-accent/70 hover:to-sidebar-muted/70 hover:text-sidebar-foreground'
+                                        : 'text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent/70 hover:to-sidebar-muted/70 hover:text-sidebar-foreground'
                                     }`
                                   }
                                 >
@@ -242,14 +242,14 @@ export function AppSidebar() {
                           `group relative rounded-xl mx-1 my-0.5 transition-all duration-200 ${
                             isActive
                               ? 'bg-gradient-to-r from-primary to-primary-glow text-white font-semibold shadow-lg shadow-primary/25 scale-[1.02]'
-                              : 'hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:shadow-sm hover:scale-[1.01]'
+                              : 'text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-sidebar-foreground hover:shadow-sm hover:scale-[1.01]'
                           }`
                         }
                       >
                         {item.icon && (
                           <div className="w-5 h-5 flex items-center justify-center">
                             <item.icon className={`transition-colors ${
-                              location.pathname === item.url ? 'text-white' : 'group-hover:text-primary'
+                              location.pathname === item.url ? 'text-white' : 'text-sidebar-foreground group-hover:text-primary'
                             }`} />
                           </div>
                         )}
