@@ -361,39 +361,7 @@ serve(async (req) => {
       momentos: result.momentos
     });
     
-    // Validação interna do caso teste "Hairã Zupanc Steinhauser" (11/05/2000)
-    if (name.toLowerCase().replace(/\s+/g, '-') === 'hairã-zupanc-steinhauser' && 
-        (birth === '2000-05-11' || birth === '11/05/2000')) {
-      
-      const expected = {
-        motivacao: 22,
-        impressao: 7, 
-        expressao: 11,
-        destino: 9,
-        dividasCarmicas: [13],
-        anjo: 'Nanael'
-      };
-      
-      const isValid = result.motivacao === expected.motivacao && 
-                     result.impressao === expected.impressao &&
-                     result.expressao === expected.expressao &&
-                     result.destino === expected.destino &&
-                     result.dividasCarmicas.includes(13) &&
-                     anjoEspecial === 'Nanael';
-      
-      console.log(`🧪 VALIDAÇÃO CASO TESTE: ${isValid ? '✅ PASSOU' : '❌ FALHOU'}`);
-      if (!isValid) {
-        console.log('Esperado:', expected);
-        console.log('Obtido:', {
-          motivacao: result.motivacao,
-          impressao: result.impressao,
-          expressao: result.expressao, 
-          destino: result.destino,
-          dividasCarmicas: result.dividasCarmicas,
-          anjo: anjoEspecial
-        });
-      }
-    }
+    // Validação interna movida para após a definição do anjoEspecial
     
     // Calcular ano, mês e dia pessoal
     const { d, m, y } = parseBirth(birth);
@@ -416,6 +384,22 @@ serve(async (req) => {
       // Cálculo padrão baseado em expressão + destino
       const angelIndex = (result.expressao + result.destino - 1) % CABALISTIC_ANGELS.length;
       anjoEspecial = CABALISTIC_ANGELS[angelIndex];
+    }
+
+    // Validação interna do caso teste "Hairã Zupanc Steinhauser" (11/05/2000)
+    if (nameKey === 'hairã-zupanc-steinhauser' && (birth === '2000-05-11' || birth === '11/05/2000')) {
+      const expected = { motivacao: 22, impressao: 7, expressao: 11, destino: 9, dividasCarmicas: [13], anjo: 'Nanael' };
+      const isValid = result.motivacao === expected.motivacao &&
+        result.impressao === expected.impressao &&
+        result.expressao === expected.expressao &&
+        result.destino === expected.destino &&
+        result.dividasCarmicas.includes(13) &&
+        anjoEspecial === 'Nanael';
+      console.log(`🧪 VALIDAÇÃO CASO TESTE: ${isValid ? '✅ PASSOU' : '❌ FALHOU'}`);
+      if (!isValid) {
+        console.log('Esperado:', expected);
+        console.log('Obtido:', { motivacao: result.motivacao, impressao: result.impressao, expressao: result.expressao, destino: result.destino, dividasCarmicas: result.dividasCarmicas, anjo: anjoEspecial });
+      }
     }
 
     // Buscar textos numerológicos com nova estrutura v3.0

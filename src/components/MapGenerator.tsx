@@ -97,7 +97,9 @@ function applyMods(v: number, m: any) {
 function letterValue(raw: string, baseMap: Record<string, number>) {
   const analyzed = analyzeChar(raw);
   if (!analyzed) return null;
-  const base = baseMap[analyzed.baseChar];
+  // Tratamento especial para 'ç'/'Ç'
+  const isCedilla = raw.toLowerCase() === 'ç';
+  const base = isCedilla ? 8 : baseMap[analyzed.baseChar];
   if (base === undefined) return null;
   const value = applyMods(base, analyzed.marks);
   return { baseChar: analyzed.baseChar, marks: analyzed.marks, base, value, raw };
@@ -119,6 +121,13 @@ function reduce(n: number): number {
   while (n > 9 && !MASTER.has(n)) {
     n = String(n).split('').reduce((a, d) => a + Number(d), 0);
     if (MASTER.has(n)) return n;
+  }
+  return n;
+}
+
+function reduceSimple(n: number): number {
+  while (n > 9) {
+    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
   }
   return n;
 }
