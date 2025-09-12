@@ -7,14 +7,19 @@ const corsHeaders = {
 };
 
 // ---- Engine de cálculo numerológico (Jé Fêrraz) ----
-// Fallback BASE_MAP - will be replaced by database conversion table
+// Fallback CORRECT Cabalistic BASE_MAP (1-8 grid)
 const FALLBACK_BASE_MAP = {
-  A:1, B:2, C:3, D:4, E:5, F:8, G:3, H:5, I:1,
-  J:1, K:2, L:3, M:4, N:5, O:7, P:8, Q:1, R:2,
-  S:3, T:4, U:6, V:6, W:6, X:6, Y:1, Z:7, 'Ç':8
+  A:1, I:1, Q:1, Y:1, J:1,
+  B:2, K:2, R:2,
+  C:3, G:3, L:3, S:3,
+  D:4, M:4, T:4,
+  E:5, H:5, N:5,
+  U:6, V:6, W:6, X:6,
+  O:7, Z:7,
+  F:8, P:8, 'Ç':8
 };
 const VOWELS = new Set(['A','E','I','O','U','Y']);
-const MASTER = new Set([11,22]);
+const MASTER = new Set([11,22]); // Only 11 and 22 are master numbers in Cabalistic
 
 function analyzeChar(raw: string) {
   if (!raw) return null;

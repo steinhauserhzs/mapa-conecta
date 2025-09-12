@@ -64,7 +64,15 @@ export function useNumerologia({ nome, data }: UseNumerologiaProps): UseNumerolo
     if (!nome || !data || loading) return null;
     
     try {
-      return calcularCompleto(nome, data, conversionTable, psychicTable);
+      // Convert data format if needed
+      let formattedData = data;
+      if (data.includes('-')) {
+        // Convert YYYY-MM-DD to DD/MM/YYYY for compatibility
+        const [year, month, day] = data.split('-');
+        formattedData = `${day}/${month}/${year}`;
+      }
+      
+      return calcularCompleto(nome, formattedData, conversionTable, psychicTable, new Date().getFullYear());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro nos cálculos');
       return null;
@@ -75,7 +83,7 @@ export function useNumerologia({ nome, data }: UseNumerologiaProps): UseNumerolo
   const isValidTestCase = useMemo(() => {
     if (!result) return false;
     
-    const isTestCase = nome.toLowerCase().includes('hairã') && data === '11/05/2000';
+    const isTestCase = nome.toLowerCase().includes('hairã') && (data === '11/05/2000' || data === '2000-05-11');
     if (isTestCase) {
       return validateTestCase(result);
     }
