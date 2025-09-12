@@ -1,534 +1,589 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// ---- Engine de cálculo numerológico (Jé Fêrraz) ----
-// Fallback CORRECT Cabalistic BASE_MAP (1-8 grid)
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Tabela de conversão padrão atualizada
 const FALLBACK_BASE_MAP = {
-  A:1, I:1, Q:1, Y:1, J:1,
-  B:2, K:2, R:2,
-  C:3, G:3, L:3, S:3,
-  D:4, M:4, T:4,
-  E:5, H:5, N:5,
-  U:6, V:6, W:6, X:6,
-  O:7, Z:7,
-  F:8, P:8, 'Ç':8
+  'A': 1, 'J': 1, 'S': 1,
+  'B': 2, 'K': 2, 'T': 2, 
+  'C': 3, 'L': 3, 'U': 3,
+  'D': 4, 'M': 4, 'V': 4,
+  'E': 5, 'N': 5, 'W': 5,
+  'F': 6, 'O': 6, 'X': 6,
+  'G': 7, 'P': 7, 'Y': 7,
+  'H': 8, 'Q': 8, 'Z': 8,
+  'I': 9, 'R': 9
 };
-const VOWELS = new Set(['A','E','I','O','U','Y']);
-const MASTER = new Set([11,22]); // Only 11 and 22 are master numbers in Cabalistic
 
+// Anjos cabalísticos por nome
+const CABALISTIC_ANGELS = [
+  "Vehuiah", "Jeliel", "Sitael", "Elemiah", "Mahasiah", "Lelahel", "Achaiah", "Cahetel",
+  "Haziel", "Aladiah", "Lauviah", "Hahaiah", "Jezalel", "Mebahel", "Hariel", "Hekamiah",
+  "Lauviah", "Caliel", "Leuviah", "Pahaliah", "Nelchael", "Yeiayel", "Melahel", "Haheuiah",
+  "Nith-Haiah", "Haaiah", "Yerathel", "Seheiah", "Reiyel", "Omael", "Lecabel", "Vasariah",
+  "Yehuiah", "Lehahiah", "Chavakiah", "Menadel", "Aniel", "Haamiah", "Rehael", "Ieiazel",
+  "Hahahel", "Mikael", "Veualiah", "Yelahiah", "Sehaliah", "Ariel", "Asaliah", "Mihael",
+  "Vehuel", "Daniel", "Hahasiah", "Imamiah", "Nanael", "Nithael", "Mebahiah", "Poiel",
+  "Nemamiah", "Yeialel", "Harahel", "Mitzrael", "Umabel", "Iah-Hel", "Anauel", "Mehiel",
+  "Damabiah", "Manakel", "Eyael", "Habuhiah", "Rochel", "Jabamiah", "Haiaiel", "Mumiah"
+];
+
+// Função para analisar caracteres
 function analyzeChar(raw: string) {
-  if (!raw) return null;
-  const nfd = raw.normalize('NFD');
-  const m = nfd.toUpperCase().match(/[A-Z]|Ç/);
-  if (!m) return null;
-  const baseChar = m[0];
-  return {
-    baseChar,
-    marks: {
-      apostrophe: /['']/.test(raw),
-      circumflex: /[\u0302]|\^/.test(nfd),
-      ring: /[\u030A]|\u02DA/.test(nfd),
-      tilde: /[\u0303]|~/.test(nfd),
-      diaeresis: /[\u0308]|\u00A8/.test(nfd),
-      grave: /[\u0300]|`/.test(nfd)
-    }
+  const ch = raw.toLowerCase();
+  let baseChar = ch.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+  if (baseChar.length === 0) baseChar = ch;
+  
+  const marks = {
+    hasAcute: /[\u0301\u0341]/.test(raw.normalize("NFD")),
+    hasGrave: /[\u0300\u0340]/.test(raw.normalize("NFD")), 
+    hasCircumflex: /[\u0302\u0342]/.test(raw.normalize("NFD")),
+    hasTilde: /[\u0303\u0343]/.test(raw.normalize("NFD")),
+    hasDieresis: /[\u0308\u0344]/.test(raw.normalize("NFD")),
+    hasCedilla: /[\u0327]/.test(raw.normalize("NFD"))
   };
+  
+  return { baseChar, marks };
 }
 
-function applyMods(v: number, m: any) {
-  let val = v;
-  if (m.apostrophe) val += 2;
-  if (m.circumflex) val += 7;
-  if (m.ring) val += 7;
-  if (m.tilde) val += 3;
-  if (m.diaeresis) val *= 2;
-  if (m.grave) val *= 2;
-  return val;
+function applyMods(v: number, m: any): number {
+  if (m.hasAcute) v += 1;
+  if (m.hasGrave) v -= 1; 
+  if (m.hasCircumflex) v += 2;
+  if (m.hasTilde) v += 3;
+  if (m.hasDieresis) v += 4;
+  if (m.hasCedilla && v > 5) v -= 5;
+  return v;
 }
 
-function letterValue(raw: string, baseMap: Record<string, number>) {
-  const analyzed = analyzeChar(raw);
-  if (!analyzed) return null;
-  const base = baseMap[analyzed.baseChar];
-  if (base === undefined) return null;
-  const value = applyMods(base, analyzed.marks);
-  return { baseChar: analyzed.baseChar, marks: analyzed.marks, base, value, raw };
+function letterValue(raw: string, baseMap: Record<string, number>): number {
+  const { baseChar, marks } = analyzeChar(raw);
+  const upperBase = baseChar.toUpperCase();
+  let val = baseMap[upperBase];
+  if (val === undefined) return 0;
+  return applyMods(val, marks);
 }
 
-function sumLetters(str: string, baseMap: Record<string, number>, filter = () => true) {
+function sumLetters(str: string, baseMap: Record<string, number>, filter?: (ch: string) => boolean): number {
   let total = 0;
-  const list: any[] = [];
-  for (const ch of [...str]) {
-    const lv = letterValue(ch, baseMap);
-    if (!lv) continue;
-    if (typeof filter === 'function' ? filter(lv.baseChar) : true) {
-      total += lv.value;
-      list.push(lv);
+  for (const ch of str) {
+    if (/[a-záàâãéèêíìîóòôõúùûç]/i.test(ch)) {
+      if (!filter || filter(ch)) {
+        total += letterValue(ch, baseMap);
+      }
     }
   }
-  return { total, list };
+  return total;
 }
 
 function reduce(n: number): number {
-  if (n <= 0) return 0;
-  if (MASTER.has(n)) return n;
-  while (n > 9 && !MASTER.has(n)) {
-    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
-    if (MASTER.has(n)) return n;
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    n = Math.floor(n / 10) + (n % 10);
   }
   return n;
 }
 
 function parseBirth(b: string) {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(b)) { 
-    const [y, m, d] = b.split('-').map(Number); 
-    return { d, m, y }; 
+  const parts = b.split(/[\/\-\.]/);
+  if (parts.length !== 3) throw new Error("Formato de data inválido");
+  
+  let d: number, m: number, y: number;
+  
+  if (parts[0].length === 4) {
+    y = parseInt(parts[0]);
+    m = parseInt(parts[1]); 
+    d = parseInt(parts[2]);
+  } else {
+    d = parseInt(parts[0]);
+    m = parseInt(parts[1]);
+    y = parseInt(parts[2]);
+    if (y < 100) y += (y <= 30 ? 2000 : 1900);
   }
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(b)) { 
-    const [d, m, y] = b.split('/').map(Number); 
-    return { d, m, y }; 
-  }
-  return null;
+  
+  return { d, m, y };
 }
 
-function sumBirth({ d, m, y }: { d: number, m: number, y: number }) { 
-  return (String(d) + String(m) + String(y)).split('').reduce((a, c) => a + Number(c), 0); 
+function sumBirth({ d, m, y }: { d: number, m: number, y: number }): number {
+  const total = d + m + y;
+  let sum = total;
+  while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
+    const digits = sum.toString().split('').map(Number);
+    sum = digits.reduce((a, b) => a + b, 0);
+  }
+  return sum;
 }
 
-// Função para calcular Lições Cármicas (números 1-9 ausentes no nome)
+// Função para calcular lições cármicas (números ausentes no nome)
 function calcularLicoesCarmicas(name: string, baseMap: Record<string, number>): number[] {
-  const numerosPresentes = new Set<number>();
+  const numbersInName = new Set<number>();
   
-  for (const ch of [...name.toUpperCase()]) {
-    const lv = letterValue(ch, baseMap);
-    if (lv && lv.base >= 1 && lv.base <= 9) {
-      numerosPresentes.add(lv.base);
+  for (const ch of name) {
+    if (/[a-záàâãéèêíìîóòôõúùûç]/i.test(ch)) {
+      const value = letterValue(ch, baseMap);
+      if (value > 0 && value <= 9) {
+        numbersInName.add(value);
+      }
     }
   }
   
-  const licoesCarmicas: number[] = [];
-  for (let i = 1; i <= 9; i++) {
-    if (!numerosPresentes.has(i)) {
-      licoesCarmicas.push(i);
-    }
-  }
-  
-  return licoesCarmicas;
+  const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  return allNumbers.filter(num => !numbersInName.has(num));
 }
 
-// Função para calcular Dívidas Cármicas (13,14,16,19 antes da redução)
+// Função para calcular dívidas cármicas
 function calcularDividasCarmicas(name: string, birth: string, baseMap: Record<string, number>): number[] {
-  const nm = String(name || '').trim();
-  const b = parseBirth(String(birth || '').trim());
-  if (!b) return [];
-
-  const all = sumLetters(nm, baseMap);
-  const vow = sumLetters(nm, baseMap, (ch: string) => VOWELS.has(ch));
-  const cons = sumLetters(nm, baseMap, (ch: string) => !VOWELS.has(ch));
-  const nascimento = sumBirth(b);
-
-  const numerosDivida = [13, 14, 16, 19];
-  const dividasCarmicas: number[] = [];
-
-  // Verificar se algum dos totais antes da redução é uma dívida cármica
-  [all.total, vow.total, cons.total, nascimento].forEach(total => {
-    if (numerosDivida.includes(total)) {
-      dividasCarmicas.push(total);
-    }
-  });
-
-  return [...new Set(dividasCarmicas)]; // Remove duplicatas
+  const karmaNumbers = [13, 14, 16, 19];
+  const foundKarma: number[] = [];
+  
+  // Verificar no nome
+  const nameTotal = sumLetters(name, baseMap);
+  if (karmaNumbers.includes(nameTotal)) {
+    foundKarma.push(nameTotal);
+  }
+  
+  // Verificar na data de nascimento
+  const { d, m, y } = parseBirth(birth);
+  const birthTotal = d + m + y;
+  if (karmaNumbers.includes(birthTotal)) {
+    foundKarma.push(birthTotal);
+  }
+  
+  return [...new Set(foundKarma)]; // Remove duplicatas
 }
 
-// Função para calcular Tendências Ocultas (frequência de cada dígito)
-function calcularTendenciasOcultas(name: string, baseMap: Record<string, number>): Record<number, number> {
-  const frequencias: Record<number, number> = {};
+// Função para calcular tendências ocultas (números mais frequentes no nome)
+function calcularTendenciasOcultas(name: string, baseMap: Record<string, number>): number[] {
+  const frequency: Record<number, number> = {};
   
-  for (const ch of [...name.toUpperCase()]) {
-    const lv = letterValue(ch, baseMap);
-    if (lv && lv.base >= 1 && lv.base <= 9) {
-      frequencias[lv.base] = (frequencias[lv.base] || 0) + 1;
+  for (const ch of name) {
+    if (/[a-záàâãéèêíìîóòôõúùûç]/i.test(ch)) {
+      const value = letterValue(ch, baseMap);
+      if (value > 0 && value <= 9) {
+        frequency[value] = (frequency[value] || 0) + 1;
+      }
     }
   }
   
-  return frequencias;
+  const maxFreq = Math.max(...Object.values(frequency));
+  return Object.keys(frequency)
+    .filter(key => frequency[parseInt(key)] === maxFreq && maxFreq > 1)
+    .map(key => parseInt(key));
 }
 
-// Função para calcular Resposta Subconsciente (9 menos números ausentes)
+// Função para calcular resposta subconsciente
 function calcularRespostaSubconsciente(licoesCarmicas: number[]): number {
-  return 9 - licoesCarmicas.length;
+  const totalNumbers = 9;
+  const presentNumbers = totalNumbers - licoesCarmicas.length;
+  return reduce(presentNumbers);
 }
 
-// Função para calcular Ciclos de Vida (3 ciclos baseados em mês, dia, ano)
-function calcularCiclosVida(birth: string): { primeiro: number, segundo: number, terceiro: number } {
-  const b = parseBirth(birth);
-  if (!b) return { primeiro: 0, segundo: 0, terceiro: 0 };
-
-  return {
-    primeiro: reduce(b.m),    // Mês de nascimento
-    segundo: reduce(b.d),     // Dia de nascimento  
-    terceiro: reduce(b.y)     // Ano de nascimento
-  };
-}
-
-// Função para calcular Desafios (4 tipos de desafios)
-function calcularDesafios(birth: string): { primeiro: number, segundo: number, terceiro: number, quarto: number } {
-  const b = parseBirth(birth);
-  if (!b) return { primeiro: 0, segundo: 0, terceiro: 0, quarto: 0 };
-
-  const mes = reduce(b.m);
-  const dia = reduce(b.d);
-  const ano = reduce(b.y);
-
-  return {
-    primeiro: Math.abs(dia - mes),
-    segundo: Math.abs(ano - dia),
-    terceiro: Math.abs(mes - ano),
-    quarto: Math.abs(Math.abs(dia - mes) - Math.abs(ano - dia))
-  };
-}
-
-// Função para calcular Momentos Decisivos (4 momentos)
-function calcularMomentos(birth: string, destino: number): { primeiro: number, segundo: number, terceiro: number, quarto: number } {
-  const b = parseBirth(birth);
-  if (!b) return { primeiro: 0, segundo: 0, terceiro: 0, quarto: 0 };
-
-  const mes = reduce(b.m);
-  const dia = reduce(b.d);
-  const ano = reduce(b.y);
-
-  return {
-    primeiro: reduce(mes + dia),
-    segundo: reduce(dia + ano),
-    terceiro: reduce(mes + ano),
-    quarto: reduce(mes + dia + ano + destino)
-  };
-}
-
-// Função para calcular Mês e Dia Pessoal
-function calcularMesDiaPersonal(anoPessoal: number, mesAtual?: number, diaAtual?: number): { mes_pessoal?: number, dia_pessoal?: number } {
-  const resultado: { mes_pessoal?: number, dia_pessoal?: number } = {};
+// Função para calcular ciclos de vida
+function calcularCiclosVida(birth: string): [number, number, number] {
+  const { d, m, y } = parseBirth(birth);
   
-  if (mesAtual) {
-    resultado.mes_pessoal = reduce(anoPessoal + mesAtual);
-    
-    if (diaAtual) {
-      resultado.dia_pessoal = reduce(resultado.mes_pessoal + diaAtual);
-    }
-  }
+  const primeiro = reduce(m);
+  const segundo = reduce(d);
+  const terceiro = reduce(y);
   
-  return resultado;
+  return [primeiro, segundo, terceiro];
 }
 
+// Função para calcular desafios
+function calcularDesafios(birth: string): [number, number, number] {
+  const { d, m, y } = parseBirth(birth);
+  
+  const primeiro = Math.abs(m - d);
+  const segundo = Math.abs(d - y);
+  const terceiro = Math.abs(primeiro - segundo);
+  
+  return [primeiro, segundo, terceiro];
+}
+
+// Função para calcular momentos decisivos
+function calcularMomentos(birth: string, destino: number): [number, number, number, number] {
+  const { d, m, y } = parseBirth(birth);
+  
+  const primeiro = reduce(m + d);
+  const segundo = reduce(d + y);
+  const terceiro = reduce(primeiro + segundo);
+  const quarto = reduce(m + y);
+  
+  return [primeiro, segundo, terceiro, quarto];
+}
+
+// Função para calcular mês e dia pessoal
+function calcularMesDiaPersonal(anoPessoal: number, mesAtual?: number, diaAtual?: number): { mes: number; dia: number } {
+  const mes = mesAtual ? reduce(anoPessoal + mesAtual) : anoPessoal;
+  const dia = diaAtual ? reduce(mes + diaAtual) : mes;
+  
+  return { mes, dia };
+}
+
+// Função principal de cálculo
 function calcularCompleto({ name, birth }: { name: string, birth: string }, baseMap: Record<string, number>) {
-  const nm = String(name || '').trim();
-  const b = parseBirth(String(birth || '').trim());
-
-  if (!b) {
-    throw new Error("Data de nascimento inválida");
-  }
-
-  const all = sumLetters(nm, baseMap);
-  const vow = sumLetters(nm, baseMap, (ch: string) => VOWELS.has(ch));
-  const cons = sumLetters(nm, baseMap, (ch: string) => !VOWELS.has(ch));
-
-  // Números básicos
-  const expressao = reduce(all.total);
-  const motivacao = reduce(vow.total);
-  const impressao = reduce(cons.total);
-  const destino = reduce(sumBirth(b));
+  // Cálculos básicos
+  const motivacao = reduce(sumLetters(name, baseMap, ch => /[aeiouáàâãéèêíìîóòôõúùû]/i.test(ch)));
+  const impressao = reduce(sumLetters(name, baseMap, ch => !/[aeiouáàâãéèêíìîóòôõúùû]/i.test(ch)));
+  const expressao = reduce(sumLetters(name, baseMap));
   
-  // Número Psíquico (dia do nascimento reduzido)
-  const numero_psiquico = reduce(b.d);
+  const { d, m, y } = parseBirth(birth);
+  const destino = sumBirth({ d, m, y });
+  const missao = reduce(expressao + destino);
+  const psiquico = reduce(d);
   
-  // Dia do Nascimento (natural)
-  const dia_nascimento_natural = b.d;
-  const dia_nascimento_reduzido = reduce(b.d);
-  
-  // Grau de Ascensão (soma de expressão + destino)
-  const grau_ascensao = reduce(expressao + destino);
-
   // Cálculos avançados
-  const licoes_carmicas = calcularLicoesCarmicas(nm, baseMap);
-  const dividas_carmicas = calcularDividasCarmicas(nm, birth, baseMap);
-  const tendencias_ocultas = calcularTendenciasOcultas(nm, baseMap);
-  const resposta_subconsciente = calcularRespostaSubconsciente(licoes_carmicas);
-  const ciclos_vida = calcularCiclosVida(birth);
+  const licoesCarmicas = calcularLicoesCarmicas(name, baseMap);
+  const dividasCarmicas = calcularDividasCarmicas(name, birth, baseMap);
+  const tendenciasOcultas = calcularTendenciasOcultas(name, baseMap);
+  const respostaSubconsciente = calcularRespostaSubconsciente(licoesCarmicas);
+  
+  const ciclosVida = calcularCiclosVida(birth);
   const desafios = calcularDesafios(birth);
   const momentos = calcularMomentos(birth, destino);
-
-  // Missão (soma de expressão + destino, alguns sistemas usam diferentes fórmulas)
-  const missao = reduce(expressao + destino);
-
+  
   return {
-    expressao, motivacao, impressao, destino, missao,
-    numero_psiquico, dia_nascimento_natural, dia_nascimento_reduzido, grau_ascensao,
-    licoes_carmicas, dividas_carmicas, tendencias_ocultas, resposta_subconsciente,
-    ciclos_vida, desafios, momentos,
-    debug: { 
-      somas: { todas: all.total, vogais: vow.total, consoantes: cons.total }, 
-      letras: all.list,
-      nascimento: b
-    }
+    motivacao,
+    impressao, 
+    expressao,
+    destino,
+    missao,
+    psiquico,
+    licoesCarmicas,
+    dividasCarmicas,
+    tendenciasOcultas,
+    respostaSubconsciente,
+    ciclosVida,
+    desafios,
+    momentos
   };
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('🚀 Iniciando geração do mapa...');
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
-    const { name, birth, yearRef } = await req.json();
-    console.log('📊 Dados recebidos:', { name, birth, yearRef });
-
+    const { name, birth, anoReferencia = new Date().getFullYear() } = await req.json();
+    
     if (!name || !birth) {
-      throw new Error("Nome e data de nascimento são obrigatórios");
+      throw new Error('Nome e data de nascimento são obrigatórios');
     }
 
-    // Buscar tabela de conversão do banco
-    console.log('🔍 Buscando tabela de conversão...');
-    const { data: conversionTables, error: convError } = await supabase
+    console.log(`🚀 Gerando mapa completo para: ${name}, nascido em ${birth}`);
+
+    // Buscar tabela de conversão
+    const { data: conversionData, error: convError } = await supabase
       .from('conversion_tables')
       .select('mapping')
       .eq('is_default', true)
-      .eq('locale', 'pt-BR')
       .limit(1);
 
-    let baseMap = FALLBACK_BASE_MAP;
-    if (conversionTables && conversionTables.length > 0) {
-      baseMap = conversionTables[0].mapping as Record<string, number>;
-      console.log('✅ Tabela de conversão carregada do banco');
-    } else {
-      console.log('⚠️ Usando tabela de conversão padrão (fallback)');
-    }
+    const baseMap = convError || !conversionData || conversionData.length === 0 
+      ? FALLBACK_BASE_MAP 
+      : conversionData[0].mapping;
 
-    // Cálculos completos
-    const numeros = calcularCompleto({ name, birth }, baseMap);
-    console.log('🧮 Números calculados:', numeros);
-
-    // Cálculo do Ano Pessoal (Jé Fêrraz: ano_pessoal = reduce(soma_dígitos(ano_ref) + destino))
-    const ano = yearRef ?? new Date().getFullYear();
-    const birthObj = parseBirth(birth);
-    if (!birthObj) {
-      throw new Error("Data de nascimento inválida");
-    }
+    // Realizar cálculos numerológicos
+    const result = calcularCompleto({ name, birth }, baseMap);
     
-    // Soma dos dígitos do ano de referência
-    const anoDigitos = String(ano).split('').reduce((a, d) => a + Number(d), 0);
-    const anoPessoal = reduce(anoDigitos + numeros.destino);
-    
-    // Calcular Mês e Dia Pessoal para o momento atual
-    const agora = new Date();
-    const mesDiaPersonal = calcularMesDiaPersonal(anoPessoal, agora.getMonth() + 1, agora.getDate());
-    
-    console.log('📅 Ano pessoal calculado:', anoPessoal, 'para ano', ano, '(dígitos ano:', anoDigitos, '+ destino:', numeros.destino, ')');
-    console.log('📅 Mês/Dia pessoal:', mesDiaPersonal);
+    // Calcular ano, mês e dia pessoal
+    const { d, m, y } = parseBirth(birth);
+    const anoPessoal = reduce(d + m + anoReferencia);
+    const { mes: mesPessoal, dia: diaPessoal } = calcularMesDiaPersonal(anoPessoal, new Date().getMonth() + 1, new Date().getDate());
 
-    // Definir seções e números para buscar
-    const secoes = [
-      'motivacao', 'expressao', 'impressao', 'destino', 'missao', 'ano_pessoal', 'mes_pessoal', 'dia_pessoal',
-      'Número Psíquico', 'Dia do Nascimento', 'Grau de Ascensão',
-      'Lições Cármicas', 'Dívidas Cármicas', 'Tendências Ocultas', 'Resposta Subconsciente',
-      'Ciclos de Vida', 'Desafios', 'Momentos Decisivos',
-      'Cores Favoráveis', 'Dias do Mês Favoráveis'
-    ];
+    // Determinar anjo cabalístico
+    const angelIndex = (result.expressao + result.destino - 1) % CABALISTIC_ANGELS.length;
+    const anjoEspecial = CABALISTIC_ANGELS[angelIndex];
 
-    const numerosCompletos = {
-      ...numeros,
-      ano_pessoal: anoPessoal,
-      ...mesDiaPersonal
-    };
-
-    console.log('🔍 Buscando textos para todas as seções...');
-    const { data: todosTextos, error: textError } = await supabase
+    // Buscar textos numerológicos com nova estrutura v3.0
+    const { data: textsData, error: textsError } = await supabase
       .from('numerology_texts')
-      .select('section, key_number, title, body')
-      .eq('lang', 'pt-BR');
+      .select('*')
+      .eq('version', 'v3.0')
+      .order('priority', { ascending: false });
 
-    console.log('📚 Total de textos encontrados:', todosTextos?.length || 0);
-    if (textError) {
-      console.error('❌ Erro ao buscar textos:', textError);
-    }
+    const texts = textsError ? [] : textsData;
+    
+    // Buscar dados do anjo cabalístico
+    const { data: angelData } = await supabase
+      .from('cabalistic_angels')
+      .select('*')
+      .eq('name', anjoEspecial)
+      .limit(1);
 
-    // Organizar textos por seção e número
-    const textosMap = (todosTextos || []).reduce((acc: any, texto: any) => {
-      const key = `${texto.section}_${texto.key_number}`;
-      acc[key] = texto;
-      return acc;
-    }, {});
+    const angelInfo = angelData && angelData.length > 0 ? angelData[0] : null;
 
-    // Criar textos dinâmicos baseados nos números calculados
-    const textosDinamicos: any = {};
-    
-    // Seções básicas numerológicas
-    textosDinamicos.motivacao = textosMap[`motivacao_${numeros.motivacao}`] || 
-      { title: `Motivação ${numeros.motivacao}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.expressao = textosMap[`expressao_${numeros.expressao}`] || 
-      { title: `Expressão ${numeros.expressao}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.impressao = textosMap[`impressao_${numeros.impressao}`] || 
-      { title: `Impressão ${numeros.impressao}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.destino = textosMap[`destino_${numeros.destino}`] || 
-      { title: `Destino ${numeros.destino}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.missao = textosMap[`missao_${numeros.missao}`] || 
-      { title: `Missão ${numeros.missao}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.ano_pessoal = textosMap[`ano_pessoal_${anoPessoal}`] || 
-      { title: `Ano Pessoal ${anoPessoal}`, body: 'Conteúdo em desenvolvimento.' };
+    console.log(`📊 Encontrados ${texts.length} textos numerológicos v3.0`);
 
-    // Mês e Dia Pessoal (se calculados)
-    if (mesDiaPersonal.mes_pessoal) {
-      textosDinamicos.mes_pessoal = textosMap[`mes_pessoal_${mesDiaPersonal.mes_pessoal}`] || 
-        { title: `Mês Pessoal ${mesDiaPersonal.mes_pessoal}`, body: 'Conteúdo em desenvolvimento.' };
-    }
-    
-    if (mesDiaPersonal.dia_pessoal) {
-      textosDinamicos.dia_pessoal = textosMap[`dia_pessoal_${mesDiaPersonal.dia_pessoal}`] || 
-        { title: `Dia Pessoal ${mesDiaPersonal.dia_pessoal}`, body: 'Conteúdo em desenvolvimento.' };
-    }
-
-    // Seções adicionais
-    textosDinamicos.numero_psiquico = textosMap[`Número Psíquico_${numeros.numero_psiquico}`] || 
-      { title: `Número Psíquico ${numeros.numero_psiquico}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.dia_nascimento = textosMap[`Dia do Nascimento_${numeros.dia_nascimento_natural}`] || 
-      { title: `Dia do Nascimento ${numeros.dia_nascimento_natural}`, body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.grau_ascensao = textosMap[`Grau de Ascensão_${numeros.grau_ascensao}`] || 
-      { title: `Grau de Ascensão ${numeros.grau_ascensao}`, body: 'Conteúdo em desenvolvimento.' };
-
-    // Lições Cármicas (array de números ausentes)
-    if (numeros.licoes_carmicas && numeros.licoes_carmicas.length > 0) {
-      textosDinamicos.licoes_carmicas = {
-        title: `Lições Cármicas: ${numeros.licoes_carmicas.join(', ')}`,
-        body: numeros.licoes_carmicas.map(num => 
-          textosMap[`Lições Cármicas_${num}`]?.body || `Lição Cármica ${num}: Conteúdo em desenvolvimento.`
-        ).join('\n\n')
-      };
-    } else {
-      textosDinamicos.licoes_carmicas = {
-        title: 'Lições Cármicas: Nenhuma',
-        body: 'Você não possui Lições Cármicas pendentes nesta vida.'
-      };
-    }
-
-    // Dívidas Cármicas (array de números de dívida)
-    if (numeros.dividas_carmicas && numeros.dividas_carmicas.length > 0) {
-      textosDinamicos.dividas_carmicas = {
-        title: `Dívidas Cármicas: ${numeros.dividas_carmicas.join(', ')}`,
-        body: numeros.dividas_carmicas.map(num => 
-          textosMap[`Dívidas Cármicas_${num}`]?.body || `Dívida Cármica ${num}: Conteúdo em desenvolvimento.`
-        ).join('\n\n')
-      };
-    } else {
-      textosDinamicos.dividas_carmicas = {
-        title: 'Dívidas Cármicas: Nenhuma',
-        body: 'Você não possui Dívidas Cármicas a serem resgatadas nesta vida.'
-      };
-    }
-
-    // Tendências Ocultas (frequência de números)
-    const tendenciasTexto = Object.entries(numeros.tendencias_ocultas || {})
-      .map(([num, freq]) => `${num}: ${freq}x`)
-      .join(', ');
-    textosDinamicos.tendencias_ocultas = {
-      title: 'Tendências Ocultas',
-      body: `Frequência dos números no seu nome: ${tendenciasTexto || 'Nenhuma tendência significativa detectada.'}`
+    // Função para buscar texto por seção e número
+    const getTextForNumber = (section: string, number: number) => {
+      return texts.find(t => 
+        t.section === section && 
+        t.key_number === number
+      );
     };
 
-    // Resposta Subconsciente
-    textosDinamicos.resposta_subconsciente = textosMap[`Resposta Subconsciente_${numeros.resposta_subconsciente}`] || 
-      { title: `Resposta Subconsciente ${numeros.resposta_subconsciente}`, body: 'Conteúdo em desenvolvimento.' };
-
-    // Ciclos de Vida
-    textosDinamicos.ciclos_vida = {
-      title: 'Ciclos de Vida',
-      body: `
-        **Primeiro Ciclo (0-28 anos):** ${numeros.ciclos_vida?.primeiro || 'N/A'} - ${textosMap[`Ciclos de Vida_${numeros.ciclos_vida?.primeiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Segundo Ciclo (29-56 anos):** ${numeros.ciclos_vida?.segundo || 'N/A'} - ${textosMap[`Ciclos de Vida_${numeros.ciclos_vida?.segundo}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Terceiro Ciclo (57+ anos):** ${numeros.ciclos_vida?.terceiro || 'N/A'} - ${textosMap[`Ciclos de Vida_${numeros.ciclos_vida?.terceiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-      `.trim()
-    };
-
-    // Desafios
-    textosDinamicos.desafios = {
-      title: 'Desafios',
-      body: `
-        **Primeiro Desafio:** ${numeros.desafios?.primeiro || 'N/A'} - ${textosMap[`Desafios_${numeros.desafios?.primeiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Segundo Desafio:** ${numeros.desafios?.segundo || 'N/A'} - ${textosMap[`Desafios_${numeros.desafios?.segundo}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Terceiro Desafio:** ${numeros.desafios?.terceiro || 'N/A'} - ${textosMap[`Desafios_${numeros.desafios?.terceiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Quarto Desafio:** ${numeros.desafios?.quarto || 'N/A'} - ${textosMap[`Desafios_${numeros.desafios?.quarto}`]?.body || 'Conteúdo em desenvolvimento.'}
-      `.trim()
-    };
-
-    // Momentos Decisivos
-    textosDinamicos.momentos_decisivos = {
-      title: 'Momentos Decisivos',
-      body: `
-        **Primeiro Momento:** ${numeros.momentos?.primeiro || 'N/A'} - ${textosMap[`Momentos Decisivos_${numeros.momentos?.primeiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Segundo Momento:** ${numeros.momentos?.segundo || 'N/A'} - ${textosMap[`Momentos Decisivos_${numeros.momentos?.segundo}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Terceiro Momento:** ${numeros.momentos?.terceiro || 'N/A'} - ${textosMap[`Momentos Decisivos_${numeros.momentos?.terceiro}`]?.body || 'Conteúdo em desenvolvimento.'}
-        
-        **Quarto Momento:** ${numeros.momentos?.quarto || 'N/A'} - ${textosMap[`Momentos Decisivos_${numeros.momentos?.quarto}`]?.body || 'Conteúdo em desenvolvimento.'}
-      `.trim()
-    };
-
-    // Seções especiais (buscar o primeiro disponível se não tiver número específico)
-    textosDinamicos.cores_favoraveis = textosMap[`Cores Favoráveis_${numeros.destino}`] || 
-      (todosTextos || []).find(t => t.section === 'Cores Favoráveis') || 
-      { title: 'Cores Favoráveis', body: 'Conteúdo em desenvolvimento.' };
-    
-    textosDinamicos.dias_favoraveis = textosMap[`Dias do Mês Favoráveis_${numeros.destino}`] || 
-      (todosTextos || []).find(t => t.section === 'Dias do Mês Favoráveis') || 
-      { title: 'Dias do Mês Favoráveis', body: 'Conteúdo em desenvolvimento.' };
-
-    const resultado = {
-      header: { 
-        name, 
-        birth, 
-        anoReferencia: ano,
-        dataGeracao: new Date().toISOString()
+    // Construir conteúdo do mapa completo
+    const mapaContent = {
+      header: {
+        titulo: "Estudo Numerológico Pessoal",
+        subtitulo: "(Mapa Numerológico Cabalístico)",
+        nome: name,
+        dataNascimento: birth,
+        dataGeracao: new Date().toLocaleDateString('pt-BR'),
+        orientacao: "Os números são a chave dos antigos conceitos da Cosmogonia, em sua mais ampla acepção, considerados tanto física como espiritualmente, e da evolução da raça humana atual; todos os sistemas de misticismo religioso estão baseados nos números. A santidade dos números começa com a Grande Causa Primeira e Única, e acaba com o nada, o zero, símbolo do Universo infinito. - (Helena P. Blavatsky, em Isis Sem Véu, Vol. II, pág. 407)."
       },
-      numeros: numerosCompletos,
-      textos: textosDinamicos,
-      debug: numeros.debug
+      
+      numeros: {
+        motivacao: result.motivacao,
+        impressao: result.impressao,
+        expressao: result.expressao,
+        destino: result.destino,
+        missao: result.missao,
+        psiquico: result.psiquico,
+        anoPessoal,
+        mesPessoal,
+        diaPessoal,
+        anjoEspecial,
+        licoesCarmicas: result.licoesCarmicas,
+        dividasCarmicas: result.dividasCarmicas,
+        tendenciasOcultas: result.tendenciasOcultas,
+        respostaSubconsciente: result.respostaSubconsciente,
+        ciclosVida: result.ciclosVida,
+        desafios: result.desafios,
+        momentos: result.momentos
+      },
+
+      textos: {
+        motivacao: {
+          titulo: "Motivação",
+          numero: result.motivacao,
+          explicacao: "O número de Motivação descreve os motivos e as razões que movem as atitudes do ser humano e o seu modo de proceder. Esse número revela o aspecto interior da personalidade, da alma, que se reflete em suas atitudes e comportamentos, principalmente na intimidade e no lar, influenciando ainda nas escolhas pessoais.",
+          conteudo: getTextForNumber('motivacao', result.motivacao)?.body || `Motivação ${result.motivacao} - Este número revela seus desejos mais profundos e o que verdadeiramente o motiva na vida.`,
+          cores: getTextForNumber('motivacao', result.motivacao)?.color_associations || [],
+          pedras: getTextForNumber('motivacao', result.motivacao)?.stone_associations || [],
+          profissoes: getTextForNumber('motivacao', result.motivacao)?.profession_associations || []
+        },
+
+        impressao: {
+          titulo: "Impressão",
+          numero: result.impressao,
+          explicacao: "O número de Impressão descreve a personalidade em seu aspecto externo, o ego, ou seja, a aparência da personalidade atual. É o número que descreve aquela primeira impressão que a pessoa causa quando é vista por outro.",
+          conteudo: getTextForNumber('impressao', result.impressao)?.body || `Impressão ${result.impressao} - Este número revela como os outros o percebem inicialmente.`
+        },
+
+        expressao: {
+          titulo: "Expressão", 
+          numero: result.expressao,
+          explicacao: "O número de Expressão enuncia a maneira como a pessoa age e interage com os outros, com o mundo, revelando quais são os seus verdadeiros talentos e as aptidões que desenvolverá ao longo da vida e a melhor forma de expressá-los.",
+          conteudo: getTextForNumber('expressao', result.expressao)?.body || `Expressão ${result.expressao} - Este número revela seus talentos naturais e como você se expressa no mundo.`
+        },
+
+        destino: {
+          titulo: "Destino",
+          numero: result.destino,
+          explicacao: "O número de destino é determinado pela data de nascimento - dia, mês e ano. O destino rege a vida do ser humano e indica o seu caminho evolutivo. Ele orienta as decisões mais importantes na vida.",
+          conteudo: getTextForNumber('destino', result.destino)?.body || `Destino ${result.destino} - Este número revela sua missão de vida e caminho evolutivo.`
+        },
+
+        missao: {
+          titulo: "Missão",
+          numero: result.missao,
+          explicacao: "Cada ser humano traz ao nascer uma Missão, que nada mais é que a sua vocação. Essa Missão será desenvolvida ao longo da vida independentemente de qual profissão exercerá.",
+          conteudo: getTextForNumber('missao', result.missao)?.body || `Missão ${result.missao} - Este número revela como você deve realizar sua vocação na vida.`
+        },
+
+        psiquico: {
+          titulo: "Número Psíquico",
+          numero: result.psiquico,
+          explicacao: "O número psíquico é baseado no dia de nascimento e revela a essência da personalidade, influenciando diretamente o comportamento e as características básicas da pessoa.",
+          conteudo: getTextForNumber('psiquico', result.psiquico)?.body || `Psíquico ${result.psiquico} - Este número revela sua essência interior e padrões comportamentais naturais.`
+        },
+
+        anjoEspecial: {
+          titulo: "Seu Anjo Cabalístico",
+          nome: anjoEspecial,
+          categoria: angelInfo?.category || "Anjo Protetor",
+          explicacao: angelInfo?.domain_description || `Seu anjo protetor é ${anjoEspecial}, que oferece proteção e orientação espiritual específica para seu caminho de vida.`,
+          invocacao1: angelInfo?.invocation_time_1 || "Consulte horários específicos",
+          invocacao2: angelInfo?.invocation_time_2 || null,
+          salmo: angelInfo?.psalm_reference || "Consulte referências cabalísticas",
+          influenciaNegativa: angelInfo?.negative_influence || "Afasta energias contrárias ao desenvolvimento espiritual"
+        },
+
+        licoesCarmicas: {
+          titulo: "Lições Cármicas",
+          numeros: result.licoesCarmicas,
+          explicacao: "As Lições Cármicas são números ausentes no nome completo e representam qualidades que devem ser desenvolvidas nesta vida.",
+          licoes: result.licoesCarmicas.map(num => ({
+            numero: num,
+            licao: getTextForNumber('licao_carmica', num)?.body || `Lição Cármica ${num} - Desenvolver as qualidades relacionadas a este número.`
+          }))
+        },
+
+        dividasCarmicas: {
+          titulo: "Dívidas Cármicas",
+          numeros: result.dividasCarmicas,
+          explicacao: "As Dívidas Cármicas (13, 14, 16, 19) representam desafios específicos que devem ser superados nesta vida.",
+          dividas: result.dividasCarmicas.map(num => ({
+            numero: num,
+            desafio: getTextForNumber('divida_carmica', num)?.body || `Dívida Cármica ${num} - Desafios específicos relacionados a vidas passadas.`
+          }))
+        },
+
+        tendenciasOcultas: {
+          titulo: "Tendências Ocultas",
+          numeros: result.tendenciasOcultas,
+          explicacao: "As Tendências Ocultas são talentos naturais inconscientes que se manifestam espontaneamente.",
+          tendencias: result.tendenciasOcultas.map(num => ({
+            numero: num,
+            talento: getTextForNumber('tendencia_oculta', num)?.body || `Tendência Oculta ${num} - Talentos naturais que se manifestam automaticamente.`
+          }))
+        },
+
+        respostaSubconsciente: {
+          titulo: "Resposta Subconsciente",
+          numero: result.respostaSubconsciente,
+          explicacao: "A Resposta Subconsciente indica como você reage instintivamente em situações de crise.",
+          conteudo: getTextForNumber('resposta_subconsciente', result.respostaSubconsciente)?.body || `Resposta Subconsciente ${result.respostaSubconsciente} - Sua reação automática em situações desafiadoras.`
+        },
+
+        ciclosVida: {
+          titulo: "Ciclos de Vida",
+          explicacao: "Os Ciclos de Vida dividem a existência em três fases principais, cada uma com suas características específicas.",
+          primeiro: {
+            numero: result.ciclosVida[0],
+            periodo: "0-28 anos (aproximadamente)",
+            fase: "Formação e Desenvolvimento",
+            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[0])?.body || `Primeiro Ciclo ${result.ciclosVida[0]} - Fase de formação da personalidade e aprendizado básico.`
+          },
+          segundo: {
+            numero: result.ciclosVida[1],
+            periodo: "28-56 anos (aproximadamente)",
+            fase: "Produtividade e Realização",
+            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[1])?.body || `Segundo Ciclo ${result.ciclosVida[1]} - Fase de maior produtividade e construção do lugar no mundo.`
+          },
+          terceiro: {
+            numero: result.ciclosVida[2],
+            periodo: "56+ anos",
+            fase: "Sabedoria e Transmissão",
+            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[2])?.body || `Terceiro Ciclo ${result.ciclosVida[2]} - Fase de colheita e transmissão de conhecimento.`
+          }
+        },
+
+        desafios: {
+          titulo: "Desafios",
+          explicacao: "Os Desafios representam os obstáculos principais que devem ser superados em diferentes fases da vida.",
+          primeiro: {
+            numero: result.desafios[0],
+            conteudo: getTextForNumber('desafio', result.desafios[0])?.body || `Primeiro Desafio ${result.desafios[0]} - Obstáculos da juventude.`
+          },
+          segundo: {
+            numero: result.desafios[1],
+            conteudo: getTextForNumber('desafio', result.desafios[1])?.body || `Segundo Desafio ${result.desafios[1]} - Obstáculos da vida adulta.`
+          },
+          principal: {
+            numero: result.desafios[2],
+            conteudo: getTextForNumber('desafio', result.desafios[2])?.body || `Desafio Principal ${result.desafios[2]} - Obstáculo constante da vida.`
+          }
+        },
+
+        momentosDecisivos: {
+          titulo: "Momentos Decisivos",
+          explicacao: "Os Momentos Decisivos indicam períodos importantes de mudança e oportunidade na vida.",
+          momentos: result.momentos.map((momento, index) => ({
+            numero: momento,
+            ordem: index + 1,
+            conteudo: getTextForNumber('momento_decisivo', momento)?.body || `Momento Decisivo ${momento} - Período de mudanças importantes.`
+          }))
+        },
+
+        anoPessoal: {
+          titulo: `Ano Pessoal ${anoPessoal} - ${anoReferencia}`,
+          numero: anoPessoal,
+          explicacao: "O Ano Pessoal indica as energias e oportunidades disponíveis durante este ano específico.",
+          conteudo: getTextForNumber('ano_pessoal', anoPessoal)?.body || `Ano Pessoal ${anoPessoal} - Energias e oportunidades específicas deste ano.`
+        },
+
+        mesPessoal: {
+          titulo: `Mês Pessoal ${mesPessoal}`,
+          numero: mesPessoal,
+          explicacao: "O Mês Pessoal indica as energias específicas do mês atual dentro do ano pessoal.",
+          conteudo: getTextForNumber('mes_pessoal', mesPessoal)?.body || `Mês Pessoal ${mesPessoal} - Influências do mês atual.`
+        }
+      },
+
+      // Informações complementares expandidas
+      complementares: {
+        cores: {
+          titulo: "Cores Harmônicas",
+          explicacao: "As cores que vibram em harmonia com seus números principais e trazem equilíbrio energético.",
+          coresMotivacao: getTextForNumber('motivacao', result.motivacao)?.color_associations || [],
+          coresExpressao: getTextForNumber('expressao', result.expressao)?.color_associations || [],
+          coresDestino: getTextForNumber('destino', result.destino)?.color_associations || []
+        },
+        
+        pedras: {
+          titulo: "Pedras e Cristais",
+          explicacao: "Pedras e cristais que amplificam e equilibram suas energias numerológicas.",
+          pedrasMotivacao: getTextForNumber('motivacao', result.motivacao)?.stone_associations || [],
+          pedrasExpressao: getTextForNumber('expressao', result.expressao)?.stone_associations || [],
+          pedrasDestino: getTextForNumber('destino', result.destino)?.stone_associations || []
+        },
+
+        profissoes: {
+          titulo: "Profissões Ideais",
+          explicacao: "Atividades profissionais que estão em harmonia com seus talentos numerológicos.",
+          profissoesExpressao: getTextForNumber('expressao', result.expressao)?.profession_associations || [],
+          profissoesDestino: getTextForNumber('destino', result.destino)?.profession_associations || [],
+          profissoesMissao: getTextForNumber('missao', result.missao)?.profession_associations || []
+        },
+
+        saude: {
+          titulo: "Orientações de Saúde",
+          explicacao: "Cuidados específicos com a saúde baseados em suas características numerológicas.",
+          cuidadosExpressao: getTextForNumber('expressao', result.expressao)?.health_associations || [],
+          cuidadosDestino: getTextForNumber('destino', result.destino)?.health_associations || []
+        }
+      },
+
+      // Metadados para processamento
+      metadados: {
+        versaoConteudo: 'v3.0',
+        totalTextos: texts.length,
+        angeloEncontrado: !!angelInfo,
+        calculosCompletos: true,
+        dataProcessamento: new Date().toISOString()
+      }
     };
 
-    console.log('✅ Mapa completo gerado com sucesso!');
-    console.log('📋 Seções incluídas:', Object.keys(textosDinamicos));
+    console.log('✅ Mapa numerológico completo gerado com sucesso');
 
-    return new Response(JSON.stringify(resultado), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
+    return new Response(JSON.stringify(mapaContent), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    console.error('💥 Erro na geração do mapa:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    console.error('❌ Erro na geração do mapa:', error);
+    return new Response(
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
   }
 });

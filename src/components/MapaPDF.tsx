@@ -1,196 +1,474 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Edit2 } from 'lucide-react';
 
 interface MapaData {
   header: {
-    name: string;
-    birth: string;
-    anoReferencia: number;
-    dataGeracao: string;
+    titulo?: string;
+    subtitulo?: string;
+    nome?: string;
+    name?: string;
+    dataNascimento?: string;
+    birth?: string;
+    dataGeracao?: string;
+    anoReferencia?: number;
+    orientacao?: string;
   };
   numeros: {
-    expressao: number;
-    motivacao: number;
-    impressao: number;
-    destino: number;
-    ano_pessoal: number;
-    numero_psiquico?: number;
-    dia_nascimento_natural?: number;
-    dia_nascimento_reduzido?: number;
-    grau_ascensao?: number;
+    motivacao?: number;
+    impressao?: number;
+    expressao?: number;
+    destino?: number;
+    missao?: number;
+    psiquico?: number;
+    anoPessoal?: number;
+    ano_pessoal?: number;
+    mesPessoal?: number;
+    diaPessoal?: number;
+    anjoEspecial?: string;
+    licoesCarmicas?: number[];
+    dividasCarmicas?: number[];
+    tendenciasOcultas?: number[];
+    respostaSubconsciente?: number;
+    ciclosVida?: number[];
+    desafios?: number[];
+    momentos?: number[];
   };
-  textos: Record<string, {
-    title: string;
-    body: string;
-  }>;
-  debug?: any;
+  textos?: any;
+  complementares?: {
+    cores?: any;
+    pedras?: any;
+    profissoes?: any;
+    saude?: any;
+  };
+  metadados?: {
+    versaoConteudo?: string;
+    totalTextos?: number;
+    angeloEncontrado?: boolean;
+    calculosCompletos?: boolean;
+  };
 }
 
 interface MapaPDFProps {
   data: MapaData;
+  isEditing?: boolean;
+  editedTexts?: Record<string, { title: string; body: string }>;
+  onEdit?: (section: string, field: string) => void;
 }
 
-const Section = ({ title, body }: { title: string; body: string }) => (
-  <section className="px-12 py-12 break-before-page min-h-screen flex flex-col">
-    <h2 className="text-4xl font-bold mb-8 text-primary border-b-2 border-primary/20 pb-4">
-      {title}
-    </h2>
-    <div className="flex-1 prose prose-lg prose-neutral max-w-none leading-relaxed">
-      <div className="whitespace-pre-wrap text-justify">{body}</div>
-    </div>
-  </section>
-);
-
-export default function MapaPDF({ data }: MapaPDFProps) {
-  const { header, numeros, textos } = data;
+const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts = {}, onEdit }) => {
+  const isV3Format = data.metadados?.versaoConteudo === 'v3.0' || data.textos?.motivacao?.titulo;
   
-  // Define section order for display
-  const secaoOrdem = [
-    'motivacao', 'expressao', 'impressao', 'destino', 'ano_pessoal',
-    'numero_psiquico', 'dia_nascimento', 'grau_ascensao', 
-    'cores_favoraveis', 'dias_favoraveis'
-  ];
+  const renderEditButton = (section: string, field: string) => {
+    if (!isEditing || !onEdit) return null;
+    
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => onEdit(section, field)}
+        className="ml-2 h-6 w-6 p-0"
+      >
+        <Edit2 className="h-3 w-3" />
+      </Button>
+    );
+  };
 
-  // Get available sections in defined order
-  const secoesDisponiveis = secaoOrdem.filter(secao => textos[secao]);
+  const getEditedText = (section: string, field: string, originalText: string) => {
+    return editedTexts[section]?.[field] || originalText;
+  };
 
-  return (
-    <div className="w-[794px] mx-auto bg-background text-foreground font-serif" id="mapa-para-pdf">
-      {/* CAPA */}
-      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/20 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-20 left-20 w-32 h-32 rounded-full bg-primary/30"></div>
-          <div className="absolute bottom-20 right-20 w-48 h-48 rounded-full bg-primary/20"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/10"></div>
+  // Função para renderizar números básicos
+  const renderNumerosBasicos = () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+      {data.numeros.motivacao && (
+        <div className="text-center p-4 bg-purple-50 rounded-lg">
+          <div className="text-3xl font-bold text-purple-600">{data.numeros.motivacao}</div>
+          <div className="text-sm font-medium">Motivação</div>
         </div>
-        
-        <div className="text-center z-10 max-w-2xl px-8">
-          <h1 className="text-6xl font-bold tracking-wide mb-4 text-primary">
-            Mapa Numerológico
-          </h1>
-          <div className="w-24 h-1 bg-primary mx-auto mb-8"></div>
-          <h2 className="text-3xl font-semibold mb-6 text-muted-foreground">
-            Cabalístico
-          </h2>
-          <div className="bg-background/80 backdrop-blur-sm rounded-lg p-8 shadow-lg border">
-            <p className="text-2xl font-medium mb-2">{header.name}</p>
-            <p className="text-lg text-muted-foreground mb-4">{header.birth}</p>
-            <p className="text-sm text-muted-foreground">
-              Ano de Referência: {header.anoReferencia}
-            </p>
-          </div>
+      )}
+      {data.numeros.impressao && (
+        <div className="text-center p-4 bg-blue-50 rounded-lg">
+          <div className="text-3xl font-bold text-blue-600">{data.numeros.impressao}</div>
+          <div className="text-sm font-medium">Impressão</div>
         </div>
-      </section>
-
-      {/* SUMÁRIO/OS SEUS NÚMEROS */}
-      <section className="px-12 py-16 min-h-screen flex flex-col justify-center">
-        <h2 className="text-5xl font-bold mb-12 text-center text-primary">
-          Os Seus Números
-        </h2>
-        
-        <div className="grid grid-cols-1 gap-8 max-w-2xl mx-auto">
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-semibold">Expressão</span>
-              <span className="text-3xl font-bold text-primary">{numeros.expressao}</span>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-semibold">Motivação</span>
-              <span className="text-3xl font-bold text-primary">{numeros.motivacao}</span>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-semibold">Impressão</span>
-              <span className="text-3xl font-bold text-primary">{numeros.impressao}</span>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-semibold">Destino</span>
-              <span className="text-3xl font-bold text-primary">{numeros.destino}</span>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-            <div className="flex justify-between items-center">
-              <span className="text-xl font-semibold">Ano Pessoal</span>
-              <span className="text-3xl font-bold text-primary">{numeros.ano_pessoal}</span>
-            </div>
-          </div>
-
-          {/* Additional numbers if available */}
-          {numeros.numero_psiquico && (
-            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-semibold">Número Psíquico</span>
-                <span className="text-3xl font-bold text-primary">{numeros.numero_psiquico}</span>
-              </div>
-            </div>
-          )}
-          
-          {numeros.dia_nascimento_natural && (
-            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-semibold">Dia Nascimento</span>
-                <span className="text-3xl font-bold text-primary">{numeros.dia_nascimento_natural}</span>
-              </div>
-            </div>
-          )}
-          
-          {numeros.grau_ascensao && (
-            <div className="bg-card rounded-lg p-6 shadow-md border border-border">
-              <div className="flex justify-between items-center">
-                <span className="text-xl font-semibold">Grau Ascensão</span>
-                <span className="text-3xl font-bold text-primary">{numeros.grau_ascensao}</span>
-              </div>
-            </div>
-          )}
+      )}
+      {data.numeros.expressao && (
+        <div className="text-center p-4 bg-green-50 rounded-lg">
+          <div className="text-3xl font-bold text-green-600">{data.numeros.expressao}</div>
+          <div className="text-sm font-medium">Expressão</div>
         </div>
-        
-        <div className="text-center mt-12">
-          <p className="text-muted-foreground">
-            Gerado em: {new Date(header.dataGeracao).toLocaleString('pt-BR')}
-          </p>
+      )}
+      {data.numeros.destino && (
+        <div className="text-center p-4 bg-orange-50 rounded-lg">
+          <div className="text-3xl font-bold text-orange-600">{data.numeros.destino}</div>
+          <div className="text-sm font-medium">Destino</div>
         </div>
-      </section>
-
-      {/* SEÇÕES DINÂMICAS */}
-      {secoesDisponiveis.map((secao) => (
-        <Section 
-          key={secao}
-          title={textos[secao].title}
-          body={textos[secao].body}
-        />
-      ))}
-      
-      {/* RODAPÉ FINAL */}
-      <section className="px-12 py-16 text-center break-before-page min-h-screen flex flex-col justify-center">
-        <div className="max-w-2xl mx-auto">
-          <h3 className="text-3xl font-bold mb-8 text-primary">
-            Sobre Este Mapa
-          </h3>
-          <div className="prose prose-lg max-w-none text-justify">
-            <p className="mb-6">
-              Este mapa numerológico foi calculado usando o método cabalístico tradicional, 
-              considerando os valores específicos das letras e suas modificações por acentos 
-              e sinais diacríticos.
-            </p>
-            <p className="mb-6">
-              Os números mestres 11 e 22 foram preservados conforme a tradição numerológica, 
-              mantendo sua vibração especial quando presentes nos cálculos.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Mapa gerado pelo Sistema de Numerologia Cabalística Jé Fêrraz
-            </p>
+      )}
+      {data.numeros.missao && (
+        <div className="text-center p-4 bg-red-50 rounded-lg">
+          <div className="text-3xl font-bold text-red-600">{data.numeros.missao}</div>
+          <div className="text-sm font-medium">Missão</div>
+        </div>
+      )}
+      {data.numeros.psiquico && (
+        <div className="text-center p-4 bg-indigo-50 rounded-lg">
+          <div className="text-3xl font-bold text-indigo-600">{data.numeros.psiquico}</div>
+          <div className="text-sm font-medium">Psíquico</div>
+        </div>
+      )}
+      {(data.numeros.anoPessoal || data.numeros.ano_pessoal) && (
+        <div className="text-center p-4 bg-amber-50 rounded-lg">
+          <div className="text-3xl font-bold text-amber-600">
+            {data.numeros.anoPessoal || data.numeros.ano_pessoal}
           </div>
+          <div className="text-sm font-medium">Ano Pessoal</div>
         </div>
-      </section>
+      )}
+      {data.numeros.anjoEspecial && (
+        <div className="text-center p-6 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg col-span-2 md:col-span-3 border border-yellow-200">
+          <div className="text-xl font-bold text-yellow-700 mb-1">{data.numeros.anjoEspecial}</div>
+          <div className="text-sm font-medium text-yellow-600">Anjo Cabalístico</div>
+        </div>
+      )}
     </div>
   );
-}
+
+  // Função para renderizar seção de texto
+  const renderSecaoTexto = (titulo: string, conteudo: any, secao?: string) => {
+    if (!conteudo) return null;
+
+    return (
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center text-primary">
+            {titulo}
+            {secao && renderEditButton(secao, 'title')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {conteudo.explicacao && (
+            <div className="mb-4 p-3 bg-muted/50 rounded-md">
+              <p className="text-sm italic text-muted-foreground">
+                {conteudo.explicacao}
+              </p>
+            </div>
+          )}
+          
+          <div className="prose prose-sm max-w-none">
+            <div className="whitespace-pre-wrap leading-relaxed">
+              {getEditedText(secao || '', 'body', conteudo.conteudo || conteudo.body || 'Conteúdo em desenvolvimento.')}
+            </div>
+          </div>
+
+          {/* Informações adicionais para v3.0 */}
+          {conteudo.cores && conteudo.cores.length > 0 && (
+            <div className="mt-4 p-3 bg-purple-50 rounded-md">
+              <h4 className="font-semibold text-purple-700 mb-2">Cores Harmônicas:</h4>
+              <div className="flex flex-wrap gap-2">
+                {conteudo.cores.map((cor: string, idx: number) => (
+                  <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">
+                    {cor}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {conteudo.pedras && conteudo.pedras.length > 0 && (
+            <div className="mt-4 p-3 bg-emerald-50 rounded-md">
+              <h4 className="font-semibold text-emerald-700 mb-2">Pedras e Cristais:</h4>
+              <div className="flex flex-wrap gap-2">
+                {conteudo.pedras.map((pedra: string, idx: number) => (
+                  <span key={idx} className="px-2 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs">
+                    {pedra}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {conteudo.profissoes && conteudo.profissoes.length > 0 && (
+            <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              <h4 className="font-semibold text-blue-700 mb-2">Profissões Ideais:</h4>
+              <div className="flex flex-wrap gap-2">
+                {conteudo.profissoes.map((prof: string, idx: number) => (
+                  <span key={idx} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    {prof}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-white" id="mapa-pdf">
+      {/* Header */}
+      <div className="text-center mb-8 pb-6 border-b-2 border-primary/20">
+        <h1 className="text-3xl font-bold mb-2 text-primary">
+          {data.header.titulo || "Estudo Numerológico Pessoal"}
+        </h1>
+        <h2 className="text-lg text-muted-foreground mb-4">
+          {data.header.subtitulo || "(Mapa Numerológico Cabalístico)"}
+        </h2>
+        
+        <div className="space-y-2">
+          <p className="text-xl font-semibold">
+            Nome: <span className="text-primary">
+              {data.header.nome || data.header.name}
+            </span>
+          </p>
+          <p className="text-lg">
+            Data de Nascimento: <span className="font-medium">
+              {data.header.dataNascimento || data.header.birth}
+            </span>
+          </p>
+          {(data.header.anoReferencia || data.header.dataGeracao) && (
+            <p className="text-sm text-muted-foreground">
+              Gerado em: {data.header.dataGeracao ? 
+                new Date(data.header.dataGeracao).toLocaleDateString('pt-BR') : 
+                new Date().toLocaleDateString('pt-BR')
+              } {data.header.anoReferencia && `| Ano de Referência: ${data.header.anoReferencia}`}
+            </p>
+          )}
+        </div>
+
+        {/* Orientação Cabalística */}
+        {data.header.orientacao && (
+          <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+            <p className="text-sm italic text-amber-800 leading-relaxed">
+              {data.header.orientacao}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Os Seus Números */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-6 text-center text-primary">Os Seus Números</h2>
+        {renderNumerosBasicos()}
+      </div>
+
+      {/* Seções principais - Formato v3.0 */}
+      {isV3Format && data.textos && (
+        <div className="space-y-6">
+          {data.textos.motivacao && renderSecaoTexto(
+            `Motivação ${data.textos.motivacao.numero || ''}`, 
+            data.textos.motivacao, 
+            'motivacao'
+          )}
+          
+          {data.textos.impressao && renderSecaoTexto(
+            `Impressão ${data.textos.impressao.numero || ''}`, 
+            data.textos.impressao, 
+            'impressao'
+          )}
+          
+          {data.textos.expressao && renderSecaoTexto(
+            `Expressão ${data.textos.expressao.numero || ''}`, 
+            data.textos.expressao, 
+            'expressao'
+          )}
+          
+          {data.textos.destino && renderSecaoTexto(
+            `Destino ${data.textos.destino.numero || ''}`, 
+            data.textos.destino, 
+            'destino'
+          )}
+          
+          {data.textos.missao && renderSecaoTexto(
+            `Missão ${data.textos.missao.numero || ''}`, 
+            data.textos.missao, 
+            'missao'
+          )}
+
+          {data.textos.psiquico && renderSecaoTexto(
+            `Número Psíquico ${data.textos.psiquico.numero || ''}`, 
+            data.textos.psiquico, 
+            'psiquico'
+          )}
+
+          {/* Anjo Cabalístico */}
+          {data.textos.anjoEspecial && (
+            <Card className="mb-6 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200">
+              <CardHeader>
+                <CardTitle className="text-yellow-700">
+                  {data.textos.anjoEspecial.titulo} - {data.textos.anjoEspecial.nome}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <p><strong>Categoria:</strong> {data.textos.anjoEspecial.categoria}</p>
+                  <p><strong>Domínio:</strong> {data.textos.anjoEspecial.explicacao}</p>
+                  {data.textos.anjoEspecial.invocacao1 && (
+                    <p><strong>Horário de Invocação:</strong> {data.textos.anjoEspecial.invocacao1}</p>
+                  )}
+                  {data.textos.anjoEspecial.salmo && (
+                    <p><strong>Salmo:</strong> {data.textos.anjoEspecial.salmo}</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Lições Cármicas */}
+          {data.textos.licoesCarmicas && data.textos.licoesCarmicas.numeros.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-primary">
+                  Lições Cármicas: {data.textos.licoesCarmicas.numeros.join(', ')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 p-3 bg-muted/50 rounded-md">
+                  <p className="text-sm italic text-muted-foreground">
+                    {data.textos.licoesCarmicas.explicacao}
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  {data.textos.licoesCarmicas.licoes.map((licao: any, idx: number) => (
+                    <div key={idx} className="p-3 bg-orange-50 rounded-md">
+                      <h4 className="font-semibold text-orange-700 mb-2">Lição {licao.numero}:</h4>
+                      <p className="text-sm text-orange-800">{licao.licao}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Ciclos de Vida */}
+          {data.textos.ciclosVida && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-primary">Ciclos de Vida</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4 p-3 bg-muted/50 rounded-md">
+                  <p className="text-sm italic text-muted-foreground">
+                    {data.textos.ciclosVida.explicacao}
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  {data.textos.ciclosVida.primeiro && (
+                    <div className="p-4 bg-blue-50 rounded-md">
+                      <h4 className="font-semibold text-blue-700 mb-2">
+                        Primeiro Ciclo - Número {data.textos.ciclosVida.primeiro.numero}
+                      </h4>
+                      <p className="text-sm text-blue-600 mb-2">
+                        <strong>{data.textos.ciclosVida.primeiro.periodo}</strong> - {data.textos.ciclosVida.primeiro.fase}
+                      </p>
+                      <p className="text-sm text-blue-800">{data.textos.ciclosVida.primeiro.conteudo}</p>
+                    </div>
+                  )}
+                  
+                  {data.textos.ciclosVida.segundo && (
+                    <div className="p-4 bg-green-50 rounded-md">
+                      <h4 className="font-semibold text-green-700 mb-2">
+                        Segundo Ciclo - Número {data.textos.ciclosVida.segundo.numero}
+                      </h4>
+                      <p className="text-sm text-green-600 mb-2">
+                        <strong>{data.textos.ciclosVida.segundo.periodo}</strong> - {data.textos.ciclosVida.segundo.fase}
+                      </p>
+                      <p className="text-sm text-green-800">{data.textos.ciclosVida.segundo.conteudo}</p>
+                    </div>
+                  )}
+                  
+                  {data.textos.ciclosVida.terceiro && (
+                    <div className="p-4 bg-purple-50 rounded-md">
+                      <h4 className="font-semibold text-purple-700 mb-2">
+                        Terceiro Ciclo - Número {data.textos.ciclosVida.terceiro.numero}
+                      </h4>
+                      <p className="text-sm text-purple-600 mb-2">
+                        <strong>{data.textos.ciclosVida.terceiro.periodo}</strong> - {data.textos.ciclosVida.terceiro.fase}
+                      </p>
+                      <p className="text-sm text-purple-800">{data.textos.ciclosVida.terceiro.conteudo}</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {data.textos.anoPessoal && renderSecaoTexto(
+            data.textos.anoPessoal.titulo, 
+            data.textos.anoPessoal, 
+            'anoPessoal'
+          )}
+        </div>
+      )}
+
+      {/* Fallback para formato antigo */}
+      {!isV3Format && data.textos && (
+        <div className="space-y-6">
+          {Object.entries(data.textos).map(([section, content]: [string, any]) => (
+            <Card key={section} className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary capitalize">
+                  {content.title || section.replace('_', ' ')}
+                  {renderEditButton(section, 'title')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <div className="whitespace-pre-wrap leading-relaxed">
+                    {getEditedText(section, 'body', content.body || 'Conteúdo em desenvolvimento.')}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Informações complementares v3.0 */}
+      {data.complementares && (
+        <div className="mt-8 space-y-6">
+          <h2 className="text-2xl font-bold text-center text-primary">Informações Complementares</h2>
+          
+          {data.complementares.cores && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-primary">Cores Harmônicas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">{data.complementares.cores.explicacao}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {data.complementares.cores.coresMotivacao && (
+                    <div>
+                      <h4 className="font-semibold mb-2">Motivação:</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {data.complementares.cores.coresMotivacao.map((cor: string, idx: number) => (
+                          <span key={idx} className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                            {cor}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+
+      {/* Footer com metadados */}
+      {data.metadados && (
+        <div className="mt-8 pt-6 border-t border-primary/20 text-center text-xs text-muted-foreground">
+          <p>
+            Mapa gerado com {data.metadados.totalTextos || 0} textos numerológicos v{data.metadados.versaoConteudo || '1.0'}
+            {data.metadados.angeloEncontrado && ' • Anjo Cabalístico incluído'}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MapaPDF;
