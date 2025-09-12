@@ -189,6 +189,18 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
       return (data.numeros as any)[mappedField] as number;
     }
 
+    // Snake_case fallbacks for client-side fallback structure
+    const snakeFallback: Record<string, string> = {
+      psychic: 'numero_psiquico',
+      personalYear: 'ano_pessoal',
+      personalMonth: 'mes_pessoal',
+      personalDay: 'dia_pessoal',
+    };
+    const snakeKey = snakeFallback[field];
+    if (data.numeros && snakeKey && typeof (data.numeros as any)[snakeKey] === 'number') {
+      return (data.numeros as any)[snakeKey] as number;
+    }
+
     // Try v2 format (data.numbers.motivation)
     const numberValue = data.numbers?.[field as keyof NonNullable<typeof data.numbers>] as number | undefined;
     if (typeof numberValue === 'number') {

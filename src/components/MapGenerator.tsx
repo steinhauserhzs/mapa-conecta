@@ -357,7 +357,7 @@ export default function MapGenerator() {
       const requestBody = {
         name: data.name,
         birth: birthString,
-        yearRef: new Date().getFullYear(),
+        anoReferencia: new Date().getFullYear(),
       };
       console.log('📤 Enviando request para generate-map:', requestBody);
       
@@ -433,6 +433,14 @@ export default function MapGenerator() {
       // Normalize the result to ensure consistent format for MapaPDF
       const normalizedResult = {
         ...result,
+        // Ensure metadata compatibility
+        metadata: result.metadata ?? (result.metadados ? {
+          version: result.metadados.versaoConteudo,
+          totalTexts: result.metadados.totalTextos,
+          angelFound: result.metadados.angeloEncontrado,
+          calculationsComplete: result.metadados.calculosCompletos,
+          generatedAt: result.metadados.dataProcessamento,
+        } : undefined),
         // Ensure texts are always in normalized format for editing
         texts: result.textos ? Object.fromEntries(
           Object.entries(result.textos).map(([key, content]: [string, any]) => [

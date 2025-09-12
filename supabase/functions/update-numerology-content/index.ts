@@ -141,33 +141,82 @@ Retorne JSON estruturado com textos profissionais de qualidade premium.`;
         cabalistic_angels: []
       };
 
-      // Generate base content for essential sections
-      const sections = ['motivacao', 'impressao', 'expressao', 'destino', 'missao', 'psiquico'];
-      
-      for (const section of sections) {
-        for (let num = 1; num <= 22; num++) {
-          if (num <= 9 || num === 11 || num === 22) {
-            let content = '';
-            
-            if (BASE_NUMEROLOGY_CONTENT[section] && BASE_NUMEROLOGY_CONTENT[section][num]) {
-              content = BASE_NUMEROLOGY_CONTENT[section][num];
-            } else {
-              content = `Interpretação para ${section} ${num}. Este número representa características e potenciais específicos que influenciam sua jornada de vida.`;
-            }
-            
-            parsedContent.numerology_texts.push({
-              section,
-              key_number: num,
-              title: `${section.charAt(0).toUpperCase() + section.slice(1)} ${num}`,
-              body: content,
-              lang: 'pt-BR',
-              version: 'v3.0',
-              category: 'main'
-            });
+      // Generate base content for all required sections with rich long-form texts
+      const range = (start: number, end: number) => Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      const numbersBase = [...range(1, 9), 11, 22];
+
+      const sectionsConfig = [
+        { name: 'motivacao', nums: numbersBase },
+        { name: 'impressao', nums: numbersBase },
+        { name: 'expressao', nums: numbersBase },
+        { name: 'destino', nums: numbersBase },
+        { name: 'missao', nums: numbersBase },
+        { name: 'psiquico', nums: numbersBase },
+        { name: 'licao_carmica', nums: range(1, 9) },
+        { name: 'divida_carmica', nums: [13, 14, 16, 19] },
+        { name: 'tendencia_oculta', nums: range(1, 9) },
+        { name: 'ciclo_vida', nums: numbersBase },
+        { name: 'desafio', nums: range(0, 9) },
+        { name: 'momento_decisivo', nums: numbersBase },
+        { name: 'ano_pessoal', nums: range(1, 9) },
+        { name: 'mes_pessoal', nums: range(1, 9) },
+        { name: 'resposta_subconsciente', nums: range(1, 9) },
+      ];
+
+      const TITLE_MAP: Record<string, string> = {
+        motivacao: 'Motivação', impressao: 'Impressão', expressao: 'Expressão', destino: 'Destino', missao: 'Missão', psiquico: 'Número Psíquico',
+        licao_carmica: 'Lição Cármica', divida_carmica: 'Dívida Cármica', tendencia_oculta: 'Tendência Oculta', ciclo_vida: 'Ciclo de Vida',
+        desafio: 'Desafio', momento_decisivo: 'Momento Decisivo', ano_pessoal: 'Ano Pessoal', mes_pessoal: 'Mês Pessoal', resposta_subconsciente: 'Resposta Subconsciente'
+      };
+
+      const TRAIT: Record<number, string> = {
+        1: 'Liderança, iniciativa, coragem, autonomia e foco em resultados.',
+        2: 'Cooperação, diplomacia, sensibilidade, escuta e harmonia.',
+        3: 'Criatividade, comunicação, arte, leveza e carisma.',
+        4: 'Estrutura, disciplina, ordem, método e consistência.',
+        5: 'Mudança, liberdade, adaptabilidade, movimento e expansão.',
+        6: 'Cuidado, responsabilidade, família, serviço e beleza.',
+        7: 'Introspecção, estudo, espiritualidade, profundidade e silêncio interior.',
+        8: 'Poder, gestão, prosperidade, autoridade e estratégia.',
+        9: 'Humanitarismo, compaixão, síntese, filantropia e sabedoria.',
+        11: 'Intuição elevada, inspiração, sensibilidade espiritual e missão coletiva.',
+        22: 'Materialização de grandes obras, visão ampla e impacto duradouro.'
+      };
+
+      const buildExtra = (section: string, n: number) => {
+        const t = TRAIT[n] || 'Potenciais específicos que pedem consciência e equilíbrio.';
+        return [
+          `\n\nANÁLISE PSICOLÓGICA PROFUNDA\n${t}`,
+          `\nORIENTAÇÕES PRÁTICAS\n1) Aprimore as virtudes do ${n} com constância.\n2) Observe os excessos do ${n} e aplique correções conscientes.\n3) Estabeleça rituais diários para consolidar hábitos positivos.`,
+          `\nCARREIRA E VOCAÇÃO\nTransforme os talentos do ${n} em resultados: projetos, processos e contribuições reais.`,
+          `\nSAÚDE E BEM-ESTAR\nCuide do corpo, mente e espírito com rotinas simples e efetivas, alinhadas às vibrações do ${n}.`,
+          `\nEXEMPLOS PRÁTICOS\nSituações reais onde o ${n} se manifesta e como agir com maestria.`
+        ].join('\n');
+      };
+
+      for (const cfg of sectionsConfig) {
+        for (const num of cfg.nums) {
+          let base = '';
+          if ((BASE_NUMEROLOGY_CONTENT as any)[cfg.name] && (BASE_NUMEROLOGY_CONTENT as any)[cfg.name][num]) {
+            base = (BASE_NUMEROLOGY_CONTENT as any)[cfg.name][num];
+          } else {
+            base = `${TITLE_MAP[cfg.name]} ${num}. Interpretação clara e objetiva com aplicações práticas.`;
           }
+
+          const content = `${base}${buildExtra(cfg.name, num)}`;
+
+          parsedContent.numerology_texts.push({
+            section: cfg.name,
+            key_number: num,
+            title: `${TITLE_MAP[cfg.name]} ${num}`,
+            body: content,
+            lang: 'pt-BR',
+            version: 'v3.0',
+            category: 'main'
+          });
         }
       }
-      
+
       console.log('📝 Conteúdo base gerado com', parsedContent.numerology_texts.length, 'textos');
     }
 

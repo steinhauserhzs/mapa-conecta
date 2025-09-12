@@ -280,7 +280,9 @@ serve(async (req) => {
   }
 
   try {
-    const { name, birth, anoReferencia = new Date().getFullYear() } = await req.json();
+    const body = await req.json();
+    const { name, birth } = body || {};
+    const anoReferencia = (body && (body.anoReferencia ?? body.yearRef)) ?? new Date().getFullYear();
     
     if (!name || !birth) {
       throw new Error('Nome e data de nascimento são obrigatórios');
@@ -288,7 +290,6 @@ serve(async (req) => {
 
     console.log(`🚀 Gerando mapa completo para: ${name}, nascido em ${birth}`);
     console.log(`📅 Ano de referência: ${anoReferencia}`);
-    console.log(`🔧 Usando tabela de conversão: ${convError ? 'FALLBACK' : 'SUPABASE'}`);
 
     // Buscar tabela de conversão
     const { data: conversionData, error: convError } = await supabase
@@ -299,7 +300,9 @@ serve(async (req) => {
 
     const baseMap = convError || !conversionData || conversionData.length === 0 
       ? FALLBACK_BASE_MAP 
-      : conversionData[0].mapping;
+      : (conversionData[0] as any).mapping;
+
+    console.log(`🔧 Usando tabela de conversão: ${convError || !conversionData || conversionData.length === 0 ? 'FALLBACK' : 'SUPABASE'}`);
 
     // Realizar cálculos numerológicos
     const result = calcularCompleto({ name, birth }, baseMap);
@@ -322,8 +325,8 @@ serve(async (req) => {
     
     // Calcular ano, mês e dia pessoal
     const { d, m, y } = parseBirth(birth);
-    const anoPessoal = reduce(d + m + anoReferencia);
-    const { mes: mesPessoal, dia: diaPessoal } = calcularMesDiaPersonal(anoPessoal, new Date().getMonth() + 1, new Date().getDate());
+    const anoDigits = `${d}${m}${anoReferencia}`.split('').map(n => parseInt(n));
+    const anoPessoal = reduce(anoDigits.reduce((sum, digit) => sum + digit, 0));
 
     // Determinar anjo cabalístico
     const angelIndex = (result.expressao + result.destino - 1) % CABALISTIC_ANGELS.length;
@@ -588,6 +591,14 @@ serve(async (req) => {
         angeloEncontrado: !!angelInfo,
         calculosCompletos: true,
         dataProcessamento: new Date().toISOString()
+      },
+      // Metadata (compatibilidade)
+      metadata: {
+        version: 'v3.0',
+        totalTexts: texts.length,
+        angelFound: !!angelInfo,
+        calculationsComplete: true,
+        generatedAt: new Date().toISOString()
       }
     };
 
