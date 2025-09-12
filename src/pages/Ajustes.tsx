@@ -3,14 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User, Bell, Shield, Palette } from "lucide-react";
+import { Settings, User, Bell, Shield, Palette, RefreshCcw, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Ajustes() {
   const { profile, signOut } = useAuth();
   const [notificacoes, setNotificacoes] = useState(true);
   const [temaEscuro, setTemaEscuro] = useState(false);
+  const [isUpdatingContent, setIsUpdatingContent] = useState(false);
+  const { toast } = useToast();
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -109,6 +113,43 @@ export default function Ajustes() {
               onCheckedChange={setTemaEscuro}
             />
           </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RefreshCcw className="h-5 w-5" />
+            Conteúdo Numerológico Profissional
+          </CardTitle>
+          <CardDescription>
+            Atualize os textos extensos (60+ páginas) usados nos mapas
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button
+            className="w-full"
+            disabled={isUpdatingContent}
+            onClick={async () => {
+              try {
+                setIsUpdatingContent(true);
+                toast({ title: 'Atualizando base de textos...', description: 'Chamando função edge update-numerology-content.' });
+                const { data, error } = await supabase.functions.invoke('update-numerology-content');
+                if (error) throw error;
+                toast({ title: 'Textos atualizados com sucesso!', description: `${data?.total_records || 0} registros processados.` });
+              } catch (err: any) {
+                console.error('Erro ao atualizar conteúdos:', err);
+                toast({ title: 'Falha ao atualizar textos', description: err.message || 'Tente novamente.', variant: 'destructive' });
+              } finally {
+                setIsUpdatingContent(false);
+              }
+            }}
+          >
+            {isUpdatingContent ? 'Atualizando...' : 'Atualizar conteúdo profissional'}
+          </Button>
+          <p className="text-sm text-muted-foreground">
+            Requer chave OPENAI_API_KEY configurada nos segredos do projeto.
+          </p>
         </CardContent>
       </Card>
       
