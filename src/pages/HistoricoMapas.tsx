@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Eye, Edit, FileText, Filter, Calendar, User } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Search, Eye, Edit, FileText, Filter, Calendar, User, Download, Loader2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import MapaPDF from "@/components/MapaPDF";
 
 interface MapHistory {
   id: string;
@@ -19,6 +21,7 @@ interface MapHistory {
   client_id?: string;
   input: any;
   result: any;
+  pdf_url?: string;
 }
 
 export default function HistoricoMapas() {
@@ -28,6 +31,9 @@ export default function HistoricoMapas() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("all");
+  const [selectedMap, setSelectedMap] = useState<MapHistory | null>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState<string | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,6 +61,7 @@ export default function HistoricoMapas() {
           input,
           result,
           client_id,
+          pdf_url,
           clients (
             name
           )
@@ -93,10 +100,12 @@ export default function HistoricoMapas() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'ready':
         return <Badge variant="default">Concluído</Badge>;
       case 'draft':
         return <Badge variant="secondary">Rascunho</Badge>;
+      case 'processing':
+        return <Badge variant="outline">Processando</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -147,6 +156,76 @@ export default function HistoricoMapas() {
 
     return matchesSearch && matchesType && matchesStatus && matchesDate;
   });
+
+  const handleViewMap = (map: MapHistory) => {
+    setSelectedMap(map);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditMap = (mapId: string) => {
+    window.location.href = `/mapas/editar/${mapId}`;
+  };
+
+  const handleDownloadPDF = async (map: MapHistory) => {
+    try {
+      setIsGeneratingPDF(map.id);
+
+      // Se já tem PDF, fazer download direto
+      if (map.pdf_url) {
+        const link = document.createElement('a');
+        link.href = map.pdf_url;
+        link.download = `${map.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        link.click();
+        
+        toast({
+          title: "Download iniciado",
+          description: "O PDF está sendo baixado.",
+        });
+        return;
+      }
+
+      // Gerar PDF se não existir
+      const { data, error } = await supabase.functions.invoke('generate-professional-pdf', {
+        body: { mapId: map.id }
+      });
+
+      if (error) throw error;
+
+      if (data?.pdf_url) {
+        // Atualizar o mapa local com a nova URL
+        setMaps(prev => prev.map(m => 
+          m.id === map.id ? { ...m, pdf_url: data.pdf_url } : m
+        ));
+
+        // Fazer download
+        const link = document.createElement('a');
+        link.href = data.pdf_url;
+        link.download = `${map.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+        link.click();
+
+        toast({
+          title: "PDF gerado com sucesso",
+          description: "O download foi iniciado automaticamente.",
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao gerar/baixar PDF:', error);
+      toast({
+        title: "Erro no download",
+        description: "Tente novamente em alguns instantes.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingPDF(null);
+    }
+  };
+
+  const getPDFStatus = (map: MapHistory) => {
+    if (map.pdf_url) {
+      return <Badge variant="default" className="bg-green-500">PDF Pronto</Badge>;
+    }
+    return <Badge variant="outline">Gerar PDF</Badge>;
+  };
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-64">Carregando...</div>;
@@ -209,7 +288,7 @@ export default function HistoricoMapas() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os status</SelectItem>
-                  <SelectItem value="completed">Concluído</SelectItem>
+                  <SelectItem value="ready">Concluído</SelectItem>
                   <SelectItem value="draft">Rascunho</SelectItem>
                 </SelectContent>
               </Select>
@@ -268,6 +347,7 @@ export default function HistoricoMapas() {
                   <TableHead>Cliente</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>PDF</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -295,6 +375,7 @@ export default function HistoricoMapas() {
                     </TableCell>
                     <TableCell>{getTypeLabel(map.type)}</TableCell>
                     <TableCell>{getStatusBadge(map.status)}</TableCell>
+                    <TableCell>{getPDFStatus(map)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1 text-sm">
                         <Calendar className="h-3 w-3" />
@@ -306,12 +387,46 @@ export default function HistoricoMapas() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewMap(map)}
+                          title="Visualizar mapa"
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditMap(map.id)}
+                          title="Editar mapa"
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
+                        <Button 
+                          variant="default" 
+                          size="sm"
+                          onClick={() => handleDownloadPDF(map)}
+                          disabled={isGeneratingPDF === map.id}
+                          title={map.pdf_url ? "Download PDF" : "Gerar e baixar PDF"}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          {isGeneratingPDF === map.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                        </Button>
+                        {map.pdf_url && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => window.open(map.pdf_url, '_blank')}
+                            title="Abrir PDF em nova aba"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -321,6 +436,23 @@ export default function HistoricoMapas() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Visualização */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Visualizar Mapa Numerológico</DialogTitle>
+            <DialogDescription>
+              {selectedMap?.title} - {selectedMap && getTypeLabel(selectedMap.type)}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedMap && (
+            <div className="mt-4">
+              <MapaPDF data={selectedMap.result || {}} />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
