@@ -452,13 +452,33 @@ export default function MapGenerator() {
         } : undefined),
         // Ensure texts are always in normalized format for editing
         texts: result.textos ? Object.fromEntries(
-          Object.entries(result.textos).map(([key, content]: [string, any]) => [
-            key,
-            {
+          Object.entries(result.textos).map(([key, content]: [string, any]) => {
+            // Handle structured sections specially
+            if (['licoesCarmicas', 'dividasCarmicas', 'tendenciasOcultas', 'ciclosVida', 'desafios', 'momentos'].includes(key)) {
+              // For structured sections, create a summary text for editing
+              const arrays = result.numeros?.[key];
+              if (Array.isArray(arrays)) {
+                return [key, {
+                  title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
+                  body: content.conteudo || content.body || `Análise estruturada baseada nos números: ${arrays.join(', ')}`
+                }];
+              }
+            }
+            
+            // Handle angel section
+            if (key === 'anjoEspecial' && result.cabalisticAngel) {
+              return [key, {
+                title: 'Anjo Cabalístico Pessoal',
+                body: content.conteudo || content.body || `Anjo: ${result.cabalisticAngel.name}\nCategoria: ${result.cabalisticAngel.category || ''}\nDescrição: ${result.cabalisticAngel.description || ''}`
+              }];
+            }
+            
+            // Regular text sections
+            return [key, {
               title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
               body: content.conteudo || content.body || content.text || 'Conteúdo em desenvolvimento'
-            }
-          ])
+            }];
+          })
         ) : (result.texts || {})
       };
       

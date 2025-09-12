@@ -802,15 +802,335 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
           </CardContent>
         </Card>
 
-        {/* RENDERIZAÇÃO DE TEXTOS EXISTENTES (Compatibilidade) */}
-        {((data.textos && Object.keys(data.textos).length > 0) || (data.texts && Object.keys(data.texts).length > 0)) && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center text-primary mb-6">
-              ANÁLISES NUMEROLÓGICAS DETALHADAS
-            </h2>
+        {/* RENDERIZAÇÃO DE TEXTOS EXISTENTES E SEÇÕES ESTRUTURADAS */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-center text-primary mb-6">
+            ANÁLISES NUMEROLÓGICAS DETALHADAS
+          </h2>
+          
+          {/* SEÇÕES ESTRUTURADAS ESPECIAIS */}
+          
+          {/* Lições Cármicas */}
+          {getNumberArray('licoesCarmicas').length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  🎭 Lições Cármicas
+                  {renderEditButton('licoesCarmicas')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Números ausentes em seu nome que representam experiências de vidas passadas a serem desenvolvidas:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('licoesCarmicas').map((numero) => (
+                      <div key={numero} className="p-4 bg-amber-50 rounded-lg border border-amber-200">
+                        <h4 className="font-bold text-amber-700 mb-2">Lição Cármica {numero}</h4>
+                        <div className="text-sm text-amber-800">
+                          {getEditedText(`licao-carmica-${numero}`, 
+                            getTextContent(`licao-carmica-${numero}`, 
+                              `Você deve desenvolver as qualidades do número ${numero} nesta vida. Esta é uma área onde precisará dedicar atenção especial para seu crescimento espiritual.`
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Dívidas Cármicas */}
+          {getNumberArray('dividasCarmicas').length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  ⚖️ Dívidas Cármicas
+                  {renderEditButton('dividasCarmicas')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Números especiais que indicam responsabilidades cármicas específicas:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('dividasCarmicas').map((numero) => (
+                      <div key={numero} className="p-4 bg-red-50 rounded-lg border border-red-200">
+                        <h4 className="font-bold text-red-700 mb-2">Dívida Cármica {numero}</h4>
+                        <div className="text-sm text-red-800">
+                          {getEditedText(`divida-carmica-${numero}`,
+                            getTextContent(`divida-carmica-${numero}`,
+                              `O número ${numero} representa uma dívida cármica que deve ser quitada através de atitudes conscientes e equilibradas nesta vida.`
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Tendências Ocultas */}
+          {getNumberArray('tendenciasOcultas').length > 0 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  🔮 Tendências Ocultas
+                  {renderEditButton('tendenciasOcultas')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Números mais frequentes em seu nome, revelando talentos naturais e habilidades instintivas:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('tendenciasOcultas').map((numero) => (
+                      <div key={numero} className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                        <h4 className="font-bold text-purple-700 mb-2">Tendência Oculta {numero}</h4>
+                        <div className="text-sm text-purple-800">
+                          {getEditedText(`tendencia-oculta-${numero}`,
+                            getTextContent(`tendencia-oculta-${numero}`,
+                              `O número ${numero} aparece com frequência em seu nome, indicando um talento natural que pode ser facilmente acessado quando necessário.`
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Ciclos de Vida */}
+          {getNumberArray('ciclosVida').length === 3 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  🌅 Ciclos de Vida
+                  {renderEditButton('ciclosVida')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Suas três fases principais de desenvolvimento baseadas em sua data de nascimento:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('ciclosVida').map((numero, index) => {
+                      const periodos = ['Juventude (até ~28 anos)', 'Maturidade (~28-56 anos)', 'Idade Avançada (56+ anos)'];
+                      return (
+                        <div key={index} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="font-bold text-blue-700 mb-2">
+                            {index + 1}º Ciclo - {periodos[index]} - Número {numero}
+                          </h4>
+                          <div className="text-sm text-blue-800">
+                            {getEditedText(`ciclo-vida-${index + 1}`,
+                              getTextContent(`ciclo-vida-${index + 1}-${numero}`,
+                                `Durante este período da vida, você será influenciado pela energia do número ${numero}, que traz ${
+                                  numero === 1 ? 'oportunidades de liderança e independência' :
+                                  numero === 2 ? 'experiências de cooperação e diplomacia' :
+                                  numero === 3 ? 'momentos de criatividade e expressão' :
+                                  numero === 4 ? 'necessidade de organização e estabilidade' :
+                                  numero === 5 ? 'aventuras e mudanças significativas' :
+                                  numero === 6 ? 'responsabilidades familiares e cuidado' :
+                                  numero === 7 ? 'desenvolvimento espiritual e introspectivo' :
+                                  numero === 8 ? 'conquistas materiais e reconhecimento' :
+                                  numero === 9 ? 'serviço humanitário e sabedoria' :
+                                  numero === 11 ? 'inspiração e desenvolvimento intuitivo' :
+                                  'experiências especiais de crescimento'
+                                }.`
+                              )
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Desafios */}
+          {getNumberArray('desafios').length === 3 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  🏔️ Desafios de Vida
+                  {renderEditButton('desafios')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Seus principais desafios numerológicos que oferecem oportunidades de crescimento:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('desafios').map((numero, index) => {
+                      const tipos = ['Primeiro Desafio', 'Segundo Desafio', 'Desafio Principal'];
+                      return (
+                        <div key={index} className="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                          <h4 className="font-bold text-orange-700 mb-2">
+                            {tipos[index]} - Número {numero}
+                          </h4>
+                          <div className="text-sm text-orange-800">
+                            {getEditedText(`desafio-${index + 1}`,
+                              getTextContent(`desafio-${index + 1}-${numero}`,
+                                `Este desafio ${index === 2 ? 'principal' : `${index + 1}`} representa ${
+                                  numero === 0 ? 'a necessidade de desenvolver todas as qualidades em equilíbrio' :
+                                  numero === 1 ? 'aprender a liderar sem ser autoritário' :
+                                  numero === 2 ? 'equilibrar sensibilidade com assertividade' :
+                                  numero === 3 ? 'focar energia criativa sem dispersão' :
+                                  numero === 4 ? 'organizar-se sem tornar-se rígido demais' :
+                                  numero === 5 ? 'buscar liberdade com responsabilidade' :
+                                  numero === 6 ? 'cuidar dos outros sem se sacrificar' :
+                                  numero === 7 ? 'desenvolver sabedoria sem se isolar' :
+                                  numero === 8 ? 'alcançar sucesso material com ética' :
+                                  'um aspecto especial de desenvolvimento pessoal'
+                                }. ${index === 2 ? 'Este é seu desafio de vida mais importante.' : ''}`
+                              )
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Momentos Decisivos */}
+          {getNumberArray('momentos').length === 4 && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  ⭐ Momentos Decisivos
+                  {renderEditButton('momentosDecisivos')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Quatro períodos especiais de sua vida com energias específicas para decisões importantes:
+                  </p>
+                  <div className="grid grid-cols-1 gap-4">
+                    {getNumberArray('momentos').map((numero, index) => (
+                      <div key={index} className="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <h4 className="font-bold text-emerald-700 mb-2">
+                          {index + 1}º Momento Decisivo - Número {numero}
+                        </h4>
+                        <div className="text-sm text-emerald-800">
+                          {getEditedText(`momento-${index + 1}`,
+                            getTextContent(`momento-${index + 1}-${numero}`,
+                              `Durante este período, você será influenciado pela energia do número ${numero}, que favorece ${
+                                numero === 1 ? 'tomada de decisões independentes e início de novos projetos' :
+                                numero === 2 ? 'parcerias, colaborações e decisões em conjunto' :
+                                numero === 3 ? 'expressão criativa e comunicação importante' :
+                                numero === 4 ? 'estabelecimento de bases sólidas e planejamento' :
+                                numero === 5 ? 'mudanças significativas e aventuras' :
+                                numero === 6 ? 'decisões familiares e responsabilidades' :
+                                numero === 7 ? 'reflexão profunda e decisões espirituais' :
+                                numero === 8 ? 'conquistas materiais e reconhecimento profissional' :
+                                numero === 9 ? 'conclusões importantes e serviço aos outros' :
+                                numero === 11 ? 'inspiração e decisões intuitivas' :
+                                'oportunidades especiais de crescimento'
+                              }.`
+                            )
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Anjo Cabalístico */}
+          {(data.cabalisticAngel?.name || data.numeros?.anjoEspecial) && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary">
+                  👼 Anjo Cabalístico Pessoal
+                  {renderEditButton('anjoEspecial')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none space-y-4">
+                  <div className="p-6 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border border-yellow-200">
+                    <h3 className="text-2xl font-bold text-amber-700 mb-4 text-center">
+                      🌟 {data.cabalisticAngel?.name || data.numeros?.anjoEspecial}
+                    </h3>
+                    
+                    {data.cabalisticAngel?.category && (
+                      <p className="text-center text-amber-600 font-semibold mb-4">
+                        {data.cabalisticAngel.category}
+                      </p>
+                    )}
+                    
+                    <div className="space-y-4">
+                      {data.cabalisticAngel?.description && (
+                        <div>
+                          <h4 className="font-bold text-amber-700 mb-2">Descrição:</h4>
+                          <p className="text-sm text-amber-800">
+                            {getEditedText('anjo-descricao', data.cabalisticAngel.description)}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {(data.cabalisticAngel?.invocationTime1 || data.cabalisticAngel?.invocationTime2) && (
+                        <div>
+                          <h4 className="font-bold text-amber-700 mb-2">Horários de Invocação:</h4>
+                          <div className="text-sm text-amber-800 space-y-1">
+                            {data.cabalisticAngel.invocationTime1 && (
+                              <p>• {data.cabalisticAngel.invocationTime1}</p>
+                            )}
+                            {data.cabalisticAngel.invocationTime2 && (
+                              <p>• {data.cabalisticAngel.invocationTime2}</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {data.cabalisticAngel?.psalm && (
+                        <div>
+                          <h4 className="font-bold text-amber-700 mb-2">Salmo:</h4>
+                          <p className="text-sm text-amber-800">{data.cabalisticAngel.psalm}</p>
+                        </div>
+                      )}
+                      
+                      {data.cabalisticAngel?.completeInvocation && (
+                        <div>
+                          <h4 className="font-bold text-amber-700 mb-2">Invocação Completa:</h4>
+                          <div className="text-sm text-amber-800 italic p-3 bg-amber-100 rounded">
+                            {data.cabalisticAngel.completeInvocation}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {/* Renderizar textos regulares do formato v3 (data.textos) */}
+          {data.textos && Object.entries(data.textos).map(([section, content]: [string, any]) => {
+            // Pular seções estruturadas que já foram renderizadas acima
+            if (['licoesCarmicas', 'dividasCarmicas', 'tendenciasOcultas', 'ciclosVida', 'desafios', 'momentos', 'anjoEspecial'].includes(section)) {
+              return null;
+            }
             
-            {/* Renderizar textos do formato v3 (data.textos) */}
-            {data.textos && Object.entries(data.textos).map(([section, content]: [string, any]) => (
+            return (
               <Card key={`v3-${section}`} className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary capitalize">
@@ -826,28 +1146,28 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
                   </div>
                 </CardContent>
               </Card>
-            ))}
-            
-            {/* Renderizar textos do formato v2 (data.texts) - fallback */}
-            {data.texts && Object.entries(data.texts).map(([section, content]: [string, any]) => (
-              <Card key={`v2-${section}`} className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary capitalize">
-                    {content.title || section.replace(/[-_]/g, ' ')}
-                    {renderEditButton(section)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap leading-relaxed">
-                      {getEditedText(section, content.body || 'Conteúdo em desenvolvimento.')}
-                    </div>
+            );
+          })}
+          
+          {/* Renderizar textos do formato v2 (data.texts) - fallback */}
+          {data.texts && Object.entries(data.texts).map(([section, content]: [string, any]) => (
+            <Card key={`v2-${section}`} className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center text-primary capitalize">
+                  {content.title || section.replace(/[-_]/g, ' ')}
+                  {renderEditButton(section)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-sm max-w-none">
+                  <div className="whitespace-pre-wrap leading-relaxed">
+                    {getEditedText(section, content.body || 'Conteúdo em desenvolvimento.')}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         {/* FOOTER PROFISSIONAL */}
         <div className="mt-16 pt-8 border-t-2 border-primary/20 text-center text-sm text-muted-foreground">
