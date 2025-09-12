@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/store/useAppStore';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
   const { profile, isAdmin } = useAuth();
   const { demoFlag } = useAppStore();
+  const { mapsCount, analysesCount, clientsCount, loading } = useDashboardStats();
   const navigate = useNavigate();
 
   return (
@@ -83,7 +85,9 @@ const Dashboard = () => {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{demoFlag ? '12' : '0'}</div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : (demoFlag ? '12' : mapsCount)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Total de mapas numerológicos
             </p>
@@ -96,7 +100,9 @@ const Dashboard = () => {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{demoFlag ? '8' : '0'}</div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : (demoFlag ? '8' : analysesCount)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Telefones, endereços e placas
             </p>
@@ -109,7 +115,9 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{demoFlag ? '5' : '0'}</div>
+            <div className="text-2xl font-bold">
+              {loading ? '...' : (demoFlag ? '5' : clientsCount)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Clientes cadastrados
             </p>
