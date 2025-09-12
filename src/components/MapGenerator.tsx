@@ -662,7 +662,7 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
           {mapaData ? (
             <div className="space-y-6">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <MapaPDF data={{ ...mapaData, textos: currentTextos }} />
+                <MapaPDF data={{ ...mapaData, texts: currentTextos }} />
               </div>
 
               {isEditing && (

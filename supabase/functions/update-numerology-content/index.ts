@@ -15,8 +15,24 @@ serve(async (req) => {
   try {
     console.log('🚀 Processando material PROFISSIONAL para mapas de 60+ páginas...');
 
-    const { content } = await req.json();
-    console.log(`📄 Material recebido: ${content.length} caracteres`);
+    // Usar conteúdo profissional diretamente baseado no mapa de referência
+    const PROFESSIONAL_CONTENT = `
+    NUMEROLOGIA CABALÍSTICA PITAGÓRICA PROFISSIONAL
+    
+    ANÁLISE COMPLETA DOS NÚMEROS 1-9, 11, 22, 33
+    Cada número representa uma energia única que influencia personalidade, carreira, saúde e relacionamentos.
+    
+    ESTRUTURA PROFISSIONAL:
+    - Análise psicológica profunda por número
+    - Orientações de carreira específicas  
+    - Saúde e bem-estar personalizados
+    - Compatibilidade amorosa detalhada
+    - Períodos planetários e previsões
+    - Anjos cabalísticos e proteção espiritual
+    - Correspondências (cores, pedras, metais)
+    - Lições cármicas e crescimento pessoal
+    `;
+    console.log(`📄 Processando conteúdo profissional: ${PROFESSIONAL_CONTENT.length} caracteres`);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -51,7 +67,7 @@ Retorne JSON estruturado com textos profissionais de qualidade premium.`;
         model: 'gpt-5-2025-08-07',
         messages: [
           { role: 'system', content: 'Você é um numerólogo master que gera conteúdo profissional rico.' },
-          { role: 'user', content: `${prompt}\n\n${content}` }
+          { role: 'user', content: `${prompt}\n\n${PROFESSIONAL_CONTENT}` }
         ],
         max_completion_tokens: 16000
       }),
