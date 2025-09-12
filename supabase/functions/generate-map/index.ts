@@ -515,6 +515,18 @@ serve(async (req) => {
           invocacao1: angelInfo?.invocation_time_1 || "Consulte horários específicos",
           invocacao2: angelInfo?.invocation_time_2 || null,
           salmo: angelInfo?.psalm_reference || "Consulte referências cabalísticas",
+          oracaoCompleta: angelInfo?.complete_prayer || `Divino ${anjoEspecial}, concedei-me vossa proteção e orientação em meu caminho espiritual.`,
+          invocacaoDetalhada: angelInfo?.detailed_invocation || "Invoque com devoção e fé sincera",
+          areasManifestacao: angelInfo?.manifestation_areas || [],
+          especialidadesCura: angelInfo?.healing_specialties || [],
+          metodosProtecao: angelInfo?.protection_methods || "Proteção espiritual geral",
+          sinaisPresenca: angelInfo?.signs_presence || [],
+          coresCorrespondentes: angelInfo?.color_correspondences || [],
+          cristaisAssociados: angelInfo?.crystal_associations || [],
+          horasPlanetarias: angelInfo?.planetary_hours || "Consulte calendário cabalístico",
+          instrucoesPracao: angelInfo?.ritual_instructions || "Prepare um ambiente sagrado para invocação",
+          oferendasSugeridas: angelInfo?.offering_suggestions || [],
+          praticasGratidao: angelInfo?.gratitude_practices || "Agradeça com sinceridade após receber as bênçãos",
           influenciaNegativa: angelInfo?.negative_influence || "Afasta energias contrárias ao desenvolvimento espiritual"
         },
 
