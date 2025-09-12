@@ -24,6 +24,8 @@ serve(async (req) => {
     
     const { content } = await req.json();
     
+    console.log('Iniciando processamento do conteúdo numerológico...');
+    
     if (!content) {
       throw new Error('Conteúdo não fornecido');
     }

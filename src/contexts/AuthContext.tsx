@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useContentSync } from '@/hooks/useContentSync';
 
 interface Profile {
   id: string;
@@ -46,6 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { checkContentVersion } = useContentSync();
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -102,6 +104,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // Use setTimeout to defer async operation
           setTimeout(() => {
             fetchProfile(session.user.id);
+            // Verifica e atualiza conteúdo automaticamente após login
+            checkContentVersion();
           }, 0);
         } else {
           setProfile(null);
