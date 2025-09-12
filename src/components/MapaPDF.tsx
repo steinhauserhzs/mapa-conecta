@@ -44,6 +44,7 @@ interface MapaData {
     anoPessoal?: number;
     mesPessoal?: number;
     diaPessoal?: number;
+    anjoEspecial?: string;
     ciclosVida?: number[];
     desafios?: number[];
     momentos?: number[];
@@ -111,7 +112,46 @@ interface MapaPDFProps {
 }
 
 const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts = {}, onEdit }) => {
+  // Debug logging das propriedades essenciais
+  console.log('🔍 MapaPDF Debug:', {
+    hasHeader: !!data.header,
+    hasNumeros: !!data.numeros,
+    hasTextos: !!data.textos,
+    hasTexts: !!data.texts,
+    headerNome: data.header?.nome || data.header?.name,
+    numerosKeys: data.numeros ? Object.keys(data.numeros) : [],
+    textosKeys: data.textos ? Object.keys(data.textos) : [],
+    textsKeys: data.texts ? Object.keys(data.texts) : []
+  });
+
   const isV3Format = data.metadata?.version === 'v3.0' || data.textos?.motivacao;
+
+  // Normalize texts from both v3 and v2 formats
+  const normalizedTexts: Record<string, { title: string; body: string }> = {};
+  
+  // Process v3 format first (Portuguese)
+  if (data.textos) {
+    Object.entries(data.textos).forEach(([key, content]: [string, any]) => {
+      normalizedTexts[key] = {
+        title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
+        body: content.conteudo || content.body || content.text || 'Conteúdo em desenvolvimento'
+      };
+    });
+  }
+  
+  // Process v2 format as fallback (English)
+  if (data.texts) {
+    Object.entries(data.texts).forEach(([key, content]: [string, any]) => {
+      if (!normalizedTexts[key]) { // Don't overwrite v3 data
+        normalizedTexts[key] = {
+          title: content.title || key.replace(/[-_]/g, ' '),
+          body: content.body || content.text || 'Conteúdo em desenvolvimento'
+        };
+      }
+    });
+  }
+
+  console.log('📚 Textos normalizados:', Object.keys(normalizedTexts));
   
   // Helper functions
   const getNumber = (field: string): number => {
@@ -165,13 +205,46 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
     return editedTexts[section] || originalText;
   };
 
+  // Helper para obter arrays de números (lições, tendências, etc.)
+  const getNumberArray = (field: string): number[] => {
+    // Try v3 format first (data.numeros.licoesCarmicas)
+    const v3Value = data.numeros?.[field as keyof NonNullable<typeof data.numeros>];
+    if (Array.isArray(v3Value)) return v3Value;
+    
+    // Try v2 format (data.karmicLessons)
+    const v2Map: Record<string, string> = {
+      'licoesCarmicas': 'karmicLessons',
+      'dividasCarmicas': 'karmicDebts', 
+      'tendenciasOcultas': 'hiddenTendencies',
+      'ciclosVida': 'lifeCycles',
+      'desafios': 'challenges',
+      'momentos': 'decisiveMoments'
+    };
+    const v2Field = v2Map[field] || field;
+    const v2Value = data.numbers?.[v2Field as keyof NonNullable<typeof data.numbers>] || data[v2Field as keyof MapaData];
+    if (Array.isArray(v2Value)) return v2Value;
+    
+    return [];
+  };
+
+  // Helper para formatar lista de números
+  const formatNumberList = (numbers: number[]): string => {
+    if (numbers.length === 0) return 'Nenhum';
+    if (numbers.length === 1) return numbers[0].toString();
+    if (numbers.length === 2) return `${numbers[0]} e ${numbers[1]}`;
+    return `${numbers.slice(0, -1).join(', ')} e ${numbers[numbers.length - 1]}`;
+  };
+
   // Helper to get text content from v3/v2 formats de forma robusta
   const getTextContent = (section: string, defaultText: string = ''): string => {
-    // Try v3 format first (data.textos.<section>.conteudo | body)
+    console.log('📖 getTextContent', { section, hasTextos: !!data.textos, hasTexts: !!data.texts });
+    
+    // Try v3 format first (data.textos.<section>.conteudo)
     const fromTextos = (data as any).textos?.[section];
     if (fromTextos) {
       const content = fromTextos.conteudo || fromTextos.body || fromTextos.text || fromTextos.content;
       if (typeof content === 'string' && content.trim() && content !== 'Conteúdo em desenvolvimento') {
+        console.log('✅ Texto encontrado em textos:', section);
         return content;
       }
     }
@@ -179,11 +252,18 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
     // Try v2 format (data.texts[section] pode ser string ou objeto)
     const fromTexts = (data as any).texts?.[section];
     if (fromTexts) {
-      if (typeof fromTexts === 'string') return fromTexts;
+      if (typeof fromTexts === 'string') {
+        console.log('✅ Texto encontrado em texts (string):', section);
+        return fromTexts;
+      }
       const content = fromTexts.conteudo || fromTexts.body || fromTexts.text || fromTexts.content;
-      if (typeof content === 'string' && content.trim()) return content;
+      if (typeof content === 'string' && content.trim()) {
+        console.log('✅ Texto encontrado em texts (objeto):', section);
+        return content;
+      }
     }
 
+    console.log('❌ Texto não encontrado para:', section);
     return defaultText || 'Análise numerológica para este aspecto está sendo processada.';
   };
   // Renderização do Índice
@@ -353,7 +433,91 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
     </Card>
   );
 
-  // Números Básicos Melhorados
+  // Seção "Os seus Números" - Lista completa como no modelo do usuário
+  const renderSeusNumeros = () => (
+    <Card className="mb-8 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 border-2 border-primary/20">
+      <CardHeader>
+        <CardTitle className="text-xl text-primary flex items-center">
+          <Crown className="w-6 h-6 mr-2" />
+          OS SEUS NÚMEROS
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-3">
+            <div className="p-3 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border border-purple-200">
+              <div className="font-bold text-purple-700">Motivação: {getNumber('motivation')}</div>
+              <div className="text-xs text-purple-600">O que te move interiormente</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+              <div className="font-bold text-blue-700">Impressão: {getNumber('impression')}</div>
+              <div className="text-xs text-blue-600">Como os outros te veem</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+              <div className="font-bold text-green-700">Expressão: {getNumber('expression')}</div>
+              <div className="text-xs text-green-600">Seus talentos naturais</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+              <div className="font-bold text-orange-700">Destino: {getNumber('destiny')}</div>
+              <div className="text-xs text-orange-600">Sua missão de vida</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-red-50 to-red-100 rounded-lg border border-red-200">
+              <div className="font-bold text-red-700">Missão: {getNumber('mission')}</div>
+              <div className="text-xs text-red-600">Sua vocação principal</div>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border border-indigo-200">
+              <div className="font-bold text-indigo-700">Psíquico: {getNumber('psychic')}</div>
+              <div className="text-xs text-indigo-600">Essência da personalidade</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-pink-50 to-pink-100 rounded-lg border border-pink-200">
+              <div className="font-bold text-pink-700">Ano Pessoal: {getNumber('personalYear')}</div>
+              <div className="text-xs text-pink-600">Energia do período atual</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-teal-50 to-teal-100 rounded-lg border border-teal-200">
+              <div className="font-bold text-teal-700">Seu Anjo: {data.numeros?.anjoEspecial || data.cabalisticAngel?.name || 'A definir'}</div>
+              <div className="text-xs text-teal-600">Protetor cabalístico</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-amber-50 to-amber-100 rounded-lg border border-amber-200">
+              <div className="font-bold text-amber-700">Lições Cármicas: {formatNumberList(getNumberArray('licoesCarmicas'))}</div>
+              <div className="text-xs text-amber-600">Qualidades a desenvolver</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-lg border border-emerald-200">
+              <div className="font-bold text-emerald-700">Tendências Ocultas: {formatNumberList(getNumberArray('tendenciasOcultas'))}</div>
+              <div className="text-xs text-emerald-600">Características mais fortes</div>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-gradient-to-r from-violet-50 to-violet-100 rounded-lg border border-violet-200">
+              <div className="font-bold text-violet-700">Resposta Subconsciente: {getNumber('subconsciousResponse') || data.numeros?.respostaSubconsciente || 'A calcular'}</div>
+              <div className="text-xs text-violet-600">Reação instintiva</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-cyan-50 to-cyan-100 rounded-lg border border-cyan-200">
+              <div className="font-bold text-cyan-700">Dívidas Cármicas: {formatNumberList(getNumberArray('dividasCarmicas'))}</div>
+              <div className="text-xs text-cyan-600">Desafios de vidas passadas</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-lime-50 to-lime-100 rounded-lg border border-lime-200">
+              <div className="font-bold text-lime-700">Ciclos de Vida: {formatNumberList(getNumberArray('ciclosVida'))}</div>
+              <div className="text-xs text-lime-600">Fases da jornada (juventude, maturidade, velhice)</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-rose-50 to-rose-100 rounded-lg border border-rose-200">
+              <div className="font-bold text-rose-700">Desafios: {formatNumberList(getNumberArray('desafios'))}</div>
+              <div className="text-xs text-rose-600">Obstáculos principais</div>
+            </div>
+            <div className="p-3 bg-gradient-to-r from-slate-50 to-slate-100 rounded-lg border border-slate-200">
+              <div className="font-bold text-slate-700">Momentos Decisivos: {formatNumberList(getNumberArray('momentos'))}</div>
+              <div className="text-xs text-slate-600">Períodos de mudança</div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  // Números Básicos Melhorados (versão compacta para compatibilidade)
   const renderNumerosBasicos = () => {
     const numbers = [
       { 
@@ -585,6 +749,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
       <div className="space-y-8 p-6">
         {renderIndice()}
         {renderSumarioExecutivo()}
+        {renderSeusNumeros()}
         {renderNumerosBasicos()}
         {renderAnalisisPsicologica()}
 
@@ -614,13 +779,34 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
         </Card>
 
         {/* RENDERIZAÇÃO DE TEXTOS EXISTENTES (Compatibilidade) */}
-        {data.texts && Object.keys(data.texts).length > 0 && (
+        {((data.textos && Object.keys(data.textos).length > 0) || (data.texts && Object.keys(data.texts).length > 0)) && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-center text-primary mb-6">
               ANÁLISES NUMEROLÓGICAS DETALHADAS
             </h2>
-            {Object.entries(data.texts).map(([section, content]: [string, any]) => (
-              <Card key={section} className="mb-6">
+            
+            {/* Renderizar textos do formato v3 (data.textos) */}
+            {data.textos && Object.entries(data.textos).map(([section, content]: [string, any]) => (
+              <Card key={`v3-${section}`} className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-primary capitalize">
+                    {content.titulo || content.title || section.replace(/[-_]/g, ' ')}
+                    {renderEditButton(section)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="prose prose-sm max-w-none">
+                    <div className="whitespace-pre-wrap leading-relaxed">
+                      {getEditedText(section, content.conteudo || content.body || 'Conteúdo em desenvolvimento.')}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {/* Renderizar textos do formato v2 (data.texts) - fallback */}
+            {data.texts && Object.entries(data.texts).map(([section, content]: [string, any]) => (
+              <Card key={`v2-${section}`} className="mb-6">
                 <CardHeader>
                   <CardTitle className="flex items-center text-primary capitalize">
                     {content.title || section.replace(/[-_]/g, ' ')}

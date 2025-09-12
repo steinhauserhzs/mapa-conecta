@@ -386,16 +386,54 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
       if (error || !result) {
         console.warn('⚠️ Falha na função edge, usando fallback no cliente...', error);
         const fallback = await computeOnClient(data.name, birthString, new Date().getFullYear());
-        setMapaData(fallback);
-        setEditedTextos(fallback.textos || {});
+        
+        // Normalize fallback result to match edge function format
+        const normalizedFallback = {
+          ...fallback,
+          // Ensure texts are always in normalized format for editing  
+          texts: fallback.textos ? Object.fromEntries(
+            Object.entries(fallback.textos).map(([key, content]: [string, any]) => [
+              key,
+              {
+                title: content.title || key.replace(/[-_]/g, ' '),
+                body: content.body || 'Conteúdo em desenvolvimento'
+              }
+            ])
+          ) : {}
+        };
+        
+        setMapaData(normalizedFallback);
+        setEditedTextos(normalizedFallback.texts || {});
         setIsEditing(false);
         toast({ title: 'Mapa gerado (modo offline)', description: 'Usamos cálculo local como fallback.' });
         return;
       }
 
       console.log('✅ Mapa gerado com sucesso:', result);
-      setMapaData(result);
-      setEditedTextos(result.textos || {});
+      
+      // Normalize the result to ensure consistent format for MapaPDF
+      const normalizedResult = {
+        ...result,
+        // Ensure texts are always in normalized format for editing
+        texts: result.textos ? Object.fromEntries(
+          Object.entries(result.textos).map(([key, content]: [string, any]) => [
+            key,
+            {
+              title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
+              body: content.conteudo || content.body || content.text || 'Conteúdo em desenvolvimento'
+            }
+          ])
+        ) : (result.texts || {})
+      };
+      
+      console.log('🔄 Resultado normalizado:', {
+        hasTextos: !!normalizedResult.textos,
+        hasTexts: !!normalizedResult.texts,
+        textKeys: Object.keys(normalizedResult.texts || {})
+      });
+      
+      setMapaData(normalizedResult);
+      setEditedTextos(normalizedResult.texts || {});
       setIsEditing(false);
 
       // Save automatically to database
