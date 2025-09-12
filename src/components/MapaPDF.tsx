@@ -114,6 +114,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
   const isV3Format = data.metadata?.version === 'v3.0' || data.textos?.motivacao;
   
   // Helper functions
+  const getNumber = (field: string): number => {
     // Map English field names to Portuguese (edge function format)
     const fieldMap: Record<string, string> = {
       'motivation': 'motivacao',
@@ -127,37 +128,27 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
       'personalDay': 'diaPessoal'
     };
 
-    // Debug logging
-    console.log(`🔍 Buscando campo '${field}' no data:`, {
-      originalField: field,
-      mappedField: fieldMap[field] || field,
-      dataNumeros: data.numeros,
-      dataNumbers: data.numbers,
-      directValue: data[field as keyof MapaData]
-    });
+    // Debug logging (conciso)
+    const mappedField = fieldMap[field] || field;
+    console.log('🔢 getNumber', { field, mappedField });
 
     // Try new format first (data.numeros.motivacao from edge function)
-    const mappedField = fieldMap[field] || field;
-    if (data.numeros && typeof data.numeros[mappedField] === 'number') {
-      console.log(`✅ Encontrado em data.numeros.${mappedField}:`, data.numeros[mappedField]);
-      return data.numeros[mappedField];
+    if (data.numeros && typeof (data.numeros as any)[mappedField] === 'number') {
+      return (data.numeros as any)[mappedField] as number;
     }
 
     // Try v2 format (data.numbers.motivation)
-    const numberValue = data.numbers?.[field as keyof typeof data.numbers] as number;
+    const numberValue = data.numbers?.[field as keyof NonNullable<typeof data.numbers>] as number | undefined;
     if (typeof numberValue === 'number') {
-      console.log(`✅ Encontrado em data.numbers.${field}:`, numberValue);
       return numberValue;
     }
     
     // Try direct field access (legacy format)
-    const directValue = data[field as keyof MapaData];
+    const directValue = data[field as keyof MapaData] as unknown;
     if (typeof directValue === 'number') {
-      console.log(`✅ Encontrado diretamente em data.${field}:`, directValue);
-      return directValue;
+      return directValue as number;
     }
     
-    console.log(`❌ Campo '${field}' não encontrado, retornando 0`);
     return 0;
   };
 
@@ -174,25 +165,27 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
     return editedTexts[section] || originalText;
   };
 
-  // Helper to get text content from v3 format
-  const getTextContent = (section: string, defaultText: string = '') => {
-    // Try v3 format first (data.textos.motivacao.conteudo)
-    if (data.textos && data.textos[section] && data.textos[section].conteudo) {
-      const content = data.textos[section].conteudo;
-      // Don't return "Conteúdo em desenvolvimento" - use defaultText instead
-      if (content && content !== 'Conteúdo em desenvolvimento') {
+  // Helper to get text content from v3/v2 formats de forma robusta
+  const getTextContent = (section: string, defaultText: string = ''): string => {
+    // Try v3 format first (data.textos.<section>.conteudo | body)
+    const fromTextos = (data as any).textos?.[section];
+    if (fromTextos) {
+      const content = fromTextos.conteudo || fromTextos.body || fromTextos.text || fromTextos.content;
+      if (typeof content === 'string' && content.trim() && content !== 'Conteúdo em desenvolvimento') {
         return content;
       }
     }
-    
-    // Try v2 format (data.texts)
-    if (data.texts && data.texts[section]) {
-      return data.texts[section];
-    }
-    
-    return defaultText || `Análise numerológica para este aspecto está sendo processada.`;
-  };
 
+    // Try v2 format (data.texts[section] pode ser string ou objeto)
+    const fromTexts = (data as any).texts?.[section];
+    if (fromTexts) {
+      if (typeof fromTexts === 'string') return fromTexts;
+      const content = fromTexts.conteudo || fromTexts.body || fromTexts.text || fromTexts.content;
+      if (typeof content === 'string' && content.trim()) return content;
+    }
+
+    return defaultText || 'Análise numerológica para este aspecto está sendo processada.';
+  };
   // Renderização do Índice
   const renderIndice = () => (
     <Card className="mb-8 bg-gradient-to-r from-primary/5 to-secondary/5">
