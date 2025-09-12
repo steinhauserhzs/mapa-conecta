@@ -24,15 +24,13 @@ export function AppLayout() {
   }, [profile, setUser]);
 
   return (
-    <SidebarProvider defaultOpen={false}>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-background via-muted/20 to-background">
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <Topbar />
-          <main className="flex-1 overflow-auto p-2 sm:p-4 lg:p-6 bg-gradient-to-br from-background/80 to-muted/30">
-            <div className="max-w-full mx-auto">
-              <Outlet />
-            </div>
+          <main className="flex-1 overflow-auto p-6">
+            <Outlet />
           </main>
         </div>
       </div>

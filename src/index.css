@@ -26,31 +26,28 @@
     --ring: 42 87% 55%;
     --radius: 0.75rem;
     
-    /* Sidebar colors - High contrast elegant theme */
-    --sidebar-background: 42 15% 98%;
-    --sidebar-foreground: 25 50% 15%;
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 25 40% 20%;
     --sidebar-primary: 42 87% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 42 40% 92%;
-    --sidebar-accent-foreground: 25 60% 10%;
-    --sidebar-border: 42 25% 88%;
+    --sidebar-accent: 42 20% 96%;
+    --sidebar-accent-foreground: 25 40% 20%;
+    --sidebar-border: 42 30% 90%;
     --sidebar-ring: 42 87% 55%;
-    --sidebar-muted: 42 20% 94%;
-    --sidebar-muted-foreground: 25 50% 20%;
     
-    /* Numapp colors - High contrast */
+    /* Numapp colors */
     --gold: 42 87% 55%;
     --gold-light: 42 100% 70%;
     --gold-dark: 35 80% 45%;
-    --brown: 25 60% 15%;
-    --brown-light: 25 50% 25%;
-    --brown-dark: 25 70% 10%;
+    --brown: 25 30% 45%;
+    --brown-light: 25 40% 65%;
+    --brown-dark: 25 50% 25%;
     
     /* Gradients */
     --gradient-gold: linear-gradient(135deg, hsl(42 87% 55%), hsl(42 100% 70%));
     --gradient-brown: linear-gradient(135deg, hsl(25 30% 45%), hsl(25 40% 65%));
     --gradient-background: linear-gradient(180deg, hsl(0 0% 100%), hsl(42 20% 98%));
-    --gradient-sidebar: linear-gradient(180deg, hsl(42 15% 98%), hsl(42 20% 94%));
     --gradient-subtle: linear-gradient(135deg, hsl(42 20% 98%), hsl(0 0% 100%));
     
     /* Shadows */
