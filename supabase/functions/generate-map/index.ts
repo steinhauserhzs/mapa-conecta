@@ -524,7 +524,7 @@ serve(async (req) => {
           explicacao: "As Lições Cármicas são números ausentes no nome completo e representam qualidades que devem ser desenvolvidas nesta vida.",
           licoes: result.licoesCarmicas.map(num => ({
             numero: num,
-            licao: getTextForNumber('licao_carmica', num)?.body || `Lição Cármica ${num} - Desenvolver as qualidades relacionadas a este número.`
+            licao: getTextForNumber('licao-carmica', num)?.body || `Lição Cármica ${num} - Desenvolver as qualidades relacionadas a este número.`
           }))
         },
 
@@ -534,7 +534,7 @@ serve(async (req) => {
           explicacao: "As Dívidas Cármicas (13, 14, 16, 19) representam desafios específicos que devem ser superados nesta vida.",
           dividas: result.dividasCarmicas.map(num => ({
             numero: num,
-            desafio: getTextForNumber('divida_carmica', num)?.body || `Dívida Cármica ${num} - Desafios específicos relacionados a vidas passadas.`
+            desafio: getTextForNumber('divida-carmica', num)?.body || `Dívida Cármica ${num} - Desafios específicos relacionados a vidas passadas.`
           }))
         },
 
@@ -544,7 +544,7 @@ serve(async (req) => {
           explicacao: "As Tendências Ocultas são talentos naturais inconscientes que se manifestam espontaneamente.",
           tendencias: result.tendenciasOcultas.map(num => ({
             numero: num,
-            talento: getTextForNumber('tendencia_oculta', num)?.body || `Tendência Oculta ${num} - Talentos naturais que se manifestam automaticamente.`
+            talento: getTextForNumber('tendencia-oculta', num)?.body || `Tendência Oculta ${num} - Talentos naturais que se manifestam automaticamente.`
           }))
         },
 
