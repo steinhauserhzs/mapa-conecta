@@ -28,15 +28,15 @@
     
     /* Sidebar colors - Elegant golden theme */
     --sidebar-background: 42 15% 98%;
-    --sidebar-foreground: 25 40% 25%;
+    --sidebar-foreground: 25 50% 20%;
     --sidebar-primary: 42 87% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 42 40% 92%;
-    --sidebar-accent-foreground: 25 50% 20%;
+    --sidebar-accent-foreground: 25 50% 15%;
     --sidebar-border: 42 25% 88%;
     --sidebar-ring: 42 87% 55%;
     --sidebar-muted: 42 20% 94%;
-    --sidebar-muted-foreground: 25 30% 50%;
+    --sidebar-muted-foreground: 25 40% 30%;
     
     /* Numapp colors */
     --gold: 42 87% 55%;
