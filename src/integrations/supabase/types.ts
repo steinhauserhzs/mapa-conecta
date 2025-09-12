@@ -96,39 +96,99 @@ export type Database = {
       }
       cabalistic_angels: {
         Row: {
+          biblical_references: string | null
           category: string
+          color_correspondences: string[] | null
+          communication_methods: string[] | null
+          complete_prayer: string | null
           created_at: string
+          crystal_associations: string[] | null
+          detailed_invocation: string | null
           domain_description: string
+          gratitude_practices: string | null
+          healing_specialties: string[] | null
+          historical_accounts: string | null
           id: string
+          incense_oils: string[] | null
+          integration_daily_life: string | null
           invocation_time_1: string | null
           invocation_time_2: string | null
+          lunar_timing: string | null
+          manifestation_areas: string[] | null
+          miracle_stories: string | null
           name: string
           negative_influence: string | null
+          offering_suggestions: string[] | null
+          planetary_hours: string | null
+          protection_methods: string | null
           psalm_reference: string | null
+          ritual_instructions: string | null
+          sacred_geometry: string | null
+          signs_presence: string[] | null
           updated_at: string
         }
         Insert: {
+          biblical_references?: string | null
           category: string
+          color_correspondences?: string[] | null
+          communication_methods?: string[] | null
+          complete_prayer?: string | null
           created_at?: string
+          crystal_associations?: string[] | null
+          detailed_invocation?: string | null
           domain_description: string
+          gratitude_practices?: string | null
+          healing_specialties?: string[] | null
+          historical_accounts?: string | null
           id?: string
+          incense_oils?: string[] | null
+          integration_daily_life?: string | null
           invocation_time_1?: string | null
           invocation_time_2?: string | null
+          lunar_timing?: string | null
+          manifestation_areas?: string[] | null
+          miracle_stories?: string | null
           name: string
           negative_influence?: string | null
+          offering_suggestions?: string[] | null
+          planetary_hours?: string | null
+          protection_methods?: string | null
           psalm_reference?: string | null
+          ritual_instructions?: string | null
+          sacred_geometry?: string | null
+          signs_presence?: string[] | null
           updated_at?: string
         }
         Update: {
+          biblical_references?: string | null
           category?: string
+          color_correspondences?: string[] | null
+          communication_methods?: string[] | null
+          complete_prayer?: string | null
           created_at?: string
+          crystal_associations?: string[] | null
+          detailed_invocation?: string | null
           domain_description?: string
+          gratitude_practices?: string | null
+          healing_specialties?: string[] | null
+          historical_accounts?: string | null
           id?: string
+          incense_oils?: string[] | null
+          integration_daily_life?: string | null
           invocation_time_1?: string | null
           invocation_time_2?: string | null
+          lunar_timing?: string | null
+          manifestation_areas?: string[] | null
+          miracle_stories?: string | null
           name?: string
           negative_influence?: string | null
+          offering_suggestions?: string[] | null
+          planetary_hours?: string | null
+          protection_methods?: string | null
           psalm_reference?: string | null
+          ritual_instructions?: string | null
+          sacred_geometry?: string | null
+          signs_presence?: string[] | null
           updated_at?: string
         }
         Relationships: []
@@ -257,30 +317,228 @@ export type Database = {
           },
         ]
       }
-      love_compatibility: {
+      health_wellness_guidance: {
         Row: {
-          compatibility_score: number | null
-          compatibility_text: string
+          body_system: string
           created_at: string
+          dietary_suggestions: string | null
+          emotional_health: string | null
+          energy_cycles: string | null
+          healing_modalities: string[] | null
+          health_tendencies: string
+          holistic_approaches: string | null
           id: string
-          number_1: number
-          number_2: number
+          lifestyle_adjustments: string | null
+          medical_checkups: string | null
+          mental_clarity: string | null
+          number: number
+          preventive_measures: string | null
+          recommended_exercises: string[] | null
+          sleep_patterns: string | null
+          spiritual_practices: string[] | null
+          stress_management: string | null
+          supplements_herbs: string[] | null
+          updated_at: string
+          warning_signs: string[] | null
         }
         Insert: {
-          compatibility_score?: number | null
-          compatibility_text: string
+          body_system: string
           created_at?: string
+          dietary_suggestions?: string | null
+          emotional_health?: string | null
+          energy_cycles?: string | null
+          healing_modalities?: string[] | null
+          health_tendencies: string
+          holistic_approaches?: string | null
           id?: string
-          number_1: number
-          number_2: number
+          lifestyle_adjustments?: string | null
+          medical_checkups?: string | null
+          mental_clarity?: string | null
+          number: number
+          preventive_measures?: string | null
+          recommended_exercises?: string[] | null
+          sleep_patterns?: string | null
+          spiritual_practices?: string[] | null
+          stress_management?: string | null
+          supplements_herbs?: string[] | null
+          updated_at?: string
+          warning_signs?: string[] | null
         }
         Update: {
+          body_system?: string
+          created_at?: string
+          dietary_suggestions?: string | null
+          emotional_health?: string | null
+          energy_cycles?: string | null
+          healing_modalities?: string[] | null
+          health_tendencies?: string
+          holistic_approaches?: string | null
+          id?: string
+          lifestyle_adjustments?: string | null
+          medical_checkups?: string | null
+          mental_clarity?: string | null
+          number?: number
+          preventive_measures?: string | null
+          recommended_exercises?: string[] | null
+          sleep_patterns?: string | null
+          spiritual_practices?: string[] | null
+          stress_management?: string | null
+          supplements_herbs?: string[] | null
+          updated_at?: string
+          warning_signs?: string[] | null
+        }
+        Relationships: []
+      }
+      love_compatibility: {
+        Row: {
+          challenges_solutions: string | null
+          communication_style: string | null
+          compatibility_score: number | null
+          compatibility_text: string
+          conflict_resolution: string | null
+          created_at: string
+          detailed_analysis: string | null
+          energy_exchange: string | null
+          financial_compatibility: string | null
+          gift_suggestions: string[] | null
+          growth_potential: string | null
+          healing_opportunities: string | null
+          id: string
+          ideal_date_ideas: string[] | null
+          intimacy_patterns: string | null
+          karmic_relationship: string | null
+          long_term_outlook: string | null
+          marriage_potential: string | null
+          number_1: number
+          number_2: number
+          parenting_style: string | null
+          past_life_connections: string | null
+          red_flags: string[] | null
+          relationship_dynamics: string | null
+          relationship_milestones: string | null
+          social_dynamics: string | null
+          soul_lessons: string | null
+          spiritual_connection: string | null
+          success_strategies: string[] | null
+        }
+        Insert: {
+          challenges_solutions?: string | null
+          communication_style?: string | null
+          compatibility_score?: number | null
+          compatibility_text: string
+          conflict_resolution?: string | null
+          created_at?: string
+          detailed_analysis?: string | null
+          energy_exchange?: string | null
+          financial_compatibility?: string | null
+          gift_suggestions?: string[] | null
+          growth_potential?: string | null
+          healing_opportunities?: string | null
+          id?: string
+          ideal_date_ideas?: string[] | null
+          intimacy_patterns?: string | null
+          karmic_relationship?: string | null
+          long_term_outlook?: string | null
+          marriage_potential?: string | null
+          number_1: number
+          number_2: number
+          parenting_style?: string | null
+          past_life_connections?: string | null
+          red_flags?: string[] | null
+          relationship_dynamics?: string | null
+          relationship_milestones?: string | null
+          social_dynamics?: string | null
+          soul_lessons?: string | null
+          spiritual_connection?: string | null
+          success_strategies?: string[] | null
+        }
+        Update: {
+          challenges_solutions?: string | null
+          communication_style?: string | null
           compatibility_score?: number | null
           compatibility_text?: string
+          conflict_resolution?: string | null
           created_at?: string
+          detailed_analysis?: string | null
+          energy_exchange?: string | null
+          financial_compatibility?: string | null
+          gift_suggestions?: string[] | null
+          growth_potential?: string | null
+          healing_opportunities?: string | null
           id?: string
+          ideal_date_ideas?: string[] | null
+          intimacy_patterns?: string | null
+          karmic_relationship?: string | null
+          long_term_outlook?: string | null
+          marriage_potential?: string | null
           number_1?: number
           number_2?: number
+          parenting_style?: string | null
+          past_life_connections?: string | null
+          red_flags?: string[] | null
+          relationship_dynamics?: string | null
+          relationship_milestones?: string | null
+          social_dynamics?: string | null
+          soul_lessons?: string | null
+          spiritual_connection?: string | null
+          success_strategies?: string[] | null
+        }
+        Relationships: []
+      }
+      map_section_templates: {
+        Row: {
+          conditional_display: Json | null
+          content_structure: Json
+          created_at: string
+          display_order: number
+          formatting_instructions: string | null
+          id: string
+          page_break_after: boolean | null
+          page_break_before: boolean | null
+          professional_notes: string | null
+          required_data: string[] | null
+          section_type: string
+          styling_rules: Json
+          subtitle: string | null
+          template_name: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          conditional_display?: Json | null
+          content_structure?: Json
+          created_at?: string
+          display_order?: number
+          formatting_instructions?: string | null
+          id?: string
+          page_break_after?: boolean | null
+          page_break_before?: boolean | null
+          professional_notes?: string | null
+          required_data?: string[] | null
+          section_type: string
+          styling_rules?: Json
+          subtitle?: string | null
+          template_name: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          conditional_display?: Json | null
+          content_structure?: Json
+          created_at?: string
+          display_order?: number
+          formatting_instructions?: string | null
+          id?: string
+          page_break_after?: boolean | null
+          page_break_before?: boolean | null
+          professional_notes?: string | null
+          required_data?: string[] | null
+          section_type?: string
+          styling_rules?: Json
+          subtitle?: string | null
+          template_name?: string
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -412,78 +670,342 @@ export type Database = {
           },
         ]
       }
+      numerology_correspondences: {
+        Row: {
+          acquisition_tips: string | null
+          astrological_connection: string | null
+          care_instructions: string | null
+          chakra_alignment: string | null
+          combination_suggestions: string[] | null
+          correspondence_type: string
+          created_at: string
+          cultural_associations: string | null
+          hex_color: string | null
+          historical_significance: string | null
+          id: string
+          name: string
+          number: number
+          properties: string
+          ritual_applications: string | null
+          scientific_properties: string | null
+          seasonal_timing: string | null
+          spiritual_meaning: string | null
+          therapeutic_benefits: string | null
+          updated_at: string
+          usage_instructions: string | null
+        }
+        Insert: {
+          acquisition_tips?: string | null
+          astrological_connection?: string | null
+          care_instructions?: string | null
+          chakra_alignment?: string | null
+          combination_suggestions?: string[] | null
+          correspondence_type: string
+          created_at?: string
+          cultural_associations?: string | null
+          hex_color?: string | null
+          historical_significance?: string | null
+          id?: string
+          name: string
+          number: number
+          properties: string
+          ritual_applications?: string | null
+          scientific_properties?: string | null
+          seasonal_timing?: string | null
+          spiritual_meaning?: string | null
+          therapeutic_benefits?: string | null
+          updated_at?: string
+          usage_instructions?: string | null
+        }
+        Update: {
+          acquisition_tips?: string | null
+          astrological_connection?: string | null
+          care_instructions?: string | null
+          chakra_alignment?: string | null
+          combination_suggestions?: string[] | null
+          correspondence_type?: string
+          created_at?: string
+          cultural_associations?: string | null
+          hex_color?: string | null
+          historical_significance?: string | null
+          id?: string
+          name?: string
+          number?: number
+          properties?: string
+          ritual_applications?: string | null
+          scientific_properties?: string | null
+          seasonal_timing?: string | null
+          spiritual_meaning?: string | null
+          therapeutic_benefits?: string | null
+          updated_at?: string
+          usage_instructions?: string | null
+        }
+        Relationships: []
+      }
       numerology_texts: {
         Row: {
+          affirmations: string | null
           angel_category: string | null
           angel_invocation_time: string | null
           angel_name: string | null
           angel_psalm: string | null
+          author_notes: string | null
+          bibliography: string | null
           body: string
+          calculation_details: string | null
+          career_guidance: string | null
           category: string | null
+          celebrity_examples: string | null
+          chakra_associations: string | null
           color_associations: string[] | null
+          compatibility_notes: string | null
+          content_length: number | null
           created_at: string
+          cross_references: string[] | null
+          display_order: number | null
+          energy_description: string | null
+          examples: string | null
+          financial_tendencies: string | null
+          formatting_rules: Json | null
+          growth_opportunities: string | null
           health_associations: string[] | null
+          health_recommendations: string | null
+          historical_context: string | null
           id: string
+          integration_practices: string | null
           is_master_number: boolean | null
+          karmic_lessons_detail: string | null
           key_number: number
           keywords: string[] | null
           lang: string
+          life_periods: string | null
+          meditation_guide: string | null
+          numerological_formula: string | null
+          page_section: string | null
+          practical_guidance: string | null
           priority: number | null
           profession_associations: string[] | null
+          professional_applications: string | null
+          psychological_analysis: string | null
+          recommendations: string | null
+          relationship_advice: string | null
+          seasonal_influences: string | null
           section: string
+          shadow_aspects: string | null
+          spiritual_aspects: string | null
+          spiritual_mission: string | null
           stone_associations: string[] | null
           subcategory: string | null
+          tarot_connections: string | null
+          template_type: string | null
+          therapeutic_approach: string | null
           title: string
           updated_at: string
           version: string
+          warnings: string | null
         }
         Insert: {
+          affirmations?: string | null
           angel_category?: string | null
           angel_invocation_time?: string | null
           angel_name?: string | null
           angel_psalm?: string | null
+          author_notes?: string | null
+          bibliography?: string | null
           body: string
+          calculation_details?: string | null
+          career_guidance?: string | null
           category?: string | null
+          celebrity_examples?: string | null
+          chakra_associations?: string | null
           color_associations?: string[] | null
+          compatibility_notes?: string | null
+          content_length?: number | null
           created_at?: string
+          cross_references?: string[] | null
+          display_order?: number | null
+          energy_description?: string | null
+          examples?: string | null
+          financial_tendencies?: string | null
+          formatting_rules?: Json | null
+          growth_opportunities?: string | null
           health_associations?: string[] | null
+          health_recommendations?: string | null
+          historical_context?: string | null
           id?: string
+          integration_practices?: string | null
           is_master_number?: boolean | null
+          karmic_lessons_detail?: string | null
           key_number: number
           keywords?: string[] | null
           lang?: string
+          life_periods?: string | null
+          meditation_guide?: string | null
+          numerological_formula?: string | null
+          page_section?: string | null
+          practical_guidance?: string | null
           priority?: number | null
           profession_associations?: string[] | null
+          professional_applications?: string | null
+          psychological_analysis?: string | null
+          recommendations?: string | null
+          relationship_advice?: string | null
+          seasonal_influences?: string | null
           section: string
+          shadow_aspects?: string | null
+          spiritual_aspects?: string | null
+          spiritual_mission?: string | null
           stone_associations?: string[] | null
           subcategory?: string | null
+          tarot_connections?: string | null
+          template_type?: string | null
+          therapeutic_approach?: string | null
           title: string
           updated_at?: string
           version?: string
+          warnings?: string | null
         }
         Update: {
+          affirmations?: string | null
           angel_category?: string | null
           angel_invocation_time?: string | null
           angel_name?: string | null
           angel_psalm?: string | null
+          author_notes?: string | null
+          bibliography?: string | null
           body?: string
+          calculation_details?: string | null
+          career_guidance?: string | null
           category?: string | null
+          celebrity_examples?: string | null
+          chakra_associations?: string | null
           color_associations?: string[] | null
+          compatibility_notes?: string | null
+          content_length?: number | null
           created_at?: string
+          cross_references?: string[] | null
+          display_order?: number | null
+          energy_description?: string | null
+          examples?: string | null
+          financial_tendencies?: string | null
+          formatting_rules?: Json | null
+          growth_opportunities?: string | null
           health_associations?: string[] | null
+          health_recommendations?: string | null
+          historical_context?: string | null
           id?: string
+          integration_practices?: string | null
           is_master_number?: boolean | null
+          karmic_lessons_detail?: string | null
           key_number?: number
           keywords?: string[] | null
           lang?: string
+          life_periods?: string | null
+          meditation_guide?: string | null
+          numerological_formula?: string | null
+          page_section?: string | null
+          practical_guidance?: string | null
           priority?: number | null
           profession_associations?: string[] | null
+          professional_applications?: string | null
+          psychological_analysis?: string | null
+          recommendations?: string | null
+          relationship_advice?: string | null
+          seasonal_influences?: string | null
           section?: string
+          shadow_aspects?: string | null
+          spiritual_aspects?: string | null
+          spiritual_mission?: string | null
           stone_associations?: string[] | null
           subcategory?: string | null
+          tarot_connections?: string | null
+          template_type?: string | null
+          therapeutic_approach?: string | null
           title?: string
           updated_at?: string
           version?: string
+          warnings?: string | null
+        }
+        Relationships: []
+      }
+      planetary_periods: {
+        Row: {
+          age_range_end: number
+          age_range_start: number
+          astrological_connections: string | null
+          career_focus: string | null
+          challenges: string[] | null
+          created_at: string
+          famous_examples: string[] | null
+          financial_tendencies: string | null
+          general_influence: string
+          health_considerations: string | null
+          historical_context: string | null
+          id: string
+          integration_practices: string[] | null
+          life_themes: string[] | null
+          number_association: number
+          opportunities: string[] | null
+          period_name: string
+          personal_development: string | null
+          planet: string
+          recommended_actions: string[] | null
+          relationship_patterns: string | null
+          shadow_work: string | null
+          spiritual_lessons: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          age_range_end: number
+          age_range_start: number
+          astrological_connections?: string | null
+          career_focus?: string | null
+          challenges?: string[] | null
+          created_at?: string
+          famous_examples?: string[] | null
+          financial_tendencies?: string | null
+          general_influence: string
+          health_considerations?: string | null
+          historical_context?: string | null
+          id?: string
+          integration_practices?: string[] | null
+          life_themes?: string[] | null
+          number_association: number
+          opportunities?: string[] | null
+          period_name: string
+          personal_development?: string | null
+          planet: string
+          recommended_actions?: string[] | null
+          relationship_patterns?: string | null
+          shadow_work?: string | null
+          spiritual_lessons?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          age_range_end?: number
+          age_range_start?: number
+          astrological_connections?: string | null
+          career_focus?: string | null
+          challenges?: string[] | null
+          created_at?: string
+          famous_examples?: string[] | null
+          financial_tendencies?: string | null
+          general_influence?: string
+          health_considerations?: string | null
+          historical_context?: string | null
+          id?: string
+          integration_practices?: string[] | null
+          life_themes?: string[] | null
+          number_association?: number
+          opportunities?: string[] | null
+          period_name?: string
+          personal_development?: string | null
+          planet?: string
+          recommended_actions?: string[] | null
+          relationship_patterns?: string | null
+          shadow_work?: string | null
+          spiritual_lessons?: string[] | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -520,6 +1042,78 @@ export type Database = {
           price_cents?: number
           stripe_price_id?: string | null
           type?: Database["public"]["Enums"]["plan_type"]
+        }
+        Relationships: []
+      }
+      profession_guidance: {
+        Row: {
+          avoid_roles: string[] | null
+          challenges: string | null
+          collaboration_approach: string | null
+          created_at: string
+          detailed_description: string
+          entrepreneurial_potential: string | null
+          famous_professionals: string[] | null
+          freelance_potential: string | null
+          growth_trajectory: string | null
+          id: string
+          ideal_companies: string[] | null
+          industry_examples: string[] | null
+          leadership_style: string | null
+          number: number
+          profession_category: string
+          profession_name: string
+          recommended_skills: string[] | null
+          salary_expectations: string | null
+          success_factors: string | null
+          updated_at: string
+          work_environment: string | null
+        }
+        Insert: {
+          avoid_roles?: string[] | null
+          challenges?: string | null
+          collaboration_approach?: string | null
+          created_at?: string
+          detailed_description: string
+          entrepreneurial_potential?: string | null
+          famous_professionals?: string[] | null
+          freelance_potential?: string | null
+          growth_trajectory?: string | null
+          id?: string
+          ideal_companies?: string[] | null
+          industry_examples?: string[] | null
+          leadership_style?: string | null
+          number: number
+          profession_category: string
+          profession_name: string
+          recommended_skills?: string[] | null
+          salary_expectations?: string | null
+          success_factors?: string | null
+          updated_at?: string
+          work_environment?: string | null
+        }
+        Update: {
+          avoid_roles?: string[] | null
+          challenges?: string | null
+          collaboration_approach?: string | null
+          created_at?: string
+          detailed_description?: string
+          entrepreneurial_potential?: string | null
+          famous_professionals?: string[] | null
+          freelance_potential?: string | null
+          growth_trajectory?: string | null
+          id?: string
+          ideal_companies?: string[] | null
+          industry_examples?: string[] | null
+          leadership_style?: string | null
+          number?: number
+          profession_category?: string
+          profession_name?: string
+          recommended_skills?: string[] | null
+          salary_expectations?: string | null
+          success_factors?: string | null
+          updated_at?: string
+          work_environment?: string | null
         }
         Relationships: []
       }
