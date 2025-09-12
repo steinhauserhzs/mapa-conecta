@@ -33,6 +33,36 @@ interface MapaData {
     hiddenTendencies?: number[];
     subconsciousResponse?: number;
   };
+  // V3 format (Portuguese field names from edge function)
+  numeros?: {
+    motivacao?: number;
+    impressao?: number;
+    expressao?: number;
+    destino?: number;
+    missao?: number;
+    psiquico?: number;
+    anoPessoal?: number;
+    mesPessoal?: number;
+    diaPessoal?: number;
+    ciclosVida?: number[];
+    desafios?: number[];
+    momentos?: number[];
+    licoesCarmicas?: number[];
+    dividasCarmicas?: number[];
+    tendenciasOcultas?: number[];
+    respostaSubconsciente?: number;
+  };
+  // V3 format texts structure
+  textos?: Record<string, {
+    titulo?: string;
+    numero?: number;
+    explicacao?: string;
+    conteudo?: string;
+    cores?: string[];
+    pedras?: string[];
+    profissoes?: string[];
+    [key: string]: any;
+  }>;
   // Compatibilidade com formato antigo
   motivation?: number;
   impression?: number;
@@ -81,16 +111,53 @@ interface MapaPDFProps {
 }
 
 const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts = {}, onEdit }) => {
-  const isV3Format = data.metadata?.version === 'v3.0' || data.texts?.motivacao;
+  const isV3Format = data.metadata?.version === 'v3.0' || data.textos?.motivacao;
   
   // Helper functions
-  const getNumber = (field: string): number => {
+    // Map English field names to Portuguese (edge function format)
+    const fieldMap: Record<string, string> = {
+      'motivation': 'motivacao',
+      'impression': 'impressao', 
+      'expression': 'expressao',
+      'destiny': 'destino',
+      'mission': 'missao',
+      'psychic': 'psiquico',
+      'personalYear': 'anoPessoal',
+      'personalMonth': 'mesPessoal',
+      'personalDay': 'diaPessoal'
+    };
+
+    // Debug logging
+    console.log(`🔍 Buscando campo '${field}' no data:`, {
+      originalField: field,
+      mappedField: fieldMap[field] || field,
+      dataNumeros: data.numeros,
+      dataNumbers: data.numbers,
+      directValue: data[field as keyof MapaData]
+    });
+
+    // Try new format first (data.numeros.motivacao from edge function)
+    const mappedField = fieldMap[field] || field;
+    if (data.numeros && typeof data.numeros[mappedField] === 'number') {
+      console.log(`✅ Encontrado em data.numeros.${mappedField}:`, data.numeros[mappedField]);
+      return data.numeros[mappedField];
+    }
+
+    // Try v2 format (data.numbers.motivation)
     const numberValue = data.numbers?.[field as keyof typeof data.numbers] as number;
-    if (typeof numberValue === 'number') return numberValue;
+    if (typeof numberValue === 'number') {
+      console.log(`✅ Encontrado em data.numbers.${field}:`, numberValue);
+      return numberValue;
+    }
     
+    // Try direct field access (legacy format)
     const directValue = data[field as keyof MapaData];
-    if (typeof directValue === 'number') return directValue;
+    if (typeof directValue === 'number') {
+      console.log(`✅ Encontrado diretamente em data.${field}:`, directValue);
+      return directValue;
+    }
     
+    console.log(`❌ Campo '${field}' não encontrado, retornando 0`);
     return 0;
   };
 
@@ -105,6 +172,25 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
 
   const getEditedText = (section: string, originalText: string) => {
     return editedTexts[section] || originalText;
+  };
+
+  // Helper to get text content from v3 format
+  const getTextContent = (section: string, defaultText: string = '') => {
+    // Try v3 format first (data.textos.motivacao.conteudo)
+    if (data.textos && data.textos[section] && data.textos[section].conteudo) {
+      const content = data.textos[section].conteudo;
+      // Don't return "Conteúdo em desenvolvimento" - use defaultText instead
+      if (content && content !== 'Conteúdo em desenvolvimento') {
+        return content;
+      }
+    }
+    
+    // Try v2 format (data.texts)
+    if (data.texts && data.texts[section]) {
+      return data.texts[section];
+    }
+    
+    return defaultText || `Análise numerológica para este aspecto está sendo processada.`;
   };
 
   // Renderização do Índice
@@ -155,7 +241,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-4">
+            <div className="space-y-4">
             <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               <h4 className="font-bold text-blue-700 mb-2 flex items-center">
                 <Eye className="w-4 h-4 mr-2" />
@@ -163,7 +249,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
               </h4>
               <p className="text-blue-800 text-sm leading-relaxed">
                 {getEditedText('sumario-perfil', 
-                  `Com Expressão ${getNumber('expression')}, você possui um perfil ${
+                  getTextContent('expressao', `Com Expressão ${getNumber('expression')}, você possui um perfil ${
                     getNumber('expression') === 1 ? 'de liderança natural e pioneirismo' :
                     getNumber('expression') === 2 ? 'cooperativo, diplomático e harmonizador' :
                     getNumber('expression') === 3 ? 'criativo, comunicativo e inspirador' :
@@ -187,7 +273,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
                     getNumber('motivation') === 8 ? 'almeja sucesso e reconhecimento' :
                     getNumber('motivation') === 9 ? 'serve à humanidade com amor' :
                     'possui motivações especiais'
-                  }.`
+                  }.`)
                 )}
               </p>
             </div>
@@ -199,18 +285,18 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
               </h4>
               <p className="text-orange-800 text-sm leading-relaxed">
                 {getEditedText('sumario-desafios',
-                  `Seu maior desafio pessoal é representado pelo número ${getNumber('challenges')?.[2] || 'a ser calculado'}, que ${
-                    (getNumber('challenges')?.[2] || 0) === 1 ? 'exige o desenvolvimento de liderança sem autoritarismo' :
-                    (getNumber('challenges')?.[2] || 0) === 2 ? 'requer equilibrar sensibilidade com assertividade' :
-                    (getNumber('challenges')?.[2] || 0) === 3 ? 'demanda focar criatividade sem dispersão' :
-                    (getNumber('challenges')?.[2] || 0) === 4 ? 'pede organização sem rigidez excessiva' :
-                    (getNumber('challenges')?.[2] || 0) === 5 ? 'necessita liberdade com responsabilidade' :
-                    (getNumber('challenges')?.[2] || 0) === 6 ? 'solicita cuidar sem controlar' :
-                    (getNumber('challenges')?.[2] || 0) === 7 ? 'busca conhecimento sem isolamento' :
-                    (getNumber('challenges')?.[2] || 0) === 8 ? 'almeja sucesso material com ética' :
-                    (getNumber('challenges')?.[2] || 0) === 9 ? 'serve sem se sacrificar completamente' :
+                  getTextContent('desafios', `Seu maior desafio pessoal é representado pelo número ${(data.numeros?.desafios?.[2] || data.challenges?.[2]) || 'a ser calculado'}, que ${
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 1 ? 'exige o desenvolvimento de liderança sem autoritarismo' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 2 ? 'requer equilibrar sensibilidade com assertividade' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 3 ? 'demanda focar criatividade sem dispersão' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 4 ? 'pede organização sem rigidez excessiva' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 5 ? 'necessita liberdade com responsabilidade' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 6 ? 'solicita cuidar sem controlar' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 7 ? 'busca conhecimento sem isolamento' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 8 ? 'almeja sucesso material com ética' :
+                    ((data.numeros?.desafios?.[2] || data.challenges?.[2]) || 0) === 9 ? 'serve sem se sacrificar completamente' :
                     'apresenta lições especiais de crescimento'
-                  }. Este será um tema recorrente que oferece grandes oportunidades de evolução.`
+                  }. Este será um tema recorrente que oferece grandes oportunidades de evolução.`)
                 )}
               </p>
             </div>
@@ -224,7 +310,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
               </h4>
               <p className="text-green-800 text-sm leading-relaxed">
                 {getEditedText('sumario-potencial',
-                  `Com Destino ${getNumber('destiny')}, você está destinado a ${
+                  getTextContent('destino', `Com Destino ${getNumber('destiny')}, você está destinado a ${
                     getNumber('destiny') === 1 ? 'ser um pioneiro e abrir novos caminhos para outros' :
                     getNumber('destiny') === 2 ? 'ser um mediador e construtor de pontes entre pessoas' :
                     getNumber('destiny') === 3 ? 'ser um comunicador e inspirador através das artes' :
@@ -237,7 +323,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
                     getNumber('destiny') === 11 ? 'ser um inspirador e iluminador de consciências' :
                     getNumber('destiny') === 22 ? 'ser um construtor mestre de projetos grandiosos' :
                     'cumprir uma missão especial e única'
-                  }. Sua Missão ${getNumber('mission')} amplifica este potencial.`
+                  }. Sua Missão ${getNumber('mission')} amplifica este potencial.`)
                 )}
               </p>
             </div>
@@ -249,7 +335,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
               </h4>
               <p className="text-purple-800 text-sm leading-relaxed">
                 {getEditedText('sumario-periodo',
-                  `Você está vivenciando o Ano Pessoal ${getNumber('personalYear') || 'a ser calculado'}, que representa ${
+                  getTextContent('ano_pessoal', `Você está vivenciando o Ano Pessoal ${getNumber('personalYear') || 'a ser calculado'}, que representa ${
                     (getNumber('personalYear') || 1) === 1 ? 'um período de novos começos, iniciativas e plantio de sementes' :
                     (getNumber('personalYear') || 1) === 2 ? 'um tempo de cooperação, parcerias e desenvolvimento gradual' :
                     (getNumber('personalYear') || 1) === 3 ? 'uma fase de criatividade, comunicação e expressão pessoal' :
@@ -264,7 +350,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
                     (getNumber('personalYear') || 1) <= 3 ? 'novos projetos e iniciativas criativas' :
                     (getNumber('personalYear') || 1) <= 6 ? 'consolidação e desenvolvimento de relacionamentos' :
                     'crescimento interior e preparação para próximos ciclos'
-                  }.`
+                  }.`)
                 )}
               </p>
             </div>
@@ -445,7 +531,7 @@ const MapaPDF: React.FC<MapaPDFProps> = ({ data, isEditing = false, editedTexts 
                     getNumber('destiny') === 7 ? 'aponta para crescimento através de estudos, introspecção e desenvolvimento espiritual. Você evolui questionando, pesquisando e buscando sabedoria.' :
                     getNumber('destiny') === 9 ? 'direciona seu crescimento para o serviço humanitário e amor universal. Você evolui ajudando outros e expandindo sua compaixão.' :
                     'oferece um caminho único de evolução pessoal baseado em lições específicas.'
-                  } Os desafios representados pelo número ${getNumber('challenges')?.[2] || 'principal'} são oportunidades de fortalecer exatamente essas áreas de crescimento.`
+                  } Os desafios representados pelo número ${(data.numeros?.desafios?.[2] || data.challenges?.[2]) || 'principal'} são oportunidades de fortalecer exatamente essas áreas de crescimento.`
                 )}
               </p>
             </div>
