@@ -206,137 +206,189 @@ async function formatMapDataForGamma(map: any, supabase: any): Promise<string> {
     return `Interpretação para ${key} será desenvolvida.`;
   };
 
-  // Create comprehensive content
-  let content = `VOCÊ É UM NUMERÓLOGO CABALÍSTICO EXPERIENTE
+  // Create modern web-style content for Gamma
+  let content = `# 🔮 MAPA NUMEROLÓGICO PERSONALIZADO
+**${nome.toUpperCase()}** | Nascimento: ${data}
 
-Gere um mapa numerológico COMPLETO e PROFISSIONAL para o seguinte nome e data de nascimento:
+---
 
-**Nome:** ${nome}
-**Data de nascimento:** ${data}
+## ✨ INSTRUÇÕES ESPECIAIS DE DESIGN
+Crie uma apresentação MODERNA e VISUAL estilo **landing page de site premium** com:
+- Layout limpo e profissional com muito espaço em branco
+- Hierarquia visual clara com títulos grandes e atrativos
+- Cards e seções bem definidas para cada informação
+- Cores harmoniosas e elementos visuais elegantes
+- Ícones e elementos gráficos para destacar cada seção
+- Design responsivo e moderno similar a sites de coaching/consultoria
+- Use gradientes sutis e sombras elegantes
+- Organize o conteúdo em uma estrutura de página única fluida
 
-Siga rigorosamente estas instruções:
+---
 
-## NORMALIZAÇÃO REALIZADA
-Nome normalizado: ${nome.toUpperCase()}
-Todos os acentos foram removidos seguindo as regras cabalísticas tradicionais.
+# 🌟 SEU PERFIL NUMEROLÓGICO
 
-## NÚMEROS PRINCIPAIS CALCULADOS
+## 🎯 **NÚMEROS ESSENCIAIS**
 
-### **MOTIVAÇÃO (INTERIOR): ${numeros.motivacao || 'N/A'}**
-${getTexto('motivacao')}
+> ### 💎 MOTIVAÇÃO INTERIOR: **${numeros.motivacao || 'N/A'}**
+> *O que realmente move sua alma*
+> 
+> ${getTexto('motivacao')}
 
-### **IMPRESSÃO (PERSONALIDADE): ${numeros.impressao || 'N/A'}**
-${getTexto('impressao')}
+---
 
-### **EXPRESSÃO (NÚMERO DO NOME): ${numeros.expressao || 'N/A'}**
-${getTexto('expressao')}
+> ### 🌅 SUA PERSONALIDADE: **${numeros.impressao || 'N/A'}** 
+> *Como o mundo te percebe*
+> 
+> ${getTexto('impressao')}
 
-### **DESTINO (CAMINHO DE VIDA): ${numeros.destino || 'N/A'}**
-${getTexto('destino')}
+---
 
-### **MISSÃO (PROPÓSITO): ${numeros.missao || 'N/A'}**
+> ### ⚡ EXPRESSÃO PESSOAL: **${numeros.expressao || 'N/A'}**
+> *Seu poder de manifestação*
+> 
+> ${getTexto('expressao')}
+
+---
+
+> ### 🗺️ DESTINO & PROPÓSITO: **${numeros.destino || 'N/A'}**
+> *Seu caminho de vida*
+> 
+> ${getTexto('destino')}
+
+---
+
+## 👑 **SEU ANJO PROTETOR**
+
+### 🔥 **${anjo.nome}** - ${anjo.categoria}
+
+| **HORÁRIO SAGRADO** | **SALMO DE PODER** | **ORAÇÃO ESPECIAL** |
+|-------------------|------------------|-------------------|
+| ${anjo.horario} | Salmo ${anjo.salmo} | ${anjo.oracao} |
+
+> 💫 *Este anjo é seu guardião espiritual. Conecte-se nos horários indicados para receber orientação divina.*
+
+---
+
+## 🎭 **ANÁLISE PROFUNDA DA PERSONALIDADE**
+
+### 🔍 **MISSÃO DE VIDA: ${numeros.missao || 'N/A'}**
 ${getTexto('missao')}
 
-### **NÚMERO PSÍQUICO: ${numeros.numero_psiquico || 'N/A'}**
+---
+
+### 🧠 **NÚMERO PSÍQUICO: ${numeros.numero_psiquico || 'N/A'}**
 ${getTexto('numero_psiquico')}
 
-### **DIA DO NASCIMENTO: ${numeros.dia_nascimento_natural || 'N/A'}**
+---
+
+### 📅 **ENERGIA DO DIA: ${numeros.dia_nascimento_natural || 'N/A'}**
 ${getTexto('dia_nascimento')}
 
-### **GRAU DE ASCENSÃO: ${numeros.grau_ascensao || 'N/A'}**
+---
+
+### 📈 **GRAU DE EVOLUÇÃO: ${numeros.grau_ascensao || 'N/A'}**
 ${getTexto('grau_ascensao')}
 
-## SEU ANJO CABALÍSTICO
+---
 
-**${anjo.nome}**
-- **Categoria:** ${anjo.categoria}
-- **Horário de Invocação:** ${anjo.horario}
-- **Salmo:** ${anjo.salmo}
-- **Oração:** ${anjo.oracao}
+## ⚡ **ASPECTOS KÁRMICOS & ESPIRITUAIS**
 
-Este anjo é seu protetor e guia espiritual, baseado em sua data de nascimento. Invoque-o nos horários especificados para receber orientação e proteção divina.
-
-## ANÁLISES AVANÇADAS
-
-### **LIÇÕES CÁRMICAS**
+### 🎓 **LIÇÕES DA ALMA**
 ${getTexto('licoes_carmicas')}
 
-### **DÍVIDAS CÁRMICAS**
+---
+
+### ⚖️ **DÍVIDAS KÁRMICAS**  
 ${getTexto('dividas_carmicas')}
 
-### **TENDÊNCIAS OCULTAS**
+---
+
+### 🔮 **TALENTOS OCULTOS**
 ${getTexto('tendencias_ocultas')}
 
-### **RESPOSTA SUBCONSCIENTE: ${numeros.resposta_subconsciente || 'N/A'}**
+---
+
+### 🧘‍♀️ **RESPOSTA SUBCONSCIENTE: ${numeros.resposta_subconsciente || 'N/A'}**
 ${getTexto('resposta_subconsciente')}
 
-## CICLOS TEMPORAIS
+---
 
-### **CICLOS DE VIDA**
+## 📊 **CICLOS TEMPORAIS & PREVISÕES**
+
+### 🔄 **CICLOS DE VIDA**
 ${getTexto('ciclos_vida')}
 
-### **DESAFIOS**
+---
+
+### 🎯 **DESAFIOS PESSOAIS**
 ${getTexto('desafios')}
 
-### **MOMENTOS DECISIVOS**
+---
+
+### ⭐ **MOMENTOS DECISIVOS**
 ${getTexto('momentos_decisivos')}
 
-## ANÁLISE TEMPORAL ATUAL
+---
 
-### **ANO PESSOAL ${result.header?.anoReferencia || new Date().getFullYear()}: ${numeros.ano_pessoal || 'N/A'}**
+## 🗓️ **SUA ENERGIA ATUAL**
+
+### 🌟 **ANO PESSOAL ${result.header?.anoReferencia || new Date().getFullYear()}: NÚMERO ${numeros.ano_pessoal || 'N/A'}**
 ${getTexto('ano_pessoal')}
 
 ${numeros.mes_pessoal ? `
-### **MÊS PESSOAL: ${numeros.mes_pessoal}**
+---
+### 🌙 **MÊS PESSOAL: ${numeros.mes_pessoal}**
 ${getTexto('mes_pessoal')}
 ` : ''}
 
 ${numeros.dia_pessoal ? `
-### **DIA PESSOAL: ${numeros.dia_pessoal}**
+---
+### ☀️ **DIA PESSOAL: ${numeros.dia_pessoal}**
 ${getTexto('dia_pessoal')}
 ` : ''}
 
-## INFORMAÇÕES COMPLEMENTARES
+---
 
-### **CORES FAVORÁVEIS**
+## 🎨 **GUIA DE HARMONIZAÇÃO PESSOAL**
+
+### 🌈 **SUAS CORES DE PODER**
 ${getTexto('cores_favoraveis')}
-
-### **DIAS DO MÊS FAVORÁVEIS**
-${getTexto('dias_favoraveis')}
-
-### **NÚMEROS HARMÔNICOS**
-Números que vibram em harmonia com você: ${[numeros.expressao, numeros.destino, numeros.motivacao].filter(n => n).join(', ')}
-
-## DETALHES DOS CÁLCULOS
-
-${result.debug ? `
-**Somas obtidas:**
-- Todas as letras: ${result.debug.somas?.todas || 'N/A'}
-- Vogais: ${result.debug.somas?.vogais || 'N/A'} 
-- Consoantes: ${result.debug.somas?.consoantes || 'N/A'}
-
-**Data de nascimento analisada:** ${result.debug.nascimento?.d || 'N/A'}/${result.debug.nascimento?.m || 'N/A'}/${result.debug.nascimento?.y || 'N/A'}
-` : ''}
-
-## CONCLUSÃO
-
-Este mapa numerológico completo foi elaborado seguindo rigorosamente as tradições da **Numerologia Cabalística**, utilizando:
-
-- Tabela de conversão cabalística tradicional em português
-- Preservação dos números mestres 11 e 22 onde apropriado
-- Cálculos precisos baseados em métodos consagrados
-- Interpretações detalhadas de cada aspecto numerológico
-
-**Nome analisado:** ${nome}
-**Data de nascimento:** ${data}
-**Data da análise:** ${result.header?.dataGeracao ? new Date(result.header.dataGeracao).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR')}
-**Sistema:** Numerologia Cabalística Tradicional
 
 ---
 
-*"Conhece-te a ti mesmo e conhecerás o universo e os deuses"* - Oráculo de Delfos
+### 📅 **DIAS FAVORÁVEIS DO MÊS**
+${getTexto('dias_favoraveis')}
 
-Esta análise oferece um guia completo para compreender sua essência numerológica e aproveitar ao máximo as oportunidades que a vida apresenta, sempre em harmonia com as leis universais da numerologia cabalística.`;
+---
+
+### 🔢 **NÚMEROS HARMÔNICOS**
+> **Seus números de sorte:** ${[numeros.expressao, numeros.destino, numeros.motivacao].filter(n => n).join(' • ')}
+> 
+> *Use estes números em decisões importantes, endereços, datas especiais e investimentos*
+
+---
+
+${result.debug ? `
+## 📊 **BASE MATEMÁTICA DOS CÁLCULOS**
+
+| **ELEMENTO** | **SOMA OBTIDA** | **REDUÇÃO FINAL** |
+|------------|---------------|-----------------|
+| Nome Completo | ${result.debug.somas?.todas || 'N/A'} | ${numeros.expressao || 'N/A'} |
+| Vogais | ${result.debug.somas?.vogais || 'N/A'} | ${numeros.motivacao || 'N/A'} |
+| Consoantes | ${result.debug.somas?.consoantes || 'N/A'} | ${numeros.impressao || 'N/A'} |
+| Data Nascimento | ${result.debug.somas?.nascimento || 'N/A'} | ${numeros.destino || 'N/A'} |
+
+` : ''}
+
+---
+
+## 💎 **SOBRE ESTE MAPA**
+
+> 📜 *Este mapa numerológico foi calculado seguindo as tradições cabalísticas milenares*
+> 
+> 🔬 *Baseado na Numerologia Cabalística tradicional com precisão matemática*
+> 
+> ✨ *Gerado especialmente para **${nome}** em ${new Date().toLocaleDateString('pt-BR')}*`;
 
   return content;
 }
@@ -392,12 +444,12 @@ serve(async (req) => {
     // Format map data for Gamma
     const gammaContent = await formatMapDataForGamma(map, supabase);
     
-    // Create Gamma generation request
+    // Create Gamma generation request with presentation format and creative style
     const gammaRequest: GammaGenerateRequest = {
       title: `Mapa Numerológico - ${map.input?.nome || 'Análise'}`,
       content: gammaContent,
-      format: 'document',
-      style: 'professional'
+      format: 'presentation',
+      style: 'creative'
     };
 
     // Start Gamma generation
