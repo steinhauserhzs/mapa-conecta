@@ -140,15 +140,18 @@ function sumBirth({ d, m, y }: { d: number, m: number, y: number }) {
 }
 
 async function computeOnClient(name: string, birthStr: string, yearRef?: number): Promise<MapaData> {
-  // Buscar tabela de conversão
-  const { data: conv } = await supabase
-    .from('conversion_tables')
-    .select('mapping')
-    .eq('is_default', true)
-    .eq('locale', 'pt-BR')
-    .maybeSingle();
-  const FALLBACK: Record<string, number> = { A:1, B:2, C:3, D:4, E:5, F:8, G:3, H:5, I:1, J:1, K:2, L:3, M:4, N:5, O:7, P:8, Q:1, R:2, S:3, T:4, U:6, V:6, W:6, X:6, Y:1, Z:7, 'Ç':8 };
-  const baseMap = (conv?.mapping as Record<string, number>) || FALLBACK;
+  // Usar tabela cabalística correta (1-8)
+  const CABALISTIC_TABLE: Record<string, number> = {
+    A: 1, I: 1, Q: 1, Y: 1, J: 1,
+    B: 2, K: 2, R: 2,
+    C: 3, G: 3, L: 3, S: 3,
+    D: 4, M: 4, T: 4,
+    E: 5, H: 5, N: 5,
+    U: 6, V: 6, W: 6, X: 6,
+    O: 7, Z: 7,
+    F: 8, P: 8, Ç: 8
+  };
+  const baseMap = CABALISTIC_TABLE;
 
   const nm = String(name || '').trim();
   const b = parseBirth(birthStr);
@@ -191,9 +194,9 @@ async function computeOnClient(name: string, birthStr: string, yearRef?: number)
     impressao: getText('impressao', impressao, 'Impressão'),
     destino: getText('destino', destino, 'Destino'),
     ano_pessoal: getText('ano_pessoal', ano_pessoal, 'Ano Pessoal'),
-    numero_psiquico: getText('Número Psíquico', numero_psiquico, 'Número Psíquico'),
-    dia_nascimento: getText('Dia do Nascimento', dia_nascimento_natural, 'Dia do Nascimento'),
-    grau_ascensao: getText('Grau de Ascensão', grau_ascensao, 'Grau de Ascensão'),
+    numero_psiquico: getText('psiquico', numero_psiquico, 'Número Psíquico'),
+    dia_nascimento: getText('dia_nascimento', dia_nascimento_natural, 'Dia do Nascimento'),
+    grau_ascensao: getText('grau_ascensao', grau_ascensao, 'Grau de Ascensão'),
   };
 
   return {

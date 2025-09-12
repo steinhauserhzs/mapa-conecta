@@ -11,17 +11,16 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Tabela de conversão padrão atualizada
+// Base cabalistic conversion table (1-8)
 const FALLBACK_BASE_MAP = {
-  'A': 1, 'J': 1, 'S': 1,
-  'B': 2, 'K': 2, 'T': 2, 
-  'C': 3, 'L': 3, 'U': 3,
-  'D': 4, 'M': 4, 'V': 4,
-  'E': 5, 'N': 5, 'W': 5,
-  'F': 6, 'O': 6, 'X': 6,
-  'G': 7, 'P': 7, 'Y': 7,
-  'H': 8, 'Q': 8, 'Z': 8,
-  'I': 9, 'R': 9
+  'A': 1, 'I': 1, 'Q': 1, 'Y': 1, 'J': 1,
+  'B': 2, 'K': 2, 'R': 2,
+  'C': 3, 'G': 3, 'L': 3, 'S': 3,
+  'D': 4, 'M': 4, 'T': 4,
+  'E': 5, 'H': 5, 'N': 5,
+  'U': 6, 'V': 6, 'W': 6, 'X': 6,
+  'O': 7, 'Z': 7,
+  'F': 8, 'P': 8, 'Ç': 8
 };
 
 // Anjos cabalísticos por nome
@@ -39,37 +38,35 @@ const CABALISTIC_ANGELS = [
 
 // Função para analisar caracteres
 function analyzeChar(raw: string) {
-  const ch = raw.toLowerCase();
-  let baseChar = ch.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const base = raw.normalize('NFD').toLowerCase();
+  const char = base[0];
+  const marks = base.slice(1);
   
-  if (baseChar.length === 0) baseChar = ch;
-  
-  const marks = {
-    hasAcute: /[\u0301\u0341]/.test(raw.normalize("NFD")),
-    hasGrave: /[\u0300\u0340]/.test(raw.normalize("NFD")), 
-    hasCircumflex: /[\u0302\u0342]/.test(raw.normalize("NFD")),
-    hasTilde: /[\u0303\u0343]/.test(raw.normalize("NFD")),
-    hasDieresis: /[\u0308\u0344]/.test(raw.normalize("NFD")),
-    hasCedilla: /[\u0327]/.test(raw.normalize("NFD"))
+  return {
+    base: char.toUpperCase(),
+    marks: marks ? marks.split('').map(m => m.charCodeAt(0)) : [],
+    original: raw
   };
-  
-  return { baseChar, marks };
 }
 
 function applyMods(v: number, m: any): number {
-  if (m.hasAcute) v += 1;
-  if (m.hasGrave) v -= 1; 
-  if (m.hasCircumflex) v += 2;
-  if (m.hasTilde) v += 3;
-  if (m.hasDieresis) v += 4;
-  if (m.hasCedilla && v > 5) v -= 5;
+  if (!m || !Array.isArray(m)) return v;
+  
+  for (const mark of m) {
+    if (mark === 769) v += 2; // apostrophe (´)
+    else if (mark === 770) v += 7; // circumflex (^)
+    else if (mark === 778) v += 7; // ring above (°)
+    else if (mark === 771) v += 3; // tilde (~)
+    else if (mark === 776) v *= 2; // diaeresis (¨)
+    else if (mark === 768) v *= 2; // grave (`)
+  }
+  
   return v;
 }
 
 function letterValue(raw: string, baseMap: Record<string, number>): number {
-  const { baseChar, marks } = analyzeChar(raw);
-  const upperBase = baseChar.toUpperCase();
-  let val = baseMap[upperBase];
+  const { base, marks } = analyzeChar(raw);
+  let val = baseMap[base];
   if (val === undefined) return 0;
   return applyMods(val, marks);
 }
@@ -87,7 +84,14 @@ function sumLetters(str: string, baseMap: Record<string, number>, filter?: (ch: 
 }
 
 function reduce(n: number): number {
-  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+  while (n > 9 && n !== 11 && n !== 22) {
+    n = Math.floor(n / 10) + (n % 10);
+  }
+  return n;
+}
+
+function reduceSimple(n: number): number {
+  while (n > 9) {
     n = Math.floor(n / 10) + (n % 10);
   }
   return n;
@@ -202,11 +206,16 @@ function calcularCiclosVida(birth: string): [number, number, number] {
 function calcularDesafios(birth: string): [number, number, number] {
   const { d, m, y } = parseBirth(birth);
   
-  const primeiro = Math.abs(m - d);
-  const segundo = Math.abs(d - y);
-  const terceiro = Math.abs(primeiro - segundo);
+  // Reduce components to 1-9 for challenge calculations
+  const dRed = reduceSimple(d);
+  const mRed = reduceSimple(m);
+  const yRed = reduceSimple(y);
   
-  return [primeiro, segundo, terceiro];
+  const d1 = Math.abs(mRed - dRed);
+  const d2 = Math.abs(yRed - dRed);
+  const principal = Math.abs(d1 - d2);
+  
+  return [d1, d2, principal];
 }
 
 // Função para calcular momentos decisivos
@@ -238,7 +247,7 @@ function calcularCompleto({ name, birth }: { name: string, birth: string }, base
   
   const { d, m, y } = parseBirth(birth);
   const destino = sumBirth({ d, m, y });
-  const missao = reduce(expressao + destino);
+  const missao = reduceSimple(expressao + destino);
   const psiquico = reduce(d);
   
   // Cálculos avançados
