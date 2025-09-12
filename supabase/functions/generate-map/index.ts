@@ -595,10 +595,13 @@ serve(async (req) => {
       // Metadata (compatibilidade)
       metadata: {
         version: 'v3.0',
-        totalTexts: texts.length,
+        source: 'Material_Complementar_9.pdf',
+        totalTexts: textsData?.length || 0,
         angelFound: !!angelInfo,
         calculationsComplete: true,
-        generatedAt: new Date().toISOString()
+        generatedAt: new Date().toISOString(),
+        expectedPages: '40+',
+        contentType: 'professional_extensive'
       }
     };
 
