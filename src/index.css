@@ -26,15 +26,17 @@
     --ring: 42 87% 55%;
     --radius: 0.75rem;
     
-    /* Sidebar colors */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 25 40% 20%;
+    /* Sidebar colors - Elegant golden theme */
+    --sidebar-background: 42 15% 98%;
+    --sidebar-foreground: 25 40% 25%;
     --sidebar-primary: 42 87% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 42 20% 96%;
-    --sidebar-accent-foreground: 25 40% 20%;
-    --sidebar-border: 42 30% 90%;
+    --sidebar-accent: 42 40% 92%;
+    --sidebar-accent-foreground: 25 50% 20%;
+    --sidebar-border: 42 25% 88%;
     --sidebar-ring: 42 87% 55%;
+    --sidebar-muted: 42 20% 94%;
+    --sidebar-muted-foreground: 25 30% 50%;
     
     /* Numapp colors */
     --gold: 42 87% 55%;
@@ -48,6 +50,7 @@
     --gradient-gold: linear-gradient(135deg, hsl(42 87% 55%), hsl(42 100% 70%));
     --gradient-brown: linear-gradient(135deg, hsl(25 30% 45%), hsl(25 40% 65%));
     --gradient-background: linear-gradient(180deg, hsl(0 0% 100%), hsl(42 20% 98%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(42 15% 98%), hsl(42 20% 94%));
     --gradient-subtle: linear-gradient(135deg, hsl(42 20% 98%), hsl(0 0% 100%));
     
     /* Shadows */
