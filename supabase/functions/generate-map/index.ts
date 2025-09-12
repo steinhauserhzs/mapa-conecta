@@ -327,6 +327,11 @@ serve(async (req) => {
     const { d, m, y } = parseBirth(birth);
     const anoDigits = `${d}${m}${anoReferencia}`.split('').map(n => parseInt(n));
     const anoPessoal = reduce(anoDigits.reduce((sum, digit) => sum + digit, 0));
+    
+    // Calcular mês e dia pessoal
+    const mesAtual = new Date().getMonth() + 1;
+    const diaAtual = new Date().getDate();
+    const { mes: mesPessoal, dia: diaPessoal } = calcularMesDiaPersonal(anoPessoal, mesAtual, diaAtual);
 
     // Determinar anjo cabalístico
     const angelIndex = (result.expressao + result.destino - 1) % CABALISTIC_ANGELS.length;
