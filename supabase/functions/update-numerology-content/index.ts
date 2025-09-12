@@ -184,11 +184,12 @@ O Número 22 na Motivação indica uma pessoa movida pelo desejo de materializar
 
     await supabase.from('cabalistic_angels').insert(angels);
 
-    console.log('✅ BASE DO PDF COMPLETA! 176 registros inseridos com conteúdo integral');
-
+    console.log(`✅ BASE DO PDF COMPLETA! ${numerologyTexts.length} registros inseridos com conteúdo integral`);
+    
     return new Response(JSON.stringify({
       success: true,
       message: 'Conteúdo do PDF Material_Complementar_9.pdf (156 páginas) processado com sucesso',
+      total_records: numerologyTexts.length,
       stats: {
         totalTexts: numerologyTexts.length,
         totalAngels: angels.length,
