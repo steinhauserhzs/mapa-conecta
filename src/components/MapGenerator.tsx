@@ -22,7 +22,6 @@ import { User } from 'lucide-react';
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   birth: z.date({ required_error: 'Data de nascimento é obrigatória' }),
-  yearRef: z.number().optional(),
   clientId: z.string().optional(),
 });
 
@@ -229,7 +228,6 @@ export default function MapGenerator() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      yearRef: new Date().getFullYear(),
       clientId: '',
     },
   });
@@ -356,7 +354,7 @@ export default function MapGenerator() {
       const requestBody = {
         name: data.name,
         birth: birthString,
-        yearRef: data.yearRef,
+        yearRef: new Date().getFullYear(),
       };
       console.log('📤 Enviando request:', requestBody);
       
@@ -384,7 +382,7 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
 
       if (error || !result) {
         console.warn('⚠️ Falha na função edge, usando fallback no cliente...', error);
-        const fallback = await computeOnClient(data.name, birthString, data.yearRef);
+        const fallback = await computeOnClient(data.name, birthString, new Date().getFullYear());
         setMapaData(fallback);
         setEditedTextos(fallback.textos || {});
         setIsEditing(false);
@@ -599,18 +597,7 @@ const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Er
                   )}
                 </div>
 
-                <div>
-                  <Label htmlFor="yearRef">Ano de Referência (Opcional)</Label>
-                  <Input
-                    id="yearRef"
-                    type="number"
-                    {...form.register('yearRef', { valueAsNumber: true })}
-                    placeholder={new Date().getFullYear().toString()}
-                    className="mt-1"
-                  />
-                </div>
-
-                <Button 
+                <Button
                   type="submit" 
                   disabled={isGenerating}
                   className="w-full"
