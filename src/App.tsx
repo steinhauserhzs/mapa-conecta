@@ -26,6 +26,8 @@ import AnaliseTelefone from "./pages/AnaliseTelefone";
 import AnaliseEndereco from "./pages/AnaliseEndereco";
 import AnalisePlaca from "./pages/AnalisePlaca";
 import CorrecaoAssinatura from "./pages/CorrecaoAssinatura";
+import TestNumerologia from "./pages/TestNumerologia";
+import UpdateNumerologyContent from "./pages/UpdateNumerologyContent";
 import Ajustes from "./pages/Ajustes";
 import Ajuda from "./pages/Ajuda";
 import NotFound from "./pages/NotFound";
@@ -203,6 +205,26 @@ const App = () => (
                   }
                 >
                   <Route index element={<CorrecaoAssinatura />} />
+                </Route>
+                <Route
+                  path="/test-numerologia"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<TestNumerologia />} />
+                </Route>
+                <Route
+                  path="/update-content"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<UpdateNumerologyContent />} />
                 </Route>
                 <Route
                   path="/ajustes"
