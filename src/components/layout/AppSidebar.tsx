@@ -196,17 +196,17 @@ export function AppSidebar() {
                       <CollapsibleTrigger asChild>
                         <SidebarMenuButton 
                           tooltip={item.title}
-                          className="group relative rounded-xl mx-1 my-0.5 min-h-[44px] transition-all duration-200 text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-sidebar-foreground hover:shadow-sm"
+                          className="group relative rounded-xl mx-1 my-0.5 min-h-[44px] transition-all duration-200 text-brown hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-brown hover:shadow-sm"
                         >
                           {item.icon && (
                             <div className="w-5 h-5 flex items-center justify-center">
-                              <item.icon className="text-sidebar-foreground transition-colors group-hover:text-primary" />
+                              <item.icon className="text-brown transition-colors group-hover:text-primary" />
                             </div>
                           )}
                           {!isCollapsed && (
                             <>
-                              <span className="font-medium text-sm sm:text-base">{item.title}</span>
-                              <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180 text-sidebar-foreground" />
+                              <span className="font-medium text-sm sm:text-base text-brown">{item.title}</span>
+                              <ChevronDown className="w-4 h-4 transition-transform duration-200 group-data-[state=open]:rotate-180 text-brown" />
                             </>
                           )}
                         </SidebarMenuButton>
@@ -222,7 +222,7 @@ export function AppSidebar() {
                                     `group relative rounded-lg min-h-[40px] px-3 py-2 flex items-center gap-2 transition-all duration-200 ${
                                       isActive
                                         ? 'bg-gradient-to-r from-primary/15 to-primary/10 text-primary font-semibold border-l-3 border-primary shadow-sm'
-                                        : 'text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent/70 hover:to-sidebar-muted/70 hover:text-sidebar-foreground'
+                                        : 'text-brown hover:bg-gradient-to-r hover:from-sidebar-accent/70 hover:to-sidebar-muted/70 hover:text-brown'
                                     }`
                                   }
                                 >
@@ -233,7 +233,7 @@ export function AppSidebar() {
                                       }`} />
                                     </div>
                                   )}
-                                  <span className="text-xs sm:text-sm font-medium">{subItem.title}</span>
+                                  <span className="text-xs sm:text-sm font-medium text-brown">{subItem.title}</span>
                                 </NavLink>
                               </div>
                             ))}
@@ -249,19 +249,19 @@ export function AppSidebar() {
                           `group relative rounded-xl mx-1 my-0.5 min-h-[44px] px-3 py-2 flex items-center gap-2 sm:gap-3 transition-all duration-200 ${
                             isActive
                               ? 'bg-gradient-to-r from-primary to-primary-glow text-white font-semibold shadow-lg shadow-primary/25 scale-[1.02]'
-                              : 'text-sidebar-foreground hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-sidebar-foreground hover:shadow-sm hover:scale-[1.01]'
+                              : 'text-brown hover:bg-gradient-to-r hover:from-sidebar-accent hover:to-sidebar-muted hover:text-brown hover:shadow-sm hover:scale-[1.01]'
                           }`
                         }
                       >
                         {item.icon && (
                           <div className="w-5 h-5 flex items-center justify-center">
                             <item.icon className={`transition-colors ${
-                              location.pathname === item.url ? 'text-white' : 'text-sidebar-foreground group-hover:text-primary'
+                              location.pathname === item.url ? 'text-white' : 'text-brown group-hover:text-primary'
                             }`} />
                           </div>
                         )}
                         {!isCollapsed && (
-                          <span className="font-medium text-sm sm:text-base">{item.title}</span>
+                          <span className="font-medium text-sm sm:text-base text-brown">{item.title}</span>
                         )}
                         {location.pathname === item.url && (
                           <div className="absolute right-3 top-1/2 -translate-y-1/2">
