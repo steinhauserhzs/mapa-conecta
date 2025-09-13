@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,45 +41,36 @@ export const NumerologyCalculator = () => {
   const [result, setResult] = useState<CompleteNumerologyResult | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isOnlineMode, setIsOnlineMode] = useState(true);
-  const [date, setDate] = useState<Date>();
-  const [day, setDay] = useState<string>("");
-  const [month, setMonth] = useState<string>("");
-  const [year, setYear] = useState<string>("");
-  const [manualDate, setManualDate] = useState<string>("");
+  const [birthDate, setBirthDate] = useState<string>("");
 
   const { register, handleSubmit, formState: { errors } } = useForm<NumerologyFormData>();
 
-  const constructDateFromInputs = (): Date | null => {
-    if (manualDate) {
-      // Tentar parsing da data manual no formato DD/MM/YYYY
-      const dateParts = manualDate.split('/');
-      if (dateParts.length === 3) {
-        const parsedDay = parseInt(dateParts[0]);
-        const parsedMonth = parseInt(dateParts[1]) - 1; // Mês é 0-indexed
-        const parsedYear = parseInt(dateParts[2]);
-        if (!isNaN(parsedDay) && !isNaN(parsedMonth) && !isNaN(parsedYear)) {
-          return new Date(parsedYear, parsedMonth, parsedDay);
-        }
+  const parseDate = (dateStr: string): Date | null => {
+    if (!dateStr) return null;
+    
+    // Tentar parsing da data no formato DD/MM/YYYY
+    const dateParts = dateStr.split('/');
+    if (dateParts.length === 3) {
+      const day = parseInt(dateParts[0]);
+      const month = parseInt(dateParts[1]) - 1; // Mês é 0-indexed
+      const year = parseInt(dateParts[2]);
+      
+      if (!isNaN(day) && !isNaN(month) && !isNaN(year) && 
+          day >= 1 && day <= 31 && 
+          month >= 0 && month <= 11 && 
+          year >= 1900 && year <= new Date().getFullYear()) {
+        return new Date(year, month, day);
       }
     }
     
-    if (day && month && year) {
-      const parsedDay = parseInt(day);
-      const parsedMonth = parseInt(month) - 1; // Mês é 0-indexed
-      const parsedYear = parseInt(year);
-      if (!isNaN(parsedDay) && !isNaN(parsedMonth) && !isNaN(parsedYear)) {
-        return new Date(parsedYear, parsedMonth, parsedDay);
-      }
-    }
-    
-    return date;
+    return null;
   };
 
   const onSubmit = async (data: NumerologyFormData) => {
-    const finalDate = constructDateFromInputs();
+    const finalDate = parseDate(birthDate);
     
     if (!finalDate) {
-      toast.error("Por favor, selecione ou digite uma data de nascimento válida");
+      toast.error("Por favor, digite uma data válida no formato DD/MM/YYYY");
       return;
     }
 
@@ -195,123 +185,37 @@ export const NumerologyCalculator = () => {
               )}
             </div>
 
-            <div className="space-y-4">
-              <Label>Data de Nascimento</Label>
-              
-              {/* Entrada Manual */}
-              <div className="space-y-2">
-                <Label htmlFor="manual-date" className="text-sm text-muted-foreground">
-                  Digite manualmente (DD/MM/YYYY)
-                </Label>
+            <div className="space-y-2">
+              <Label htmlFor="birth-date">Data de Nascimento</Label>
+              <div className="flex gap-2">
                 <Input
-                  id="manual-date"
-                  placeholder="Ex: 11/05/2000"
-                  value={manualDate}
-                  onChange={(e) => setManualDate(e.target.value)}
-                  className="font-mono"
+                  id="birth-date"
+                  placeholder="DD/MM/YYYY (Ex: 11/05/2000)"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="flex-1 font-mono"
+                  maxLength={10}
                 />
-              </div>
-
-              {/* Separador */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1 border-t border-border"></div>
-                <span className="text-xs text-muted-foreground">OU</span>
-                <div className="flex-1 border-t border-border"></div>
-              </div>
-
-              {/* Seletores Separados */}
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Selecione separadamente
-                </Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label htmlFor="day" className="text-xs">Dia</Label>
-                    <Select value={day} onValueChange={setDay}>
-                      <SelectTrigger id="day">
-                        <SelectValue placeholder="Dia" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background">
-                        {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                          <SelectItem key={d} value={d.toString()}>
-                            {d.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="month" className="text-xs">Mês</Label>
-                    <Select value={month} onValueChange={setMonth}>
-                      <SelectTrigger id="month">
-                        <SelectValue placeholder="Mês" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background">
-                        <SelectItem value="1">Janeiro</SelectItem>
-                        <SelectItem value="2">Fevereiro</SelectItem>
-                        <SelectItem value="3">Março</SelectItem>
-                        <SelectItem value="4">Abril</SelectItem>
-                        <SelectItem value="5">Maio</SelectItem>
-                        <SelectItem value="6">Junho</SelectItem>
-                        <SelectItem value="7">Julho</SelectItem>
-                        <SelectItem value="8">Agosto</SelectItem>
-                        <SelectItem value="9">Setembro</SelectItem>
-                        <SelectItem value="10">Outubro</SelectItem>
-                        <SelectItem value="11">Novembro</SelectItem>
-                        <SelectItem value="12">Dezembro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="year" className="text-xs">Ano</Label>
-                    <Select value={year} onValueChange={setYear}>
-                      <SelectTrigger id="year">
-                        <SelectValue placeholder="Ano" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background max-h-[200px]">
-                        {Array.from({ length: 125 }, (_, i) => new Date().getFullYear() - i).map((y) => (
-                          <SelectItem key={y} value={y.toString()}>
-                            {y}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Separador */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1 border-t border-border"></div>
-                <span className="text-xs text-muted-foreground">OU</span>
-                <div className="flex-1 border-t border-border"></div>
-              </div>
-
-              {/* Calendário */}
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Selecione no calendário
-                </Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && "text-muted-foreground"
-                      )}
+                      size="icon"
+                      className="shrink-0"
+                      type="button"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "dd/MM/yyyy") : <span>Selecionar no calendário</span>}
+                      <CalendarIcon className="h-4 w-4" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0" align="end">
                     <Calendar
                       mode="single"
-                      selected={date}
-                      onSelect={setDate}
+                      selected={parseDate(birthDate)}
+                      onSelect={(date) => {
+                        if (date) {
+                          setBirthDate(format(date, "dd/MM/yyyy"));
+                        }
+                      }}
                       disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       initialFocus
                       className="pointer-events-auto"
@@ -319,6 +223,9 @@ export const NumerologyCalculator = () => {
                   </PopoverContent>
                 </Popover>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Digite a data ou clique no calendário para selecionar
+              </p>
             </div>
 
             <Button
