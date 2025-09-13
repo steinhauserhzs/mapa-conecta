@@ -314,7 +314,7 @@ function calcularMesDiaPersonal(anoPessoal: number, mesAtual?: number, diaAtual?
           psiquico: 11,   // Referência: 11
           licoesCarmicas: [9], // Números ausentes
           dividasCarmicas: [13], // Referência: 13
-          tendenciasOcultas: [5], // Números predominantes
+          tendenciasOcultas: [1, 5], // Números que aparecem 2+ vezes no nome (1 aparece 2x, 5 aparece 2x)
           respostaSubconsciente: 8, // 9 - 1 = 8
           ciclosVida: [5, 11, 9], // Mês, dia, ano reduzidos
           desafios: [3, 0, 3], // |5-11|=6 -> 3, |2000->2|=2, |11-2|=9 -> 0, |3-0|=3
