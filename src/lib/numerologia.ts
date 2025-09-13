@@ -231,7 +231,16 @@ export function calcularLicoesCarmicas(nome: string, conversionTable: Conversion
 
 export function calcularDividasCarmicas(nome: string, data: string, conversionTable: ConversionTable): number[] {
   const karmaNumbers = [13, 14, 16, 19];
-  const debts = [];
+  const foundKarma: number[] = [];
+  
+  // Check individual words before reduction for karmic debts
+  const palavras = normalizarLetras(nome).split(/\s+/).filter(w => w.length > 0);
+  for (const palavra of palavras) {
+    const total = somarLetras(palavra, conversionTable);
+    if (karmaNumbers.includes(total)) {
+      foundKarma.push(total);
+    }
+  }
   
   // Calculate totals before reduction to detect karmic debts
   const expressaoTotal = somarLetras(nome, conversionTable);
@@ -259,13 +268,13 @@ export function calcularDividasCarmicas(nome: string, data: string, conversionTa
   
   for (const total of totalsToCheck) {
     if (karmaNumbers.includes(total)) {
-      if (!debts.includes(total)) {
-        debts.push(total);
+      if (!foundKarma.includes(total)) {
+        foundKarma.push(total);
       }
     }
   }
   
-  return debts.sort((a, b) => a - b);
+  return foundKarma.sort((a, b) => a - b);
 }
 
 export function calcularTendenciasOcultas(nome: string, conversionTable: ConversionTable): number[] {
@@ -307,7 +316,8 @@ export function calcularCiclosVida(data: string): [number, number, number] {
   
   const ciclo1 = reduzirComMestre(mes);
   const ciclo2 = reduzirComMestre(dia);
-  const ciclo3 = reduzirComMestre(ano);
+  const destino = calcularDestino(data); // Use destiny number for third cycle
+  const ciclo3 = destino;
   
   return [ciclo1, ciclo2, ciclo3];
 }
@@ -323,10 +333,10 @@ export function calcularDesafios(data: string): [number, number, number] {
   
   const diaRed = reduzirSimples(dia);
   const mesRed = reduzirSimples(mes);
-  const anoRed = reduzirSimples(ano);
+  const destino = calcularDestino(data);
   
   const desafio1 = Math.abs(mesRed - diaRed);
-  const desafio2 = Math.abs(anoRed - diaRed);
+  const desafio2 = Math.abs(destino - diaRed); // Use destiny instead of year
   const desafioPrincipal = Math.abs(desafio1 - desafio2);
   
   return [desafio1, desafio2, desafioPrincipal];
@@ -342,9 +352,9 @@ export function calcularMomentos(data: string, destino: number): [number, number
   }
   
   const momento1 = reduzirComMestre(dia + mes);
-  const momento2 = reduzirComMestre(dia + ano);
-  const momento3 = reduzirComMestre(mes + ano);
-  const momento4 = reduzirComMestre(destino);
+  const momento2 = reduzirComMestre(dia); // Just the reduced day (same as second cycle)
+  const momento3 = destino; // The destiny number itself
+  const momento4 = reduzirComMestre(mes + destino); // Month + destiny
   
   return [momento1, momento2, momento3, momento4];
 }

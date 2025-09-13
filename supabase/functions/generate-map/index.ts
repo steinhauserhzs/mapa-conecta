@@ -214,7 +214,8 @@ function calcularCiclosVida(birth: string): [number, number, number] {
   
   const primeiro = reduce(m);
   const segundo = reduce(d);
-  const terceiro = reduce(y);
+  const destino = sumBirth({ d, m, y }); // Use destiny for third cycle
+  const terceiro = destino;
   
   return [primeiro, segundo, terceiro];
 }
@@ -226,10 +227,10 @@ function calcularDesafios(birth: string): [number, number, number] {
   // Reduce components to 1-9 for challenge calculations
   const dRed = reduceSimple(d);
   const mRed = reduceSimple(m);
-  const yRed = reduceSimple(y);
+  const destino = sumBirth({ d, m, y });
   
   const d1 = Math.abs(mRed - dRed);
-  const d2 = Math.abs(yRed - dRed);
+  const d2 = Math.abs(destino - dRed); // Use destiny instead of year
   const principal = Math.abs(d1 - d2);
   
   return [d1, d2, principal];
@@ -239,10 +240,10 @@ function calcularDesafios(birth: string): [number, number, number] {
 function calcularMomentos(birth: string, destino: number): [number, number, number, number] {
   const { d, m, y } = parseBirth(birth);
   
-  const primeiro = reduce(m + d);
-  const segundo = reduce(d + y);
-  const terceiro = reduce(primeiro + segundo);
-  const quarto = reduce(m + y);
+  const primeiro = reduce(d + m); // Day + month reduced
+  const segundo = reduce(d); // Just the reduced day
+  const terceiro = destino; // The destiny number itself
+  const quarto = reduce(m + destino); // Month + destiny
   
   return [primeiro, segundo, terceiro, quarto];
 }
