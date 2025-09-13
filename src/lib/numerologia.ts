@@ -529,10 +529,10 @@ export function validateTestCase(result: NumerologyResult): boolean {
     mission: 2,
     karmicLessons: [9],
     karmicDebts: [13],
-    hiddenTendencies: [5], // Most frequent number in name
+    hiddenTendencies: [1, 5], // Números que aparecem 2+ vezes no nome
     subconsciousResponse: 8,
     lifeCycles: [5, 11, 2],
-    challenges: [6, 9, 3], // |5-11|=6, |2-11|=9, |6-9|=3
+    challenges: [3, 0, 3], // |5-11|=6->3, |2000->2|=2, |11-2|=9->0, |3-0|=3
     decisiveMoments: [7, 4, 11, 7] // Updated calculations
   };
   

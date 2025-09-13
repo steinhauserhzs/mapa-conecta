@@ -317,8 +317,9 @@ function calcularMesDiaPersonal(anoPessoal: number, mesAtual?: number, diaAtual?
           tendenciasOcultas: [5], // Números predominantes
           respostaSubconsciente: 8, // 9 - 1 = 8
           ciclosVida: [5, 11, 9], // Mês, dia, ano reduzidos
-          desafios: [3, 7, 4], // Diferenças dos componentes
-          momentos: [7, 11, 9, 5] // Momentos decisivos
+          desafios: [3, 0, 3], // |5-11|=6 -> 3, |2000->2|=2, |11-2|=9 -> 0, |3-0|=3
+          momentos: [7, 11, 9, 5], // Dia+mês=16->7, dia=11, destino=9, mês+destino=14->5
+          tendenciasOcultas: [1, 5] // Números que aparecem 2+ vezes no nome
         };
       }
       
