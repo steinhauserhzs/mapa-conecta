@@ -467,16 +467,26 @@ serve(async (req) => {
       }
     }
 
-    // Buscar textos numerológicos com nova estrutura v3.1
+    // Buscar textos numerológicos com nova estrutura v3.0
     const { data: textsData, error: textsError } = await supabase
       .from('numerology_texts')
       .select('*')
-      .eq('version', 'v3.1')
+      .eq('version', 'v3.0')
       .order('priority', { ascending: false });
 
     const texts = textsError ? [] : textsData;
     
-    console.log(`📊 Encontrados ${texts.length} textos numerológicos v3.1`);
+    console.log(`📊 Encontrados ${texts.length} textos numerológicos v3.0`);
+
+    // Buscar informações detalhadas do anjo cabalístico
+    const { data: angelData, error: angelError } = await supabase
+      .from('cabalistic_angels')
+      .select('*')
+      .eq('name', anjoEspecial)
+      .single();
+
+    const angelInfo = angelError ? null : angelData;
+    console.log(`👼 Informações do anjo ${anjoEspecial}:`, angelInfo ? 'Encontradas' : 'Não encontradas');
 
     // Função para buscar texto por seção e número
     const getTextForNumber = (section: string, number: number) => {
