@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { runValidationTests } from './validationTests';
 
 // Types
 export interface NumerologyResult {
@@ -32,17 +33,19 @@ export interface NumerologyText {
   body: string;
 }
 
-// Default Cabalistic conversion table (1-8 grid)
-export const DEFAULT_CONVERSION_TABLE: ConversionTable = {
-  "A": 1, "I": 1, "Q": 1, "Y": 1, "J": 1,
+// Base cabalistic conversion table (1-8)
+const BASE_MAP: Record<string, number> = {
+  "A": 1, "I": 1, "Q": 1, "J": 1, "Y": 1,
   "B": 2, "K": 2, "R": 2,
   "C": 3, "G": 3, "L": 3, "S": 3,
   "D": 4, "M": 4, "T": 4,
   "E": 5, "H": 5, "N": 5,
-  "U": 6, "V": 6, "W": 6, "X": 6,
+  "U": 6, "V": 6, "W": 6, "X": 6, "Ç": 6,
   "O": 7, "Z": 7,
-  "F": 8, "P": 8, "Ç": 8
+  "F": 8, "P": 8,
 };
+
+export const DEFAULT_CONVERSION_TABLE: ConversionTable = BASE_MAP;
 
 // Psychic number table (day of month -> psychic number)
 export const DEFAULT_PSYCHIC_TABLE: { [key: number]: number } = {
@@ -73,47 +76,114 @@ export function isVogal(ch: string): boolean {
   return vowels.has(ch);
 }
 
-// Character analysis with Unicode NFD decomposition
-export function analyzeChar(raw: string) {
-  if (!raw) return null;
-  const nfd = raw.normalize('NFD');
-  const m = nfd.toUpperCase().match(/[A-Z]|Ç/);
-  if (!m) return null;
-  const baseChar = m[0];
-  
-  return {
-    baseChar,
-    marks: {
-      apostrophe: /['']/.test(raw),
-      circumflex: /[\u0302]|\^/.test(nfd),
-      ring: /[\u030A]|\u02DA/.test(nfd),
-      tilde: /[\u0303]|~/.test(nfd),
-      diaeresis: /[\u0308]|\u00A8/.test(nfd),
-      grave: /[\u0300]|`/.test(nfd)
+// Implementação exata da especificação numerologia Jé
+function applyDiacritics(baseValue: number, combiningMarks: string[]): number {
+  let v = baseValue;
+  for (const mk of combiningMarks) {
+    switch (mk) {
+      case "\u0301": v += 2; break; // agudo (´)
+      case "\u0303": v += 3; break; // til (~)
+      case "\u0302": v += 7; break; // circunflexo (^)
+      case "\u030A": v += 7; break; // ring/bolinha (°)
+      case "\u0300": v *= 2; break; // grave (`)
+      case "\u0308": v *= 2; break; // trema (¨)
+      default: break; // ignorar outros diacríticos
     }
+  }
+  return v;
+}
+
+function toUpperNoSpaces(input: string): string {
+  return (input || "")
+    .toUpperCase()
+    .replace(/[ \t\r\n\-_.]/g, ""); // remove separadores, mantém diacríticos
+}
+
+// Decompõe cada caractere em [base, diacríticos] (NFD)
+function decomposeNFD(char: string): { letter: string; marks: string[] } {
+  const nfd = char.normalize("NFD");
+  const base = [...nfd][0] || "";
+  const marks = [...nfd].slice(1);
+  return { letter: base, marks };
+}
+
+// Corrige casos onde "Ç" vira "C" + cedilha (U+0327) na NFD
+function normalizeCedilla(letter: string, marks: string[]): { normLetter: string; marks: string[] } {
+  const CEDILLA = "\u0327";
+  if ((letter === "C" || letter === "c") && marks.includes(CEDILLA)) {
+    return { normLetter: "Ç", marks: marks.filter(m => m !== CEDILLA) };
+  }
+  return { normLetter: letter, marks };
+}
+
+export function numerologiaJéTabela(input: string) {
+  const clean = toUpperNoSpaces(input);
+
+  const porLetra: Array<{
+    letra: string; base: number; modificadores: string[]; valorFinal: number;
+  }> = [];
+
+  let somaTotal = 0;
+
+  for (const ch of [...clean]) {
+    if (!ch.match(/[A-ZÀ-ÖØ-ÝÞßÇ]/i)) continue;
+
+    let { letter, marks } = decomposeNFD(ch);
+    ({ normLetter: letter, marks } = normalizeCedilla(letter, marks));
+
+    const base = BASE_MAP[letter] ?? BASE_MAP[letter.toUpperCase()];
+    if (base == null) continue;
+
+    const valorFinal = applyDiacritics(base, marks);
+    somaTotal += valorFinal;
+
+    porLetra.push({
+      letra: ch,
+      base,
+      modificadores: marks,
+      valorFinal,
+    });
+  }
+
+  const reducao_1a8 = somaTotal > 0 ? ((somaTotal - 1) % 8) + 1 : 0;
+
+  return {
+    entrada: input,
+    somaTotal,
+    reducao_1a8,
+    detalhes: porLetra,
   };
 }
 
-// Apply accent modifiers: til(+3), circunflexo(+7), apóstrofe(+2), crase(*2), diérese(*2)
-export function applyMods(value: number, marks: any): number {
-  let val = value;
-  if (marks.apostrophe) val += 2;
-  if (marks.circumflex) val += 7;
-  if (marks.ring) val += 7;
-  if (marks.tilde) val += 3;
-  if (marks.diaeresis) val *= 2;
-  if (marks.grave) val *= 2;
-  return val;
+// Função para redução 1-8 preservando números mestres
+export function reduzir1a8ComMestre(n: number): number {
+  if (n === 11 || n === 22) return n;
+  return ((n - 1) % 8) + 1;
 }
 
+export function somarLetrasJé(
+  texto: string, 
+  filtro?: (letra: string) => boolean
+): number {
+  const resultado = numerologiaJéTabela(texto);
+  
+  if (!filtro) return resultado.somaTotal;
+  
+  let soma = 0;
+  for (const detalhe of resultado.detalhes) {
+    const baseChar = detalhe.letra.normalize('NFD')[0].toUpperCase();
+    if (filtro(baseChar)) {
+      soma += detalhe.valorFinal;
+    }
+  }
+  
+  return soma;
+}
+
+// Compatibilidade com código existente
 export function valorLetra(ch: string, conversionTable: ConversionTable): number {
-  const analyzed = analyzeChar(ch);
-  if (!analyzed) return 0;
-  
-  const base = conversionTable[analyzed.baseChar];
-  if (base === undefined) return 0;
-  
-  return applyMods(base, analyzed.marks);
+  const resultado = numerologiaJéTabela(ch);
+  return resultado.detalhes[0]?.valorFinal || 0;
 }
 
 export function somarLetras(
@@ -121,61 +191,32 @@ export function somarLetras(
   conversionTable: ConversionTable,
   filtro: (ch: string) => boolean = () => true
 ): number {
-  const normalized = normalizarLetras(texto);
-  let sum = 0;
-  
-  for (const ch of normalized) {
-    if (ch === ' ') continue; // Skip spaces
-    const analyzed = analyzeChar(ch);
-    if (analyzed && filtro(analyzed.baseChar)) {
-      sum += valorLetra(ch, conversionTable);
-    }
-  }
-  
-  return sum;
+  return somarLetrasJé(texto, filtro);
 }
 
 // Reduce preserving only master numbers 11 and 22 (NOT 33 in Cabalistic)
 export function reduzirComMestre(n: number): number {
   if (n === 11 || n === 22) return n;
-  while (n > 9) {
-    n = String(n).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-    if (n === 11 || n === 22) return n;
-  }
-  return n;
+  return reduzir1a8ComMestre(n);
 }
 
 export function reduzirSimples(n: number): number {
-  while (n > 9) {
-    n = String(n).split('').reduce((sum, digit) => sum + parseInt(digit), 0);
-  }
-  return n;
-}
-
-// Core numerology calculations with per-word reduction
-function calcularPerPalavra(nome: string, conversionTable: ConversionTable, filtro?: (ch: string) => boolean): number {
-  const palavras = normalizarLetras(nome).split(/\s+/).filter(p => p.length > 0);
-  let somaTotal = 0;
-  
-  for (const palavra of palavras) {
-    const somaPalavra = somarLetras(palavra, conversionTable, filtro);
-    const palavraReduzida = reduzirComMestre(somaPalavra);
-    somaTotal += palavraReduzida;
-  }
-  
-  return reduzirComMestre(somaTotal);
+  return ((n - 1) % 8) + 1;
 }
 
 export function calcularExpressao(nome: string, conversionTable: ConversionTable): number {
-  return calcularPerPalavra(nome, conversionTable);
+  const soma = somarLetrasJé(nome);
+  return reduzirComMestre(soma);
 }
 
 export function calcularMotivacao(nome: string, conversionTable: ConversionTable): number {
-  return calcularPerPalavra(nome, conversionTable, isVogal);
+  const soma = somarLetrasJé(nome, (ch) => isVogal(ch));
+  return reduzirComMestre(soma);
 }
 
 export function calcularImpressao(nome: string, conversionTable: ConversionTable): number {
-  return calcularPerPalavra(nome, conversionTable, ch => !isVogal(ch));
+  const soma = somarLetrasJé(nome, (ch) => !isVogal(ch));
+  return reduzirComMestre(soma);
 }
 
 export function calcularDestino(data: string): number {
@@ -205,22 +246,17 @@ export function calcularPsiquico(dia: number, psychicTable: { [key: number]: num
 }
 
 export function calcularLicoesCarmicas(nome: string, conversionTable: ConversionTable): number[] {
-  const normalized = normalizarLetras(nome);
+  const resultado = numerologiaJéTabela(nome);
   const presentNumbers = new Set<number>();
   
-  for (const ch of normalized) {
-    if (ch === ' ') continue;
-    const analyzed = analyzeChar(ch);
-    if (analyzed) {
-      const base = conversionTable[analyzed.baseChar];
-      if (base >= 1 && base <= 9) {
-        presentNumbers.add(base);
-      }
+  for (const detalhe of resultado.detalhes) {
+    if (detalhe.base >= 1 && detalhe.base <= 8) {
+      presentNumbers.add(detalhe.base);
     }
   }
   
   const absent = [];
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i <= 8; i++) {
     if (!presentNumbers.has(i)) {
       absent.push(i);
     }
@@ -234,18 +270,18 @@ export function calcularDividasCarmicas(nome: string, data: string, conversionTa
   const foundKarma: number[] = [];
   
   // Check individual words before reduction for karmic debts
-  const palavras = normalizarLetras(nome).split(/\s+/).filter(w => w.length > 0);
+  const palavras = toUpperNoSpaces(nome).split(/\s+/).filter(w => w.length > 0);
   for (const palavra of palavras) {
-    const total = somarLetras(palavra, conversionTable);
+    const total = somarLetrasJé(palavra);
     if (karmaNumbers.includes(total)) {
       foundKarma.push(total);
     }
   }
   
   // Calculate totals before reduction to detect karmic debts
-  const expressaoTotal = somarLetras(nome, conversionTable);
-  const motivacaoTotal = somarLetras(nome, conversionTable, isVogal);
-  const impressaoTotal = somarLetras(nome, conversionTable, ch => !isVogal(ch));
+  const expressaoTotal = somarLetrasJé(nome);
+  const motivacaoTotal = somarLetrasJé(nome, (ch) => isVogal(ch));
+  const impressaoTotal = somarLetrasJé(nome, (ch) => !isVogal(ch));
   
   // Parse birth date
   let dia: number, mes: number, ano: number;
@@ -263,7 +299,7 @@ export function calcularDividasCarmicas(nome: string, data: string, conversionTa
     motivacaoTotal, 
     impressaoTotal,
     destinoTotal,
-    dia + mes + ano  // Also check birth components sum
+    dia + mes + ano
   ];
   
   for (const total of totalsToCheck) {
@@ -278,17 +314,12 @@ export function calcularDividasCarmicas(nome: string, data: string, conversionTa
 }
 
 export function calcularTendenciasOcultas(nome: string, conversionTable: ConversionTable): number[] {
-  const normalized = normalizarLetras(nome);
+  const resultado = numerologiaJéTabela(nome);
   const frequency: { [key: number]: number } = {};
   
-  for (const ch of normalized) {
-    if (ch === ' ') continue;
-    const analyzed = analyzeChar(ch);
-    if (analyzed) {
-      const base = conversionTable[analyzed.baseChar];
-      if (base >= 1 && base <= 9) {
-        frequency[base] = (frequency[base] || 0) + 1;
-      }
+  for (const detalhe of resultado.detalhes) {
+    if (detalhe.base >= 1 && detalhe.base <= 8) {
+      frequency[detalhe.base] = (frequency[detalhe.base] || 0) + 1;
     }
   }
   
@@ -296,13 +327,13 @@ export function calcularTendenciasOcultas(nome: string, conversionTable: Convers
   
   const maxFreq = Math.max(...Object.values(frequency));
   return Object.keys(frequency)
-    .filter(key => frequency[parseInt(key)] === maxFreq)
+    .filter(key => frequency[parseInt(key)] === maxFreq && maxFreq >= 2)
     .map(key => parseInt(key))
     .sort((a, b) => a - b);
 }
 
 export function calcularRespostaSubconsciente(licoesCarmicas: number[]): number {
-  return Math.max(1, Math.min(9, 9 - licoesCarmicas.length));
+  return Math.max(1, Math.min(8, 8 - licoesCarmicas.length));
 }
 
 export function calcularCiclosVida(data: string): [number, number, number] {
