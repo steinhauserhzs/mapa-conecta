@@ -12,7 +12,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { EnhancedDatePicker } from '@/components/ui/enhanced-date-picker';
 import MapaPDF from './MapaPDF';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +20,9 @@ import { User } from 'lucide-react';
 // Schema de validação
 const formSchema = z.object({
   name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  birth: z.date({ required_error: 'Data de nascimento é obrigatória' }),
+  birth: z.string()
+    .min(8, 'Data deve ter pelo menos 8 caracteres')
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
   clientId: z.string().optional(),
 });
 
@@ -253,7 +254,8 @@ export default function MapGenerator() {
       form.setValue('clientId', preSelectedClient.id);
       form.setValue('name', preSelectedClient.name);
       if (preSelectedClient.birth_date) {
-        form.setValue('birth', new Date(preSelectedClient.birth_date));
+        const date = new Date(preSelectedClient.birth_date);
+        form.setValue('birth', format(date, 'dd/MM/yyyy'));
       }
     }
   }, [location.state]);
@@ -287,7 +289,8 @@ export default function MapGenerator() {
       setSelectedClient(client);
       form.setValue('name', client.name);
       if (client.birth_date) {
-        form.setValue('birth', new Date(client.birth_date));
+        const date = new Date(client.birth_date);
+        form.setValue('birth', format(date, 'dd/MM/yyyy'));
       }
     } else {
       setSelectedClient(null);
@@ -360,7 +363,10 @@ export default function MapGenerator() {
     console.log('🔄 Iniciando geração do mapa no cliente...', data);
     
     try {
-      const birthString = format(data.birth, 'yyyy-MM-dd');
+      // Parse date from DD/MM/YYYY format
+      const [day, month, year] = data.birth.split('/');
+      const birthDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const birthString = format(birthDate, 'yyyy-MM-dd');
       console.log('📅 Data formatada:', birthString);
       
       const requestBody = {
@@ -681,11 +687,12 @@ export default function MapGenerator() {
 
                 <div>
                   <Label htmlFor="birth">Data de Nascimento</Label>
-                  <EnhancedDatePicker
-                    date={form.watch('birth')}
-                    onDateChange={(date) => form.setValue('birth', date)}
-                    placeholder="Selecione a data"
-                    className="mt-1 w-full"
+                  <Input
+                    id="birth"
+                    type="text"
+                    {...form.register('birth')}
+                    placeholder="DD/MM/AAAA"
+                    className="mt-1"
                   />
                   {form.formState.errors.birth && (
                     <p className="text-sm text-destructive mt-1">
