@@ -155,22 +155,37 @@ function calcularDividasCarmicas(name: string, birth: string, baseMap: Record<st
   // Normalizar nome
   const normalizedName = name.toLowerCase().replace(/[^a-záàâãéèêíìîóòôõúùûç\s]/g, '').trim();
   
+  // Check individual words before reduction for karmic debts
+  const palavras = normalizedName.split(/\s+/).filter(w => w.length > 0);
+  for (const palavra of palavras) {
+    const total = sumLetters(palavra, baseMap);
+    if (karmaNumbers.includes(total)) {
+      foundKarma.push(total);
+    }
+  }
+  
   // Verificar expressão total (ANTES da redução)
   const expressaoTotal = sumLetters(normalizedName, baseMap);
   if (karmaNumbers.includes(expressaoTotal)) {
-    foundKarma.push(expressaoTotal);
+    if (!foundKarma.includes(expressaoTotal)) {
+      foundKarma.push(expressaoTotal);
+    }
   }
   
   // Verificar motivação total (ANTES da redução)  
   const motivacaoTotal = sumLetters(normalizedName, baseMap, ch => /[aeiouáàâãéèêíìîóòôõúùû]/i.test(ch));
   if (karmaNumbers.includes(motivacaoTotal)) {
-    foundKarma.push(motivacaoTotal);
+    if (!foundKarma.includes(motivacaoTotal)) {
+      foundKarma.push(motivacaoTotal);
+    }
   }
   
   // Verificar impressão total (ANTES da redução)
   const impressaoTotal = sumLetters(normalizedName, baseMap, ch => !/[aeiouáàâãéèêíìîóòôõúùû]/i.test(ch));
   if (karmaNumbers.includes(impressaoTotal)) {
-    foundKarma.push(impressaoTotal);
+    if (!foundKarma.includes(impressaoTotal)) {
+      foundKarma.push(impressaoTotal);
+    }
   }
   
   return [...new Set(foundKarma)].sort((a, b) => a - b);
