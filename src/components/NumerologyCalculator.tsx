@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
-import { CompleteNumerologyResult } from "./CompleteNumerologyResult";
+import { ProfessionalNumerologyMap } from "./ProfessionalNumerologyMap";
 
 interface NumerologyFormData {
   name: string;
@@ -38,7 +38,9 @@ interface CompleteNumerologyResult {
 }
 
 export const NumerologyCalculator = () => {
-  const [result, setResult] = useState<CompleteNumerologyResult | null>(null);
+  const [result, setResult] = useState<any>(null);
+  const [texts, setTexts] = useState<{ [key: string]: any }>({});
+  const [angel, setAngel] = useState<any>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [isOnlineMode, setIsOnlineMode] = useState(true);
   const [birthDate, setBirthDate] = useState<string>("");
@@ -76,37 +78,89 @@ export const NumerologyCalculator = () => {
 
     setIsCalculating(true);
     try {
-      const birthFormatted = format(finalDate, "yyyy-MM-dd");
+      // Format date for the API (DD/MM/YYYY)
+      const formattedDate = format(finalDate, "dd/MM/yyyy");
       
-      // Usar generate-map para obter o mapa completo
-      const { data: response, error } = await supabase.functions.invoke('generate-map', {
-        body: {
-          name: data.name,
-          birth: birthFormatted
+      console.log("Chamando generate-map com:", { name: data.name, birth: formattedDate });
+
+      // Call the Supabase function
+      const { data: mapData, error } = await supabase.functions.invoke('generate-map', {
+        body: { 
+          name: data.name, 
+          birth: formattedDate 
         }
       });
 
       if (error) {
         console.error('Erro na função generate-map:', error);
-        setIsOnlineMode(false);
-        toast.error("Erro ao gerar mapa numerológico completo. Sistema offline temporariamente.");
+        toast.error("Erro ao gerar mapa numerológico. Tente novamente.");
         return;
       }
 
-      if (response && response.metadados) {
-        setResult(response);
-        setIsOnlineMode(true);
-        
-        const completeness = response.metadados.totalTextos > 0 ? "completo" : "básico";
-        toast.success(`Mapa numerológico ${completeness} gerado com sucesso!`);
-        
-        // Validação do teste interno
-        if (response.metadados.calculosCompletos) {
-          console.log('✅ Mapa gerado com cálculos completos');
-        }
-      } else {
-        throw new Error('Resposta inválida do servidor');
+      console.log("Resposta recebida:", mapData);
+
+      // Fetch numerology texts from database
+      const { data: numerologyTexts, error: textsError } = await supabase
+        .from('numerology_texts')
+        .select('*');
+
+      if (textsError) {
+        console.warn("Erro ao carregar textos:", textsError);
       }
+
+      // Fetch angel information
+      let angelData = null;
+      if (mapData?.anjoEspecial) {
+        const { data: angelResult, error: angelError } = await supabase
+          .from('cabalistic_angels')
+          .select('*')
+          .eq('name', mapData.anjoEspecial)
+          .maybeSingle();
+
+        if (!angelError && angelResult) {
+          angelData = angelResult;
+        }
+      }
+
+      // Create texts lookup object
+      const textsLookup: { [key: string]: any } = {};
+      if (numerologyTexts) {
+        numerologyTexts.forEach((text) => {
+          const key = `${text.section}-${text.key_number}`;
+          textsLookup[key] = text;
+        });
+      }
+
+      // Prepare comprehensive result for ProfessionalNumerologyMap
+      const comprehensiveResult = {
+        nome: data.name,
+        dataNascimento: formattedDate,
+        motivacao: mapData.numeros?.motivacao || 0,
+        impressao: mapData.numeros?.impressao || 0,
+        expressao: mapData.numeros?.expressao || 0,
+        destino: mapData.numeros?.destino || 0,
+        missao: mapData.numeros?.missao || 0,
+        psiquico: mapData.numeros?.psiquico || 0,
+        licoesCarmicas: mapData.numeros?.licoesCarmicas || [],
+        dividasCarmicas: mapData.numeros?.dividasCarmicas || [],
+        tendenciasOcultas: mapData.numeros?.tendenciasOcultas || [],
+        respostaSubconsciente: mapData.numeros?.respostaSubconsciente || 0,
+        ciclosVida: mapData.numeros?.ciclosVida || [],
+        desafios: mapData.numeros?.desafios || [],
+        momentos: mapData.numeros?.momentos || [],
+        anoPessoal: mapData.complementares?.anoPessoal || 0,
+        mesPessoal: mapData.complementares?.mesPessoal || 0,
+        diaPessoal: mapData.complementares?.diaPessoal || 0,
+        anjoEspecial: mapData.anjoEspecial
+      };
+
+      setResult(comprehensiveResult);
+      setTexts(textsLookup);
+      setAngel(angelData);
+      setIsOnlineMode(true);
+
+      toast.success("Mapa numerológico profissional gerado com sucesso!");
+
     } catch (error) {
       console.error('Erro no cálculo:', error);
       setIsOnlineMode(false);
@@ -247,43 +301,33 @@ export const NumerologyCalculator = () => {
 
       {result && (
         <>
-          <CompleteNumerologyResult result={result} />
-          <Card>
-            <CardHeader>
-              <CardTitle>Exportar Mapa</CardTitle>
-              <CardDescription>
-                Baixe seu mapa numerológico em diferentes formatos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  onClick={exportJSON}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Exportar JSON
-                </Button>
-                <Button
-                  onClick={exportPDF}
-                  variant="default"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  disabled={!isOnlineMode}
-                >
-                  <FileDown className="h-4 w-4" />
-                  Gerar PDF Profissional
-                </Button>
-              </div>
-              {!isOnlineMode && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  PDF disponível apenas no modo online
-                </p>
-              )}
-            </CardContent>
-          </Card>
+          <div className="flex flex-wrap gap-2 justify-center mb-6">
+            <Button
+              onClick={exportJSON}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Exportar JSON
+            </Button>
+            <Button
+              onClick={exportPDF}
+              variant="default"
+              size="sm"
+              className="flex items-center gap-2"
+              disabled={!isOnlineMode}
+            >
+              <FileDown className="h-4 w-4" />
+              Gerar PDF Profissional
+            </Button>
+          </div>
+          
+          <ProfessionalNumerologyMap 
+            result={result} 
+            texts={texts} 
+            angel={angel} 
+          />
         </>
       )}
     </div>
