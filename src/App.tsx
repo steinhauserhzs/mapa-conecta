@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import AdminUsers from "./pages/AdminUsers";
 import MapGenerator from "./pages/MapGenerator";
+import Numerology from "./pages/Numerology";
 import MapasEmpresariais from "./pages/MapasEmpresariais";
 import HarmoniaConjugal from "./pages/HarmoniaConjugal";
 import MapasInfantis from "./pages/MapasInfantis";
@@ -73,6 +74,16 @@ const App = () => (
                   }
                 >
                   <Route index element={<MapGenerator />} />
+                </Route>
+                <Route
+                  path="/numerologia"
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route index element={<Numerology />} />
                 </Route>
                 <Route
                   path="/mapas-empresariais"

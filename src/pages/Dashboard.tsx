@@ -18,7 +18,8 @@ import {
   Phone,
   MapPin,
   Car,
-  PenTool
+  PenTool,
+  Calculator
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useNavigate } from 'react-router-dom';
@@ -144,6 +145,24 @@ const Dashboard = () => {
       <div>
         <h2 className="text-xl font-semibold mb-4 text-foreground">Acesso Rápido</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Calculadora Numerológica */}
+          <Card 
+            className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"
+            onClick={() => navigate('/numerologia')}
+          >
+            <CardContent className="p-6 text-center space-y-3">
+              <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                <Calculator className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">Calculadora Numerológica</h3>
+                <p className="text-xs text-muted-foreground leading-tight">
+                  Gerador completo de mapas numerológicos cabalísticos
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Mapas Pessoais */}
           <Card 
             className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 border-primary/20 hover:border-primary/40"

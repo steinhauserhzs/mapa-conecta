@@ -483,7 +483,7 @@ serve(async (req) => {
       .from('cabalistic_angels')
       .select('*')
       .eq('name', anjoEspecial)
-      .single();
+      .maybeSingle();
 
     const angelInfo = angelError ? null : angelData;
     console.log(`👼 Informações do anjo ${anjoEspecial}:`, angelInfo ? 'Encontradas' : 'Não encontradas');
