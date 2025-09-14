@@ -656,7 +656,7 @@ serve(async (req) => {
         invocationTime1: angelInfo?.invocation_time_1 || "06:00 às 06:20",
         invocationTime2: angelInfo?.invocation_time_2 || "18:00 às 18:20",
         psalm: angelInfo?.psalm_reference || "Salmo 113",
-        completeInvocation: angelInfo?.complete_prayer || `Invocação completa do anjo ${anjoEspecial}`
+        completeInvocation: angelInfo?.complete_prayer || `Invocação completa do anjo ${anjoEspecial}`,
       },
 
       metadata: {
