@@ -316,7 +316,7 @@ serve(async (req) => {
   }
 
   try {
-    const { name, birth, referenceYear } = await req.json();
+    const { name, birth, referenceYear, anoReferencia } = await req.json();
     
     if (!name || !birth) {
       return new Response(
@@ -353,7 +353,8 @@ serve(async (req) => {
     }
 
     // Calculate complete numerology map with ALL numbers for 31 topics
-    const numbers = calcularCompleto({ name, birth, referenceYear });
+    const refYear = referenceYear || anoReferencia || new Date().getFullYear();
+    const numbers = calcularCompleto({ name, birth, referenceYear: refYear });
     console.log('🔢 Números calculados:', JSON.stringify(numbers, null, 2));
 
     // Fetch detailed texts for ALL 31 topics from database
@@ -454,19 +455,16 @@ serve(async (req) => {
             console.log(`✅ Fallback aplicado para ${query} usando ${section} ${fallbackText.key_number}`);
           } else {
             // Se não tem NADA na seção, gerar erro claro
-            console.log(`❌ Seção ${section} completamente vazia no banco - dados ausentes`);
-            return new Response(
-              JSON.stringify({ 
-                error: `Dados numerológicos incompletos`, 
-                missing_section: section,
-                missing_numbers: [keyNumber],
-                message: `A seção '${section}' não possui textos no banco de dados. Execute a função update-numerology-content primeiro.`
-              }),
-              { 
-                status: 422, 
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-              }
-            );
+            console.log(`❌ Seção ${section} vazia no banco - seguindo com placeholder`);
+            textosObj[query] = {
+              titulo: `${section.replace(/_/g, ' ')} ${keyNumber}`,
+              numero: parseInt(keyNumber),
+              explicacao: `Conteúdo não encontrado para ${section} ${keyNumber}.`,
+              conteudo: `Conteúdo não encontrado para ${section} ${keyNumber}.`,
+              cores: [],
+              pedras: [],
+              profissoes: []
+            };
           }
         }
       } catch (error) {
