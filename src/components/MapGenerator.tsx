@@ -16,6 +16,7 @@ import MapaPDF from './MapaPDF';
 import html2pdf from 'html2pdf.js';
 import { useToast } from '@/hooks/use-toast';
 import { User } from 'lucide-react';
+import { testMapGeneration } from '@/utils/testMapGeneration';
 
 // Schema de validação
 const formSchema = z.object({
@@ -361,16 +362,22 @@ export default function MapGenerator() {
       const birthString = format(birthDate, 'yyyy-MM-dd');
       console.log('📅 Data formatada:', birthString);
       
-      // Garantir que os textos numerológicos estejam atualizados a partir do DOCX
+      // Garantir que os textos numerológicos estejam atualizados
+      console.log('📚 Verificando conteúdo numerológico...');
       try {
-        const updateTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout update')), 15000));
-        await Promise.race([
+        const updateTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000));
+        const updateResult = await Promise.race([
           supabase.functions.invoke('update-numerology-content', { body: {} }),
           updateTimeout
         ]);
-        console.log('📚 Conteúdo numerológico atualizado.');
+        
+        if (updateResult && typeof updateResult === 'object' && 'error' in updateResult && updateResult.error) {
+          console.warn('⚠️ Erro na atualização:', (updateResult.error as any)?.message || 'Erro desconhecido');
+        } else {
+          console.log('✅ Conteúdo numerológico atualizado com sucesso');
+        }
       } catch (e: any) {
-        console.warn('⚠️ Falha ao atualizar conteúdo numerológico (seguindo mesmo assim):', e?.message || e);
+        console.warn('⚠️ Falha ao atualizar conteúdo (continuando):', e?.message || e);
       }
       
       const requestBody = {
