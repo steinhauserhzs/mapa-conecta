@@ -361,6 +361,18 @@ export default function MapGenerator() {
       const birthString = format(birthDate, 'yyyy-MM-dd');
       console.log('📅 Data formatada:', birthString);
       
+      // Garantir que os textos numerológicos estejam atualizados a partir do DOCX
+      try {
+        const updateTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout update')), 15000));
+        await Promise.race([
+          supabase.functions.invoke('update-numerology-content', { body: {} }),
+          updateTimeout
+        ]);
+        console.log('📚 Conteúdo numerológico atualizado.');
+      } catch (e: any) {
+        console.warn('⚠️ Falha ao atualizar conteúdo numerológico (seguindo mesmo assim):', e?.message || e);
+      }
+      
       const requestBody = {
         name: data.name,
         birth: birthString,

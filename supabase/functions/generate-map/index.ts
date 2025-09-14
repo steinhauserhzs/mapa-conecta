@@ -292,7 +292,7 @@ serve(async (req) => {
           .select('*')
           .eq('section', section)
           .eq('key_number', parseInt(keyNumber))
-          .single();
+          .maybeSingle();
 
         if (textData) {
           totalTextsFound++;
@@ -307,16 +307,39 @@ serve(async (req) => {
           };
           console.log(`✅ Texto encontrado para ${query}`);
         } else {
-          console.log(`⚠️ Texto não encontrado para ${query}`);
-          textosObj[query] = {
-            titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
-            numero: parseInt(keyNumber),
-            explicacao: "",
-            conteudo: "",
-            cores: [],
-            pedras: [],
-            profissoes: []
-          };
+          console.log(`⚠️ Texto não encontrado para ${query}, tentando fallback por seção '${section}'`);
+          // Fallback: pegar qualquer texto existente dessa seção (ex.: key 1)
+          const { data: anyText } = await supabase
+            .from('numerology_texts')
+            .select('*')
+            .eq('section', section)
+            .order('key_number', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+          if (anyText) {
+            totalTextsFound++;
+            textosObj[query] = {
+              titulo: anyText.title || `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
+              numero: parseInt(keyNumber),
+              explicacao: anyText.body || '',
+              conteudo: anyText.body || '',
+              cores: anyText.color_associations || [],
+              pedras: anyText.stone_associations || [],
+              profissoes: anyText.profession_associations || []
+            };
+            console.log(`✅ Fallback aplicado para ${query} usando ${section} ${anyText.key_number}`);
+          } else {
+            textosObj[query] = {
+              titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
+              numero: parseInt(keyNumber),
+              explicacao: '',
+              conteudo: '',
+              cores: [],
+              pedras: [],
+              profissoes: []
+            };
+          }
         }
       } catch (error) {
         console.log(`❌ Erro ao buscar ${query}:`, error.message);
@@ -348,7 +371,7 @@ serve(async (req) => {
         .from('cabalistic_angels')
         .select('*')
         .eq('name', anjoEspecial)
-        .single();
+        .maybeSingle();
       
       if (data) {
         angelInfo = data;

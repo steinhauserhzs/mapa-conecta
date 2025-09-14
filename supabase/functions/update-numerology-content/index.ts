@@ -168,7 +168,6 @@ O Número 22 na Motivação representa o desejo supremo de materializar visões 
 
       { section: 'grau_ascensao', key_number: 1, title: 'Grau de Ascensão 1', body: `Ascensão através da Liderança – Seu crescimento espiritual acontece através do desenvolvimento de liderança autêntica, originalidade e coragem para seguir seu próprio caminho. Você evolui assumindo responsabilidades e inspirando outros através do seu exemplo pessoal.` }
     ];
-    ];
 
     console.log(`📚 Preparando para inserir ${completeTexts.length} textos numerológicos...`);
 
