@@ -588,6 +588,175 @@ serve(async (req) => {
     console.log(`👼 Informações do anjo ${anjoEspecial}:`, angelInfo ? 'Encontradas' : 'Não encontradas');
 
     // Construir conteúdo do mapa completo
+    // Pré-busca paralela de textos para evitar awaits sequenciais
+    const textosObj = {
+      motivacao: {
+        titulo: "Motivação",
+        numero: result.motivacao,
+        explicacao: "O número de Motivação descreve os motivos e as razões que movem as atitudes do ser humano e o seu modo de proceder. Esse número revela o aspecto interior da personalidade, da alma, que se reflete em suas atitudes e comportamentos, principalmente na intimidade e no lar, influenciando ainda nas escolhas pessoais.",
+        conteudo: (await getTextForNumber('motivacao', result.motivacao))?.body || `Motivação ${result.motivacao} - Este número revela seus desejos mais profundos e o que verdadeiramente o motiva na vida.`
+      },
+
+      impressao: {
+        titulo: "Impressão",
+        numero: result.impressao,
+        explicacao: "O número de Impressão descreve a personalidade em seu aspecto externo, o ego, ou seja, a aparência da personalidade atual. É o número que descreve aquela primeira impressão que a pessoa causa quando é vista por outro.",
+        conteudo: (await getTextForNumber('impressao', result.impressao))?.body || `Impressão ${result.impressao} - Este número revela como os outros o percebem inicialmente.`
+      },
+
+      expressao: {
+        titulo: "Expressão", 
+        numero: result.expressao,
+        explicacao: "O número de Expressão enuncia a maneira como a pessoa age e interage com os outros, com o mundo, revelando quais são os seus verdadeiros talentos e as aptidões que desenvolverá ao longo da vida e a melhor forma de expressá-los.",
+        conteudo: (await getTextForNumber('expressao', result.expressao))?.body || `Expressão ${result.expressao} - Este número revela seus talentos naturais e como você se expressa no mundo.`
+      },
+
+      destino: {
+        titulo: "Destino",
+        numero: result.destino,
+        explicacao: "O número de destino é determinado pela data de nascimento - dia, mês e ano. O destino rege a vida do ser humano e indica o seu caminho evolutivo. Ele orienta as decisões mais importantes na vida.",
+        conteudo: (await getTextForNumber('destino', result.destino))?.body || `Destino ${result.destino} - Este número revela sua missão de vida e caminho evolutivo.`
+      },
+
+      missao: {
+        titulo: "Missão",
+        numero: result.missao,
+        explicacao: "Cada ser humano traz ao nascer uma Missão, que nada mais é que a sua vocação. Essa Missão será desenvolvida ao longo da vida independentemente de qual profissão exercerá.",
+        conteudo: (await getTextForNumber('missao', result.missao))?.body || `Missão ${result.missao} - Este número revela como você deve realizar sua vocação na vida.`
+      },
+
+      psiquico: {
+        titulo: "Número Psíquico",
+        numero: result.psiquico,
+        explicacao: "O número psíquico é baseado no dia de nascimento e revela a essência da personalidade, influenciando diretamente o comportamento e as características básicas da pessoa.",
+        conteudo: (await getTextForNumber('psiquico', result.psiquico))?.body || `Psíquico ${result.psiquico} - Este número revela sua essência interior e padrões comportamentais naturais.`
+      },
+
+      anjoEspecial: {
+        titulo: "Seu Anjo Cabalístico",
+        nome: anjoEspecial,
+        categoria: angelInfo?.category || "Anjo Protetor",
+        explicacao: angelInfo?.domain_description || `Seu anjo protetor é ${anjoEspecial}, que oferece proteção e orientação espiritual específica para seu caminho de vida.`,
+        invocacao1: angelInfo?.invocation_time_1 || "Consulte horários específicos",
+        invocacao2: angelInfo?.invocation_time_2 || null,
+        salmo: angelInfo?.psalm_reference || "Consulte referências cabalísticas",
+        oracaoCompleta: angelInfo?.complete_prayer || `Divino ${anjoEspecial}, concedei-me vossa proteção e orientação em meu caminho espiritual.`,
+        invocacaoDetalhada: angelInfo?.detailed_invocation || "Invoque com devoção e fé sincera",
+        areasManifestacao: angelInfo?.manifestation_areas || [],
+        especialidadesCura: angelInfo?.healing_specialties || [],
+        metodosProtecao: angelInfo?.protection_methods || "Proteção espiritual geral",
+        sinaisPresenca: angelInfo?.signs_presence || [],
+        coresCorrespondentes: angelInfo?.color_correspondences || [],
+        cristaisAssociados: angelInfo?.crystal_associations || [],
+        horasPlanetarias: angelInfo?.planetary_hours || "Consulte calendário cabalístico",
+        instrucoesPracao: angelInfo?.ritual_instructions || "Prepare um ambiente sagrado para invocação",
+        oferendasSugeridas: angelInfo?.offering_suggestions || [],
+        praticasGratidao: angelInfo?.gratitude_practices || "Agradeça com sinceridade após receber as bênçãos",
+        influenciaNegativa: angelInfo?.negative_influence || "Afasta energias contrárias ao desenvolvimento espiritual"
+      },
+
+      licoesCarmicas: {
+        titulo: "Lições Cármicas",
+        numeros: result.licoesCarmicas,
+        explicacao: "As Lições Cármicas são números ausentes no nome completo e representam qualidades que devem ser desenvolvidas nesta vida.",
+        licoes: await Promise.all(result.licoesCarmicas.map(async (num) => ({
+          numero: num,
+          licao: (await getTextForNumber('licao-carmica', num))?.body || `Lição Cármica ${num} - Desenvolver as qualidades relacionadas a este número.`
+        })))
+      },
+
+      dividasCarmicas: {
+        titulo: "Dívidas Cármicas",
+        numeros: result.dividasCarmicas,
+        explicacao: "As Dívidas Cármicas (13, 14, 16, 19) representam desafios específicos que devem ser superados nesta vida.",
+        dividas: await Promise.all(result.dividasCarmicas.map(async (num) => ({
+          numero: num,
+          desafio: (await getTextForNumber('divida-carmica', num))?.body || `Dívida Cármica ${num} - Desafios específicos relacionados a vidas passadas.`
+        })))
+      },
+
+      tendenciasOcultas: {
+        titulo: "Tendências Ocultas",
+        numeros: result.tendenciasOcultas,
+        explicacao: "As Tendências Ocultas são talentos naturais inconscientes que se manifestam espontaneamente.",
+        tendencias: await Promise.all(result.tendenciasOcultas.map(async (num) => ({
+          numero: num,
+          talento: (await getTextForNumber('tendencia-oculta', num))?.body || `Tendência Oculta ${num} - Talentos naturais que se manifestam automaticamente.`
+        })))
+      },
+
+      respostaSubconsciente: {
+        titulo: "Resposta Subconsciente",
+        numero: result.respostaSubconsciente,
+        explicacao: "A Resposta Subconsciente indica como você reage instintivamente em situações de crise.",
+        conteudo: (await getTextForNumber('resposta_subconsciente', result.respostaSubconsciente))?.body || `Resposta Subconsciente ${result.respostaSubconsciente} - Sua reação automática em situações desafiadoras.`
+      },
+
+      ciclosVida: {
+        titulo: "Ciclos de Vida",
+        explicacao: "Os Ciclos de Vida dividem a existência em três fases principais, cada uma com suas características específicas.",
+        primeiro: {
+          numero: result.ciclosVida[0],
+          periodo: "0-28 anos (aproximadamente)",
+          fase: "Formação e Desenvolvimento",
+          conteudo: (await getTextForNumber('ciclo_vida', result.ciclosVida[0]))?.body || `Primeiro Ciclo ${result.ciclosVida[0]} - Fase de formação da personalidade e aprendizado básico.`
+        },
+        segundo: {
+          numero: result.ciclosVida[1],
+          periodo: "28-56 anos (aproximadamente)",
+          fase: "Produtividade e Realização",
+          conteudo: (await getTextForNumber('ciclo_vida', result.ciclosVida[1]))?.body || `Segundo Ciclo ${result.ciclosVida[1]} - Fase de maior produtividade e construção do lugar no mundo.`
+        },
+        terceiro: {
+          numero: result.ciclosVida[2],
+          periodo: "56+ anos",
+          fase: "Sabedoria e Transmissão",
+          conteudo: (await getTextForNumber('ciclo_vida', result.ciclosVida[2]))?.body || `Terceiro Ciclo ${result.ciclosVida[2]} - Fase de colheita e transmissão de conhecimento.`
+        }
+      },
+
+      desafios: {
+        titulo: "Desafios",
+        explicacao: "Os Desafios representam os obstáculos principais que devem ser superados em diferentes fases da vida.",
+        primeiro: {
+          numero: result.desafios[0],
+          conteudo: (await getTextForNumber('desafio', result.desafios[0]))?.body || `Primeiro Desafio ${result.desafios[0]} - Obstáculos da juventude.`
+        },
+        segundo: {
+          numero: result.desafios[1],
+          conteudo: (await getTextForNumber('desafio', result.desafios[1]))?.body || `Segundo Desafio ${result.desafios[1]} - Obstáculos da vida adulta.`
+        },
+        principal: {
+          numero: result.desafios[2],
+          conteudo: (await getTextForNumber('desafio', result.desafios[2]))?.body || `Desafio Principal ${result.desafios[2]} - Obstáculo constante da vida.`
+        }
+      },
+
+      momentosDecisivos: {
+        titulo: "Momentos Decisivos",
+        explicacao: "Os Momentos Decisivos indicam períodos importantes de mudança e oportunidade na vida.",
+        momentos: await Promise.all(result.momentos.map(async (momento, index) => ({
+          numero: momento,
+          ordem: index + 1,
+          conteudo: (await getTextForNumber('momento_decisivo', momento))?.body || `Momento Decisivo ${momento} - Período de mudanças importantes.`
+        })))
+      },
+
+      anoPessoal: {
+        titulo: `Ano Pessoal ${anoPessoal} - ${anoReferencia}`,
+        numero: anoPessoal,
+        explicacao: "O Ano Pessoal indica as energias e oportunidades disponíveis durante este ano específico.",
+        conteudo: (await getTextForNumber('ano_pessoal', anoPessoal))?.body || `Ano Pessoal ${anoPessoal} - Energias e oportunidades específicas deste ano.`
+      },
+
+      mesPessoal: {
+        titulo: `Mês Pessoal ${mesPessoal}`,
+        numero: mesPessoal,
+        explicacao: "O Mês Pessoal indica as energias específicas do mês atual dentro do ano pessoal.",
+        conteudo: (await getTextForNumber('mes_pessoal', mesPessoal))?.body || `Mês Pessoal ${mesPessoal} - Influências do mês atual.`
+      }
+    } as const;
+
     const mapaContent = {
       header: {
         titulo: "Estudo Numerológico Pessoal",
@@ -618,212 +787,46 @@ serve(async (req) => {
         momentos: result.momentos
       },
 
-      textos: {
-        motivacao: {
-          titulo: "Motivação",
-          numero: result.motivacao,
-          explicacao: "O número de Motivação descreve os motivos e as razões que movem as atitudes do ser humano e o seu modo de proceder. Esse número revela o aspecto interior da personalidade, da alma, que se reflete em suas atitudes e comportamentos, principalmente na intimidade e no lar, influenciando ainda nas escolhas pessoais.",
-          conteudo: (await getTextForNumber('motivacao', result.motivacao))?.body || `Motivação ${result.motivacao} - Este número revela seus desejos mais profundos e o que verdadeiramente o motiva na vida.`
-        },
-
-        impressao: {
-          titulo: "Impressão",
-          numero: result.impressao,
-          explicacao: "O número de Impressão descreve a personalidade em seu aspecto externo, o ego, ou seja, a aparência da personalidade atual. É o número que descreve aquela primeira impressão que a pessoa causa quando é vista por outro.",
-          conteudo: (await getTextForNumber('impressao', result.impressao))?.body || `Impressão ${result.impressao} - Este número revela como os outros o percebem inicialmente.`
-        },
-
-        expressao: {
-          titulo: "Expressão", 
-          numero: result.expressao,
-          explicacao: "O número de Expressão enuncia a maneira como a pessoa age e interage com os outros, com o mundo, revelando quais são os seus verdadeiros talentos e as aptidões que desenvolverá ao longo da vida e a melhor forma de expressá-los.",
-          conteudo: (await getTextForNumber('expressao', result.expressao))?.body || `Expressão ${result.expressao} - Este número revela seus talentos naturais e como você se expressa no mundo.`
-        },
-
-        destino: {
-          titulo: "Destino",
-          numero: result.destino,
-          explicacao: "O número de destino é determinado pela data de nascimento - dia, mês e ano. O destino rege a vida do ser humano e indica o seu caminho evolutivo. Ele orienta as decisões mais importantes na vida.",
-          conteudo: (await getTextForNumber('destino', result.destino))?.body || `Destino ${result.destino} - Este número revela sua missão de vida e caminho evolutivo.`
-        },
-
-        missao: {
-          titulo: "Missão",
-          numero: result.missao,
-          explicacao: "Cada ser humano traz ao nascer uma Missão, que nada mais é que a sua vocação. Essa Missão será desenvolvida ao longo da vida independentemente de qual profissão exercerá.",
-          conteudo: (await getTextForNumber('missao', result.missao))?.body || `Missão ${result.missao} - Este número revela como você deve realizar sua vocação na vida.`
-        },
-
-        psiquico: {
-          titulo: "Número Psíquico",
-          numero: result.psiquico,
-          explicacao: "O número psíquico é baseado no dia de nascimento e revela a essência da personalidade, influenciando diretamente o comportamento e as características básicas da pessoa.",
-          conteudo: getTextForNumber('psiquico', result.psiquico)?.body || `Psíquico ${result.psiquico} - Este número revela sua essência interior e padrões comportamentais naturais.`
-        },
-
-        anjoEspecial: {
-          titulo: "Seu Anjo Cabalístico",
-          nome: anjoEspecial,
-          categoria: angelInfo?.category || "Anjo Protetor",
-          explicacao: angelInfo?.domain_description || `Seu anjo protetor é ${anjoEspecial}, que oferece proteção e orientação espiritual específica para seu caminho de vida.`,
-          invocacao1: angelInfo?.invocation_time_1 || "Consulte horários específicos",
-          invocacao2: angelInfo?.invocation_time_2 || null,
-          salmo: angelInfo?.psalm_reference || "Consulte referências cabalísticas",
-          oracaoCompleta: angelInfo?.complete_prayer || `Divino ${anjoEspecial}, concedei-me vossa proteção e orientação em meu caminho espiritual.`,
-          invocacaoDetalhada: angelInfo?.detailed_invocation || "Invoque com devoção e fé sincera",
-          areasManifestacao: angelInfo?.manifestation_areas || [],
-          especialidadesCura: angelInfo?.healing_specialties || [],
-          metodosProtecao: angelInfo?.protection_methods || "Proteção espiritual geral",
-          sinaisPresenca: angelInfo?.signs_presence || [],
-          coresCorrespondentes: angelInfo?.color_correspondences || [],
-          cristaisAssociados: angelInfo?.crystal_associations || [],
-          horasPlanetarias: angelInfo?.planetary_hours || "Consulte calendário cabalístico",
-          instrucoesPracao: angelInfo?.ritual_instructions || "Prepare um ambiente sagrado para invocação",
-          oferendasSugeridas: angelInfo?.offering_suggestions || [],
-          praticasGratidao: angelInfo?.gratitude_practices || "Agradeça com sinceridade após receber as bênçãos",
-          influenciaNegativa: angelInfo?.negative_influence || "Afasta energias contrárias ao desenvolvimento espiritual"
-        },
-
-        licoesCarmicas: {
-          titulo: "Lições Cármicas",
-          numeros: result.licoesCarmicas,
-          explicacao: "As Lições Cármicas são números ausentes no nome completo e representam qualidades que devem ser desenvolvidas nesta vida.",
-          licoes: result.licoesCarmicas.map(num => ({
-            numero: num,
-            licao: getTextForNumber('licao-carmica', num)?.body || `Lição Cármica ${num} - Desenvolver as qualidades relacionadas a este número.`
-          }))
-        },
-
-        dividasCarmicas: {
-          titulo: "Dívidas Cármicas",
-          numeros: result.dividasCarmicas,
-          explicacao: "As Dívidas Cármicas (13, 14, 16, 19) representam desafios específicos que devem ser superados nesta vida.",
-          dividas: result.dividasCarmicas.map(num => ({
-            numero: num,
-            desafio: getTextForNumber('divida-carmica', num)?.body || `Dívida Cármica ${num} - Desafios específicos relacionados a vidas passadas.`
-          }))
-        },
-
-        tendenciasOcultas: {
-          titulo: "Tendências Ocultas",
-          numeros: result.tendenciasOcultas,
-          explicacao: "As Tendências Ocultas são talentos naturais inconscientes que se manifestam espontaneamente.",
-          tendencias: result.tendenciasOcultas.map(num => ({
-            numero: num,
-            talento: getTextForNumber('tendencia-oculta', num)?.body || `Tendência Oculta ${num} - Talentos naturais que se manifestam automaticamente.`
-          }))
-        },
-
-        respostaSubconsciente: {
-          titulo: "Resposta Subconsciente",
-          numero: result.respostaSubconsciente,
-          explicacao: "A Resposta Subconsciente indica como você reage instintivamente em situações de crise.",
-          conteudo: getTextForNumber('resposta_subconsciente', result.respostaSubconsciente)?.body || `Resposta Subconsciente ${result.respostaSubconsciente} - Sua reação automática em situações desafiadoras.`
-        },
-
-        ciclosVida: {
-          titulo: "Ciclos de Vida",
-          explicacao: "Os Ciclos de Vida dividem a existência em três fases principais, cada uma com suas características específicas.",
-          primeiro: {
-            numero: result.ciclosVida[0],
-            periodo: "0-28 anos (aproximadamente)",
-            fase: "Formação e Desenvolvimento",
-            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[0])?.body || `Primeiro Ciclo ${result.ciclosVida[0]} - Fase de formação da personalidade e aprendizado básico.`
-          },
-          segundo: {
-            numero: result.ciclosVida[1],
-            periodo: "28-56 anos (aproximadamente)",
-            fase: "Produtividade e Realização",
-            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[1])?.body || `Segundo Ciclo ${result.ciclosVida[1]} - Fase de maior produtividade e construção do lugar no mundo.`
-          },
-          terceiro: {
-            numero: result.ciclosVida[2],
-            periodo: "56+ anos",
-            fase: "Sabedoria e Transmissão",
-            conteudo: getTextForNumber('ciclo_vida', result.ciclosVida[2])?.body || `Terceiro Ciclo ${result.ciclosVida[2]} - Fase de colheita e transmissão de conhecimento.`
-          }
-        },
-
-        desafios: {
-          titulo: "Desafios",
-          explicacao: "Os Desafios representam os obstáculos principais que devem ser superados em diferentes fases da vida.",
-          primeiro: {
-            numero: result.desafios[0],
-            conteudo: getTextForNumber('desafio', result.desafios[0])?.body || `Primeiro Desafio ${result.desafios[0]} - Obstáculos da juventude.`
-          },
-          segundo: {
-            numero: result.desafios[1],
-            conteudo: getTextForNumber('desafio', result.desafios[1])?.body || `Segundo Desafio ${result.desafios[1]} - Obstáculos da vida adulta.`
-          },
-          principal: {
-            numero: result.desafios[2],
-            conteudo: getTextForNumber('desafio', result.desafios[2])?.body || `Desafio Principal ${result.desafios[2]} - Obstáculo constante da vida.`
-          }
-        },
-
-        momentosDecisivos: {
-          titulo: "Momentos Decisivos",
-          explicacao: "Os Momentos Decisivos indicam períodos importantes de mudança e oportunidade na vida.",
-          momentos: result.momentos.map((momento, index) => ({
-            numero: momento,
-            ordem: index + 1,
-            conteudo: getTextForNumber('momento_decisivo', momento)?.body || `Momento Decisivo ${momento} - Período de mudanças importantes.`
-          }))
-        },
-
-        anoPessoal: {
-          titulo: `Ano Pessoal ${anoPessoal} - ${anoReferencia}`,
-          numero: anoPessoal,
-          explicacao: "O Ano Pessoal indica as energias e oportunidades disponíveis durante este ano específico.",
-          conteudo: getTextForNumber('ano_pessoal', anoPessoal)?.body || `Ano Pessoal ${anoPessoal} - Energias e oportunidades específicas deste ano.`
-        },
-
-        mesPessoal: {
-          titulo: `Mês Pessoal ${mesPessoal}`,
-          numero: mesPessoal,
-          explicacao: "O Mês Pessoal indica as energias específicas do mês atual dentro do ano pessoal.",
-          conteudo: getTextForNumber('mes_pessoal', mesPessoal)?.body || `Mês Pessoal ${mesPessoal} - Influências do mês atual.`
-        }
-      },
+      textos: textosObj,
 
       // Informações complementares expandidas
       complementares: {
         cores: {
           titulo: "Cores Harmônicas",
           explicacao: "As cores que vibram em harmonia com seus números principais e trazem equilíbrio energético.",
-          coresMotivacao: getTextForNumber('motivacao', result.motivacao)?.color_associations || [],
-          coresExpressao: getTextForNumber('expressao', result.expressao)?.color_associations || [],
-          coresDestino: getTextForNumber('destino', result.destino)?.color_associations || []
+          coresMotivacao: (await getTextForNumber('motivacao', result.motivacao))?.color_associations || [],
+          coresExpressao: (await getTextForNumber('expressao', result.expressao))?.color_associations || [],
+          coresDestino: (await getTextForNumber('destino', result.destino))?.color_associations || []
         },
         
         pedras: {
           titulo: "Pedras e Cristais",
           explicacao: "Pedras e cristais que amplificam e equilibram suas energias numerológicas.",
-          pedrasMotivacao: getTextForNumber('motivacao', result.motivacao)?.stone_associations || [],
-          pedrasExpressao: getTextForNumber('expressao', result.expressao)?.stone_associations || [],
-          pedrasDestino: getTextForNumber('destino', result.destino)?.stone_associations || []
+          pedrasMotivacao: (await getTextForNumber('motivacao', result.motivacao))?.stone_associations || [],
+          pedrasExpressao: (await getTextForNumber('expressao', result.expressao))?.stone_associations || [],
+          pedrasDestino: (await getTextForNumber('destino', result.destino))?.stone_associations || []
         },
 
         profissoes: {
           titulo: "Profissões Ideais",
           explicacao: "Atividades profissionais que estão em harmonia com seus talentos numerológicos.",
-          profissoesExpressao: getTextForNumber('expressao', result.expressao)?.profession_associations || [],
-          profissoesDestino: getTextForNumber('destino', result.destino)?.profession_associations || [],
-          profissoesMissao: getTextForNumber('missao', result.missao)?.profession_associations || []
+          profissoesExpressao: (await getTextForNumber('expressao', result.expressao))?.profession_associations || [],
+          profissoesDestino: (await getTextForNumber('destino', result.destino))?.profession_associations || [],
+          profissoesMissao: (await getTextForNumber('missao', result.missao))?.profession_associations || []
         },
 
         saude: {
           titulo: "Orientações de Saúde",
           explicacao: "Cuidados específicos com a saúde baseados em suas características numerológicas.",
-          cuidadosExpressao: getTextForNumber('expressao', result.expressao)?.health_associations || [],
-          cuidadosDestino: getTextForNumber('destino', result.destino)?.health_associations || []
+          cuidadosExpressao: (await getTextForNumber('expressao', result.expressao))?.health_associations || [],
+          cuidadosDestino: (await getTextForNumber('destino', result.destino))?.health_associations || []
         }
       },
 
       // Metadados para processamento
       metadados: {
         versaoConteudo: 'v3.0',
-        totalTextos: texts.length,
+        totalTextos: Object.keys(textosObj).length,
         angeloEncontrado: !!angelInfo,
         calculosCompletos: true,
         dataProcessamento: new Date().toISOString()
@@ -832,7 +835,7 @@ serve(async (req) => {
       metadata: {
         version: 'v3.0',
         source: 'Material_Complementar_9.pdf',
-        totalTexts: textsData?.length || 0,
+        totalTexts: Object.keys(textosObj).length,
         angelFound: !!angelInfo,
         calculationsComplete: true,
         generatedAt: new Date().toISOString(),
