@@ -478,43 +478,44 @@ serve(async (req) => {
     // Fetch detailed texts for ALL 31 topics from database
     console.log('🔍 Buscando textos completos do banco de dados para todos os 31 tópicos');
     
-    const textQueries = [
-      // Core numerology numbers (6 topics)
-      `motivacao-${numbers.motivacao}`,
-      `impressao-${numbers.impressao}`,
-      `expressao-${numbers.expressao}`,
-      `destino-${numbers.destino}`,
-      `missao-${numbers.missao}`,
-      `psiquico-${numbers.psiquico}`,
-      
-      // Karmic aspects (3 topics + subconscious)
-      ...numbers.licoesCarmicas.map(n => `licao-carmica-${n}`),
-      ...numbers.dividasCarmicas.map(n => `divida-carmica-${n}`),
-      ...numbers.tendenciasOcultas.map(n => `tendencia-oculta-${n}`),
-      `resposta_subconsciente-${numbers.respostaSubconsciente}`,
-      
-      // Life cycles and moments (7 topics)
-      ...numbers.ciclosVida.map((n, i) => `ciclo_vida-${n}`),
-      ...numbers.desafios.map((n, i) => `desafio-${n}`),
-      ...numbers.momentos.map((n, i) => `momento_decisivo-${n}`),
-      
-      // Time-based calculations (4 topics)
-      `ano_pessoal-${numbers.anoPessoal}`,
-      `mes_pessoal-${numbers.mesPessoal}`,
-      `dia_pessoal-${numbers.diaPessoal}`,
-      `dia_nascimento-${numbers.diaNascimento}`,
-      
-      // Additional comprehensive topics (11 topics)
-      `arcanos-${numbers.expressao}`, // Based on main expression number
-      `numeros_harmonicos-${numbers.expressao}`,
-      `grau_ascensao-${numbers.grauAscensao}`,
-      `harmonia_conjugal-${numbers.motivacao}`, // Based on motivation for relationships
-      `sequencias_negativas-${numbers.expressao}`, // Based on expression challenges
-      `relacoes_inter_valores-${numbers.expressao}`, // Inter-value relationships
-      `potencialidade_profissional-${numbers.destino}`, // Professional potential based on destiny
-      `cores_favoraveis-${numbers.psiquico}`, // Colors based on psychic number
-      `dias_favoraveis-${numbers.mesPessoal}` // Favorable days based on personal month
-    ];
+      // Fix query generation to use correct section names with underscores
+      const textQueries = [
+        // Core numerology numbers (6 topics)
+        `motivacao-${numbers.motivacao}`,
+        `impressao-${numbers.impressao}`,
+        `expressao-${numbers.expressao}`,
+        `destino-${numbers.destino}`,
+        `missao-${numbers.missao}`,
+        `psiquico-${numbers.psiquico}`,
+        
+        // Karmic aspects (3 topics + subconscious) - use underscores for DB
+        ...numbers.licoesCarmicas.map(n => `licao_carmica-${n}`),
+        ...numbers.dividasCarmicas.map(n => `divida_carmica-${n}`),
+        ...numbers.tendenciasOcultas.map(n => `tendencia_oculta-${n}`),
+        `resposta_subconsciente-${numbers.respostaSubconsciente}`,
+        
+        // Life cycles and moments (7 topics)
+        ...numbers.ciclosVida.map((n, i) => `ciclo_vida-${n}`),
+        ...numbers.desafios.map((n, i) => `desafio-${n}`),
+        ...numbers.momentos.map((n, i) => `momento_decisivo-${n}`),
+        
+        // Time-based calculations (4 topics)
+        `ano_pessoal-${numbers.anoPessoal}`,
+        `mes_pessoal-${numbers.mesPessoal}`,
+        `dia_pessoal-${numbers.diaPessoal}`,
+        `dia_nascimento-${numbers.diaNascimento}`,
+        
+        // Additional comprehensive topics (11 topics)
+        `arcanos-${numbers.expressao}`, // Based on main expression number
+        `numeros_harmonicos-${numbers.expressao}`,
+        `grau_ascensao-${numbers.grauAscensao}`,
+        `harmonia_conjugal-${numbers.motivacao}`, // Based on motivation for relationships
+        `sequencias_negativas-${numbers.expressao}`, // Based on expression challenges
+        `relacoes_inter_valores-${numbers.expressao}`, // Inter-value relationships
+        `potencialidade_profissional-${numbers.destino}`, // Professional potential based on destiny
+        `cores_favoraveis-${numbers.psiquico}`, // Colors based on psychic number
+        `dias_favoraveis-${numbers.mesPessoal}` // Favorable days based on personal month
+      ];
 
     // Fetch all texts
     const textosObj: Record<string, any> = {};
@@ -550,7 +551,17 @@ serve(async (req) => {
           totalTextsFound++;
         } else {
           console.log(`⚠️ Nenhum texto encontrado para ${section} ${keyNumber}`);
-          // Add placeholder
+          // Add comprehensive placeholder with debugging info
+          textosObj[query] = {
+            titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
+            numero: parseInt(keyNumber),
+            explicacao: `⚠️ TEXTO NÃO ENCONTRADO: Verificar se existe no banco de dados a seção '${section}' com número ${keyNumber}. Query original: '${query}'`,
+            conteudo: `Análise em desenvolvimento para ${section} ${keyNumber}. Por favor, execute a atualização do conteúdo numerológico.`,
+            cores: [],
+            pedras: [],
+            profissoes: []
+          };
+        }
           textosObj[query] = {
             titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
             numero: parseInt(keyNumber),
@@ -572,7 +583,19 @@ serve(async (req) => {
           pedras: [],
           profissoes: []
         };
-      }
+    }
+
+    console.log(`📊 RESUMO DE COBERTURA DOS 31 TÓPICOS:`);
+    console.log(`✅ Textos encontrados: ${totalTextsFound}`);
+    console.log(`❌ Textos faltando: ${textQueries.length - totalTextsFound}`);
+    console.log(`🎯 Cobertura: ${Math.round((totalTextsFound / textQueries.length) * 100)}%`);
+    
+    if (totalTextsFound < textQueries.length) {
+      console.log(`⚠️ ATENÇÃO: Nem todos os 31 tópicos têm textos carregados!`);
+      console.log(`📋 Execute o edge function 'update-numerology-content' para carregar todos os textos.`);
+    } else {
+      console.log(`🎉 SUCESSO: Todos os 31 tópicos têm textos carregados!`);
+    }
     }
 
     // Special case for reference - Determine angel
