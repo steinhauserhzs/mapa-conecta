@@ -153,7 +153,7 @@ const TopicCard = ({
     </CardHeader>
     <CardContent>
       <div className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-        {editableContent || text?.conteudo || text?.explicacao || text?.body || "Conteúdo em desenvolvimento."}
+        {editableContent || text?.conteudo || text?.explicacao || text?.body || ''}
       </div>
     </CardContent>
   </Card>

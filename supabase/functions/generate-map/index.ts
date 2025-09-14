@@ -299,8 +299,8 @@ serve(async (req) => {
           textosObj[query] = {
             titulo: textData.title || `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
             numero: parseInt(keyNumber),
-            explicacao: textData.body || "Análise numerológica baseada em cálculos cabalísticos.",
-            conteudo: textData.body || "Conteúdo em desenvolvimento.",
+            explicacao: textData.body || "",
+            conteudo: textData.body || "",
             cores: textData.color_associations || [],
             pedras: textData.stone_associations || [],
             profissoes: textData.profession_associations || []
@@ -311,8 +311,8 @@ serve(async (req) => {
           textosObj[query] = {
             titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
             numero: parseInt(keyNumber),
-            explicacao: `⚠️ TEXTO NÃO ENCONTRADO: Verificar se existe no banco de dados a seção '${section}' com número ${keyNumber}. Query original: '${query}'`,
-            conteudo: `Análise em desenvolvimento para ${section} ${keyNumber}. Por favor, execute a atualização do conteúdo numerológico.`,
+            explicacao: "",
+            conteudo: "",
             cores: [],
             pedras: [],
             profissoes: []
@@ -323,8 +323,8 @@ serve(async (req) => {
         textosObj[query] = {
           titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
           numero: parseInt(keyNumber),
-          explicacao: `Análise estruturada baseada no número ${keyNumber}`,
-          conteudo: `Erro ao carregar conteúdo para ${section} ${keyNumber}`,
+          explicacao: "",
+          conteudo: "",
           cores: [],
           pedras: [],
           profissoes: []

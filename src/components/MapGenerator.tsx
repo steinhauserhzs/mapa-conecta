@@ -188,7 +188,7 @@ async function computeOnClient(name: string, birthStr: string, yearRef?: number)
   }, {} as Record<string, any>);
 
   const getText = (section: string, key: number, fallbackTitle: string) =>
-    textosMap[`${section}_${key}`] || { title: `${fallbackTitle} ${key}`, body: 'Conteúdo em desenvolvimento.' };
+    textosMap[`${section}_${key}`] || { title: `${fallbackTitle} ${key}`, body: '' };
 
   const textos: any = {
     motivacao: getText('motivacao', motivacao, 'Motivação'),
@@ -422,7 +422,7 @@ export default function MapGenerator() {
               key,
               {
                 title: content.title || key.replace(/[-_]/g, ' '),
-                body: content.body || 'Conteúdo em desenvolvimento'
+                body: content.body || ''
               }
             ])
           ) : {}
@@ -458,7 +458,7 @@ export default function MapGenerator() {
               if (Array.isArray(arrays)) {
                 return [key, {
                   title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
-                  body: content.conteudo || content.body || `Análise estruturada baseada nos números: ${arrays.join(', ')}`
+                  body: content.conteudo || content.body || ''
                 }];
               }
             }
@@ -474,7 +474,7 @@ export default function MapGenerator() {
             // Regular text sections
             return [key, {
               title: content.titulo || content.title || key.replace(/[-_]/g, ' '),
-              body: content.conteudo || content.body || content.text || 'Conteúdo em desenvolvimento'
+               body: content.conteudo || content.body || content.text || ''
             }];
           })
         ) : (result.texts || {})
