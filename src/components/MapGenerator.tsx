@@ -758,7 +758,7 @@ export default function MapGenerator() {
           {mapaData ? (
             <div className="space-y-6">
               <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <MapaPDF data={{ ...mapaData, texts: currentTextos }} />
+                <MapaPDF mapData={{ ...mapaData, texts: currentTextos }} />
               </div>
 
               {isEditing && (
