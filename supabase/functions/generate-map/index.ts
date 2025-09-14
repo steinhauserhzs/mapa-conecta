@@ -21,68 +21,234 @@ const FALLBACK_BASE_MAP: { [key: string]: number } = {
   'Ç': 3
 };
 
-// Numerology calculation functions
-function normalizeText(text: string): string {
-  return text.toUpperCase()
-    .replace(/[^A-ZÁÀÂÃÇÉÊÍÓÔÕÚ]/g, '');
+// Numerology calculation functions (Jé rules, matching app logic)
+// Base cabalistic map (1-8) used as base before diacritic modifiers
+const BASE_MAP: Record<string, number> = {
+  "A": 1, "I": 1, "Q": 1, "J": 1, "Y": 1,
+  "B": 2, "K": 2, "R": 2,
+  "C": 3, "G": 3, "L": 3, "S": 3,
+  "D": 4, "M": 4, "T": 4,
+  "E": 5, "H": 5, "N": 5,
+  "U": 6, "V": 6, "W": 6, "X": 6, "Ç": 6,
+  "O": 7, "Z": 7,
+  "F": 8, "P": 8,
+};
+
+function toUpperNoSpaces(input: string): string {
+  return (input || "").toUpperCase().replace(/[ \t\r\n\-_.]/g, "");
 }
 
-function calculateNumberForText(text: string, conversionMap: { [key: string]: number }): number {
-  const normalized = normalizeText(text);
-  let sum = 0;
-  
-  for (const char of normalized) {
-    if (conversionMap[char]) {
-      sum += conversionMap[char];
+function decomposeNFD(char: string): { letter: string; marks: string[] } {
+  const nfd = char.normalize("NFD");
+  const base = [...nfd][0] || "";
+  const marks = [...nfd].slice(1);
+  return { letter: base, marks };
+}
+
+function normalizeCedilla(letter: string, marks: string[]): { normLetter: string; marks: string[] } {
+  const CEDILLA = "\u0327";
+  if ((letter === "C" || letter === "c") && marks.includes(CEDILLA)) {
+    return { normLetter: "Ç", marks: marks.filter(m => m !== CEDILLA) };
+  }
+  return { normLetter: letter, marks };
+}
+
+function applyDiacritics(baseValue: number, combiningMarks: string[]): number {
+  let v = baseValue;
+  for (const mk of combiningMarks) {
+    switch (mk) {
+      case "\u0301": v += 2; break; // agudo (´)
+      case "\u0303": v += 3; break; // til (~)
+      case "\u0302": v += 7; break; // circunflexo (^)
+      case "\u030A": v += 7; break; // ring/bolinha (°)
+      case "\u0300": v *= 2; break; // grave (`)
+      case "\u0308": v *= 2; break; // trema (¨)
+      default: break;
     }
   }
-  
-  while (sum > 22 && sum !== 11 && sum !== 22) {
-    sum = sum.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
+  return v;
+}
+
+function reduzir1a8ComMestre(n: number): number {
+  if (n === 11 || n === 22) return n;
+  return ((n - 1) % 8) + 1;
+}
+
+function reduzirComMestre(n: number): number {
+  if (n === 11 || n === 22) return n;
+  return reduzir1a8ComMestre(n);
+}
+
+function isVowel(ch: string): boolean {
+  return new Set(['A', 'E', 'I', 'O', 'U', 'Y']).has(ch);
+}
+
+function somarLetrasJe(texto: string, filtro?: (ch: string) => boolean): number {
+  const clean = toUpperNoSpaces(texto);
+  let soma = 0;
+  for (const ch of [...clean]) {
+    if (!ch.match(/[A-ZÀ-ÖØ-ÝÞßÇ]/i)) continue;
+    let { letter, marks } = decomposeNFD(ch);
+    ({ normLetter: letter, marks } = normalizeCedilla(letter, marks));
+    const base = BASE_MAP[letter] ?? BASE_MAP[letter.toUpperCase()];
+    if (base == null) continue;
+    if (filtro) {
+      const baseChar = ch.normalize('NFD')[0].toUpperCase();
+      if (!filtro(baseChar)) continue;
+    }
+    const valorFinal = applyDiacritics(base, marks);
+    soma += valorFinal;
   }
-  
-  return sum;
+  return soma;
 }
 
-function calculateBirthNumbers(birth: string) {
-  const [day, month, year] = birth.split('/').map(num => parseInt(num));
-  
-  const calculateReduced = (num: number): number => {
-    while (num > 22 && num !== 11 && num !== 22) {
-      num = num.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
-    }
-    return num;
-  };
-
-  const destinySum = day + month + year;
-  const destiny = calculateReduced(destinySum);
-  const psychic = calculateReduced(day);
-  const dayOfBirth = day;
-
-  return { destiny, psychic, dayOfBirth };
+function calcularExpressao(nome: string): number {
+  return reduzirComMestre(somarLetrasJe(nome));
 }
 
-function calculatePersonalNumbers(birth: string, referenceYear?: number) {
-  const [day, month] = birth.split('/').map(num => parseInt(num));
-  const year = referenceYear || new Date().getFullYear();
-  
-  const calculateReduced = (num: number): number => {
-    while (num > 9 && num !== 11 && num !== 22) {
-      num = num.toString().split('').reduce((acc, digit) => acc + parseInt(digit), 0);
-    }
-    return num;
-  };
-
-  const personalYear = calculateReduced(day + month + year);
-  const personalMonth = calculateReduced(personalYear + new Date().getMonth() + 1);
-  const personalDay = calculateReduced(personalMonth + new Date().getDate());
-
-  return { personalYear, personalMonth, personalDay };
+function calcularMotivacao(nome: string): number {
+  return reduzirComMestre(somarLetrasJe(nome, (ch) => isVowel(ch)));
 }
 
-function determinarAnjoEspecial(nome: string, nascimento: string): string {
-  // Simple angel determination based on first letter
-  const firstLetter = nome.charAt(0).toUpperCase();
+function calcularImpressao(nome: string): number {
+  return reduzirComMestre(somarLetrasJe(nome, (ch) => !isVowel(ch)));
+}
+
+function parseBirth(birth: string): { dia: number; mes: number; ano: number } {
+  let dia: number, mes: number, ano: number;
+  if (birth.includes('-')) {
+    [ano, mes, dia] = birth.split('-').map(n => parseInt(n));
+  } else if (birth.includes('/')) {
+    [dia, mes, ano] = birth.split('/').map(n => parseInt(n));
+  } else {
+    throw new Error('Formato de data inválido. Use YYYY-MM-DD ou DD/MM/YYYY');
+  }
+  return { dia, mes, ano };
+}
+
+function calcularDestino(data: string): number {
+  const { dia, mes, ano } = parseBirth(data);
+  const digits = `${dia}${mes}${ano}`.split('').map(d => parseInt(d));
+  const soma = digits.reduce((sum, digit) => sum + digit, 0);
+  return reduzirComMestre(soma);
+}
+
+function calcularMissao(expressao: number, destino: number): number {
+  return ((expressao + destino - 1) % 8) + 1;
+}
+
+const DEFAULT_PSYCHIC_TABLE: { [key: number]: number } = {
+  1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9,
+  10: 1, 11: 11, 12: 3, 13: 4, 14: 5, 15: 6, 16: 7, 17: 8, 18: 9,
+  19: 1, 20: 2, 21: 3, 22: 22, 23: 5, 24: 6, 25: 7, 26: 8, 27: 9,
+  28: 1, 29: 11, 30: 3, 31: 4
+};
+
+function calcularPsiquico(dia: number): number {
+  return DEFAULT_PSYCHIC_TABLE[dia] || reduzir1a8ComMestre(dia);
+}
+
+function calcularCiclosVida(data: string): [number, number, number] {
+  const { dia, mes } = parseBirth(data);
+  const ciclo1 = reduzirComMestre(mes);
+  const ciclo2 = reduzirComMestre(dia);
+  const ciclo3 = calcularDestino(data);
+  return [ciclo1, ciclo2, ciclo3];
+}
+
+function calcularDesafios(data: string): [number, number, number, number] {
+  const { dia, mes, ano } = parseBirth(data);
+  const diaRed = ((dia - 1) % 8) + 1;
+  const mesRed = ((mes - 1) % 8) + 1;
+  const anoRed = reduzir1a8ComMestre(ano);
+  const d1 = Math.abs(mesRed - diaRed);
+  const d2 = Math.abs(anoRed - diaRed);
+  const d3 = Math.abs(d1 - d2);
+  const d4 = Math.abs(mesRed - (ano % 10));
+  return [d1, d2, d3, d4];
+}
+
+function calcularMomentos(data: string, destino: number): [number, number, number, number] {
+  const { dia, mes } = parseBirth(data);
+  const m1 = reduzirComMestre(dia + mes);
+  const m2 = reduzirComMestre(dia);
+  const m3 = destino;
+  const m4 = reduzirComMestre(mes + destino);
+  return [m1, m2, m3, m4];
+}
+
+function calcularAnoPessoal(data: string, anoReferencia: number): number {
+  const { dia, mes } = parseBirth(data);
+  const digits = `${dia}${mes}${anoReferencia}`.split('').map(d => parseInt(d));
+  const soma = digits.reduce((sum, digit) => sum + digit, 0);
+  return reduzirComMestre(soma);
+}
+
+function calcularMesDiaPessoal(anoPessoal: number, mesAtual?: number, diaAtual?: number): { mes: number; dia: number } {
+  let mesP = anoPessoal;
+  let diaP = anoPessoal;
+  if (mesAtual) mesP = reduzirComMestre(anoPessoal + mesAtual);
+  if (diaAtual && mesAtual) diaP = reduzirComMestre(mesP + diaAtual);
+  return { mes: mesP, dia: diaP };
+}
+
+function calcularLicoesCarmicas(nome: string): number[] {
+  const clean = toUpperNoSpaces(nome);
+  const present = new Set<number>();
+  for (const ch of [...clean]) {
+    if (!ch.match(/[A-ZÀ-ÖØ-ÝÞßÇ]/i)) continue;
+    let { letter, marks } = decomposeNFD(ch);
+    ({ normLetter: letter, marks } = normalizeCedilla(letter, marks));
+    const base = BASE_MAP[letter] ?? BASE_MAP[letter.toUpperCase()];
+    if (base == null) continue;
+    present.add(base);
+  }
+  const absent: number[] = [];
+  for (let i = 1; i <= 8; i++) if (!present.has(i)) absent.push(i);
+  return absent;
+}
+
+function calcularDividasCarmicas(nome: string, data: string): number[] {
+  const karma = [13, 14, 16, 19];
+  const found = new Set<number>();
+  const palavras = toUpperNoSpaces(nome).split(/\s+/).filter(Boolean);
+  for (const p of palavras) {
+    const total = somarLetrasJe(p);
+    if (karma.includes(total)) found.add(total);
+  }
+  const expressaoTotal = somarLetrasJe(nome);
+  const motivacaoTotal = somarLetrasJe(nome, (ch) => isVowel(ch));
+  const impressaoTotal = somarLetrasJe(nome, (ch) => !isVowel(ch));
+  const { dia, mes, ano } = parseBirth(data);
+  const destinoTotal = `${dia}${mes}${ano}`.split('').reduce((sum, d) => sum + parseInt(d), 0);
+  for (const t of [expressaoTotal, motivacaoTotal, impressaoTotal, destinoTotal, dia + mes + ano]) {
+    if (karma.includes(t)) found.add(t);
+  }
+  return Array.from(found).sort((a, b) => a - b);
+}
+
+function calcularTendenciasOcultas(nome: string): number[] {
+  const clean = toUpperNoSpaces(nome);
+  const freq: Record<number, number> = {};
+  for (const ch of [...clean]) {
+    if (!ch.match(/[A-ZÀ-ÖØ-ÝÞßÇ]/i)) continue;
+    let { letter, marks } = decomposeNFD(ch);
+    ({ normLetter: letter, marks } = normalizeCedilla(letter, marks));
+    const base = BASE_MAP[letter] ?? BASE_MAP[letter.toUpperCase()];
+    if (base == null) continue;
+    freq[base] = (freq[base] || 0) + 1;
+  }
+  if (Object.keys(freq).length === 0) return [];
+  const maxFreq = Math.max(...Object.values(freq));
+  return Object.keys(freq).filter(k => freq[parseInt(k)] === maxFreq && maxFreq >= 2).map(k => parseInt(k)).sort((a,b)=>a-b);
+}
+
+function calcularRespostaSubconsciente(licoes: number[]): number {
+  return Math.max(1, Math.min(8, 8 - licoes.length));
+}
+
+function determinarAnjoEspecialLocal(nome: string, nascimento: string): string {
+  const firstLetter = nome.trim().charAt(0).toUpperCase();
   const angelMap: { [key: string]: string } = {
     'A': 'Nanael', 'B': 'Nithael', 'C': 'Mebahiah', 'D': 'Poyel',
     'E': 'Nemamiah', 'F': 'Yeialel', 'G': 'Harashel', 'H': 'Mitzrael',
@@ -95,94 +261,51 @@ function determinarAnjoEspecial(nome: string, nascimento: string): string {
   return angelMap[firstLetter] || 'Nanael';
 }
 
-// Complete numerology calculation
-function calcularCompleto(input: { name: string, birth: string, referenceYear?: number }, conversionMap: { [key: string]: number }) {
+// Complete numerology calculation (aligned with src/lib)
+function calcularCompleto(input: { name: string, birth: string, referenceYear?: number }) {
   const { name, birth, referenceYear } = input;
-  
-  // Basic calculations
-  const motivation = calculateNumberForText(name.replace(/[bcdfghjklmnpqrstvwxyzçBCDFGHJKLMNPQRSTVWXYZÇ]/g, ''), conversionMap);
-  const impression = calculateNumberForText(name.replace(/[aeiouáàâãéêíóôõúAEIOUÁÀÂÃÉÊÍÓÔÕÚ]/g, ''), conversionMap);
-  const expression = calculateNumberForText(name, conversionMap);
-  
-  const birthNumbers = calculateBirthNumbers(birth);
-  const personalNumbers = calculatePersonalNumbers(birth, referenceYear);
-  
-  // Additional calculated numbers for complete map
-  const mission = Math.abs(motivation - impression);
-  const karmicLessons = [1, 2, 3, 4, 5, 6, 7, 8, 9].filter(num => 
-    !name.split('').some(char => calculateNumberForText(char, conversionMap) === num)
-  );
-  
-  const karmicDebts = [];
-  if (name.includes('13')) karmicDebts.push(13);
-  if (name.includes('14')) karmicDebts.push(14);
-  if (name.includes('16')) karmicDebts.push(16);
-  if (name.includes('19')) karmicDebts.push(19);
-  
-  // Hidden tendencies (repeated numbers)
-  const hiddenTendencies: number[] = [];
-  const letterCounts: { [key: number]: number } = {};
-  for (const char of name) {
-    const num = calculateNumberForText(char, conversionMap);
-    if (num) {
-      letterCounts[num] = (letterCounts[num] || 0) + 1;
-    }
-  }
-  
-  for (const [num, count] of Object.entries(letterCounts)) {
-    if (count > 2) {
-      hiddenTendencies.push(parseInt(num));
-    }
-  }
-  
-  // Subconscious response
-  const availableNumbers = Object.keys(letterCounts).length;
-  
-  // Life cycles (approximation based on birth date)
-  const [day, month, year] = birth.split('/').map(n => parseInt(n));
-  const firstCycle = Math.floor((month + day) / 2) % 9 + 1;
-  const secondCycle = Math.floor(year / 100) % 9 + 1;
-  const thirdCycle = (firstCycle + secondCycle) % 9 + 1;
-  
-  // Challenges
-  const firstChallenge = Math.abs(month - day);
-  const secondChallenge = Math.abs(year % 100 - (year - year % 100) / 100);
-  const thirdChallenge = Math.abs(firstChallenge - secondChallenge);
-  const fourthChallenge = Math.abs(month - year % 10);
-  
-  // Pinnacles/Decisive moments
-  const firstPinnacle = month + day;
-  const secondPinnacle = day + year % 100;
-  const thirdPinnacle = firstPinnacle + secondPinnacle;
-  const fourthPinnacle = month + year % 100;
-  
-  // Ascension degree
-  const ascensionDegree = (expression + birthNumbers.destiny) % 22 || 22;
-  
+
+  const motivacao = calcularMotivacao(name);
+  const impressao = calcularImpressao(name);
+  const expressao = calcularExpressao(name);
+  const destino = calcularDestino(birth);
+  const missao = calcularMissao(expressao, destino);
+
+  const { dia } = parseBirth(birth);
+  const psiquico = calcularPsiquico(dia);
+
+  const anoPessoal = calcularAnoPessoal(birth, referenceYear || new Date().getFullYear());
+  const { mes: mesPessoal, dia: diaPessoal } = calcularMesDiaPessoal(anoPessoal, new Date().getMonth() + 1, new Date().getDate());
+
+  const licoesCarmicas = calcularLicoesCarmicas(name);
+  const dividasCarmicas = calcularDividasCarmicas(name, birth);
+  const tendenciasOcultas = calcularTendenciasOcultas(name);
+  const respostaSubconsciente = calcularRespostaSubconsciente(licoesCarmicas);
+  const ciclosVida = calcularCiclosVida(birth);
+  const desafiosArr = calcularDesafios(birth);
+  const momentos = calcularMomentos(birth, destino);
+
+  const grauAscensao = reduzirComMestre((expressao + destino) % 22 || 22);
+
   return {
-    motivacao: motivation,
-    impressao: impression,
-    expressao: expression,
-    destino: birthNumbers.destiny,
-    missao: mission,
-    psiquico: birthNumbers.psychic,
-    anoPessoal: personalNumbers.personalYear,
-    mesPessoal: personalNumbers.personalMonth,
-    diaPessoal: personalNumbers.personalDay,
-    diaNascimento: birthNumbers.dayOfBirth,
-    grauAscensao: ascensionDegree,
-    licoesCarmicas: karmicLessons,
-    dividasCarmicas: karmicDebts,
-    tendenciasOcultas: hiddenTendencies,
-    respostaSubconsciente: availableNumbers,
-    ciclosVida: [firstCycle, secondCycle, thirdCycle],
-    desafios: [firstChallenge, secondChallenge, thirdChallenge, fourthChallenge],
-    momentos: [
-      firstPinnacle % 22 || 22,
-      secondPinnacle % 22 || 22, 
-      thirdPinnacle % 22 || 22,
-      fourthPinnacle % 22 || 22
-    ]
+    motivacao,
+    impressao,
+    expressao,
+    destino,
+    missao,
+    psiquico,
+    anoPessoal,
+    mesPessoal,
+    diaPessoal,
+    diaNascimento: dia,
+    grauAscensao,
+    licoesCarmicas,
+    dividasCarmicas,
+    tendenciasOcultas,
+    respostaSubconsciente,
+    ciclosVida,
+    desafios: desafiosArr,
+    momentos,
   };
 }
 
