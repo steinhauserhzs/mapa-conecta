@@ -117,20 +117,12 @@ function sumLetters(str: string, baseMap: Record<string, number>, filter: (ch: s
 }
 
 function reduce(n: number): number {
-  if (n <= 0) return 0;
-  if (MASTER.has(n)) return n;
-  while (n > 9 && !MASTER.has(n)) {
-    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
-    if (MASTER.has(n)) return n;
-  }
-  return n;
+  if (n === 11 || n === 22) return n;
+  return ((n - 1) % 8) + 1;
 }
 
 function reduceSimple(n: number): number {
-  while (n > 9) {
-    n = String(n).split('').reduce((a, d) => a + Number(d), 0);
-  }
-  return n;
+  return ((n - 1) % 8) + 1;
 }
 
 function parseBirth(b: string) {
@@ -150,16 +142,16 @@ function sumBirth({ d, m, y }: { d: number, m: number, y: number }) {
 }
 
 async function computeOnClient(name: string, birthStr: string, yearRef?: number): Promise<MapaData> {
-  // Usar tabela cabalística correta (1-8)
+  // Usar tabela cabalística correta (1-8) - CORRIGIDA
   const CABALISTIC_TABLE: Record<string, number> = {
     A: 1, I: 1, Q: 1, Y: 1, J: 1,
     B: 2, K: 2, R: 2,
     C: 3, G: 3, L: 3, S: 3,
     D: 4, M: 4, T: 4,
     E: 5, H: 5, N: 5,
-    U: 6, V: 6, W: 6, X: 6,
+    U: 6, V: 6, W: 6, X: 6, Ç: 6,  // Ç movido para posição 6
     O: 7, Z: 7,
-    F: 8, P: 8, Ç: 8
+    F: 8, P: 8
   };
   const baseMap = CABALISTIC_TABLE;
 

@@ -51,7 +51,7 @@ serve(async (req) => {
       .eq('id', mapId);
 
     // Gerar HTML profissional do PDF
-    const htmlContent = generateProfessionalHTML(mapData);
+    const htmlContent = await generateProfessionalHTML(mapData);
 
     // Gerar PDF usando Puppeteer (simulado - em produção usaria Puppeteer real)
     const pdfBuffer = await generatePDFFromHTML(htmlContent);
@@ -114,7 +114,7 @@ serve(async (req) => {
   }
 });
 
-function generateProfessionalHTML(mapData: any): string {
+async function generateProfessionalHTML(mapData: any): Promise<string> {
   const result = mapData.result || {};
   const numbers = result.numbers || {};
   const texts = result.texts || {};
@@ -424,7 +424,7 @@ function generateProfessionalHTML(mapData: any): string {
     </div>
 
     <!-- Análises Detalhadas -->
-    ${generateDetailedAnalyses(numbers, texts)}
+    ${await generateDetailedAnalyses(numbers, mapData)}
 
     <!-- Anjo Cabalístico -->
     ${cabalisticAngel.name ? `
@@ -470,24 +470,51 @@ function generateProfessionalHTML(mapData: any): string {
   `;
 }
 
-function generateDetailedAnalyses(numbers: any, texts: any): string {
+async function generateDetailedAnalyses(numbers: any, mapData: any): Promise<string> {
+  console.log('🔍 Buscando textos do banco de dados para PDF');
+  
+  // Buscar textos reais do banco de dados
+  const { data: numerologyTexts, error } = await supabase
+    .from('numerology_texts')
+    .select('section, key_number, title, body')
+    .eq('lang', 'pt-BR');
+
+  if (error) {
+    console.error('Erro ao buscar textos:', error);
+  }
+
+  const textMap = (numerologyTexts || []).reduce((acc: any, text: any) => {
+    acc[`${text.section}_${text.key_number}`] = text;
+    return acc;
+  }, {});
+
+  console.log(`📊 Encontrados ${numerologyTexts?.length || 0} textos no banco`);
+
   const sections = [
-    { key: 'motivation', title: 'MOTIVAÇÃO', number: numbers.motivation || 0 },
-    { key: 'impression', title: 'IMPRESSÃO', number: numbers.impression || 0 },
-    { key: 'expression', title: 'EXPRESSÃO', number: numbers.expression || 0 },
-    { key: 'destiny', title: 'DESTINO', number: numbers.destiny || 0 },
-    { key: 'mission', title: 'MISSÃO', number: numbers.mission || 0 },
-    { key: 'psychic', title: 'NÚMERO PSÍQUICO', number: numbers.psychic || 0 }
+    { key: 'motivacao', title: 'MOTIVAÇÃO', number: numbers.motivacao || numbers.motivation || 0 },
+    { key: 'impressao', title: 'IMPRESSÃO', number: numbers.impressao || numbers.impression || 0 },
+    { key: 'expressao', title: 'EXPRESSÃO', number: numbers.expressao || numbers.expression || 0 },
+    { key: 'destino', title: 'DESTINO', number: numbers.destino || numbers.destiny || 0 },
+    { key: 'missao', title: 'MISSÃO', number: numbers.missao || numbers.mission || 0 },
+    { key: 'psiquico', title: 'NÚMERO PSÍQUICO', number: numbers.psiquico || numbers.psychic || 0 }
   ];
 
-  return sections.map(section => `
+  return sections.map(section => {
+    const textKey = `${section.key}_${section.number}`;
+    const textData = textMap[textKey];
+    const content = textData ? textData.body : getDefaultText(section.key, section.number);
+    
+    console.log(`📄 ${section.key} ${section.number}: ${textData ? 'ENCONTRADO' : 'USANDO FALLBACK'}`);
+    
+    return `
     <div class="page-section">
         <h2 class="section-title">${section.title} - ${section.number}</h2>
         <div class="text-content">
-            <p>${texts[section.key] || getDefaultText(section.key, section.number)}</p>
+            <p>${content}</p>
         </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function getDefaultText(key: string, number: number): string {
