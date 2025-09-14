@@ -448,7 +448,7 @@ export default function HistoricoMapas() {
           </DialogHeader>
           {selectedMap && (
             <div className="mt-4">
-              <MapaPDF data={selectedMap.result || {}} />
+              <MapaPDF mapData={selectedMap.result || {}} />
             </div>
           )}
         </DialogContent>
