@@ -521,7 +521,10 @@ serve(async (req) => {
     let totalTextsFound = 0;
 
     for (const query of textQueries) {
-      const [section, keyNumber] = query.split('-');
+      // Fix parsing for hyphenated section names like 'licao-carmica' and 'divida-carmica'
+      const lastDashIndex = query.lastIndexOf('-');
+      const section = query.substring(0, lastDashIndex).replace(/-/g, '_'); // Convert dashes to underscores for DB
+      const keyNumber = query.substring(lastDashIndex + 1);
       
       try {
         console.log(`📖 Buscando texto para ${section} ${keyNumber}`);
