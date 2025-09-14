@@ -549,16 +549,33 @@ serve(async (req) => {
       }
     }
 
-    // Buscar textos numerológicos com nova estrutura v3.0
-    const { data: textsData, error: textsError } = await supabase
-      .from('numerology_texts')
-      .select('*')
-      .eq('version', 'v3.0')
-      .order('priority', { ascending: false });
-
-    const texts = textsError ? [] : textsData;
+    // Buscar textos numerológicos do banco de dados diretamente por seção e número
+    console.log('🔍 Buscando textos completos do banco de dados');
     
-    console.log(`📊 Encontrados ${texts.length} textos numerológicos v3.0`);
+    // Função para buscar texto específico por seção e número
+    const getTextForNumber = async (section: string, number: number) => {
+      console.log(`📖 Buscando texto para ${section} ${number}`);
+      
+      const { data, error } = await supabase
+        .from('numerology_texts')
+        .select('title, body')
+        .eq('section', section)
+        .eq('key_number', number)
+        .maybeSingle();
+      
+      if (error) {
+        console.error(`❌ Erro ao buscar ${section} ${number}:`, error);
+        return null;
+      }
+      
+      if (data?.body) {
+        console.log(`✅ Texto encontrado para ${section} ${number}: ${data.body.length} caracteres`);
+        return data;
+      } else {
+        console.log(`⚠️ Nenhum texto encontrado para ${section} ${number}`);
+        return null;
+      }
+    };
 
     // Buscar informações detalhadas do anjo cabalístico
     const { data: angelData, error: angelError } = await supabase
@@ -569,14 +586,6 @@ serve(async (req) => {
 
     const angelInfo = angelError ? null : angelData;
     console.log(`👼 Informações do anjo ${anjoEspecial}:`, angelInfo ? 'Encontradas' : 'Não encontradas');
-
-    // Função para buscar texto por seção e número
-    const getTextForNumber = (section: string, number: number) => {
-      return texts.find(t => 
-        t.section === section && 
-        t.key_number === number
-      );
-    };
 
     // Construir conteúdo do mapa completo
     const mapaContent = {
@@ -614,38 +623,35 @@ serve(async (req) => {
           titulo: "Motivação",
           numero: result.motivacao,
           explicacao: "O número de Motivação descreve os motivos e as razões que movem as atitudes do ser humano e o seu modo de proceder. Esse número revela o aspecto interior da personalidade, da alma, que se reflete em suas atitudes e comportamentos, principalmente na intimidade e no lar, influenciando ainda nas escolhas pessoais.",
-          conteudo: getTextForNumber('motivacao', result.motivacao)?.body || `Motivação ${result.motivacao} - Este número revela seus desejos mais profundos e o que verdadeiramente o motiva na vida.`,
-          cores: getTextForNumber('motivacao', result.motivacao)?.color_associations || [],
-          pedras: getTextForNumber('motivacao', result.motivacao)?.stone_associations || [],
-          profissoes: getTextForNumber('motivacao', result.motivacao)?.profession_associations || []
+          conteudo: (await getTextForNumber('motivacao', result.motivacao))?.body || `Motivação ${result.motivacao} - Este número revela seus desejos mais profundos e o que verdadeiramente o motiva na vida.`
         },
 
         impressao: {
           titulo: "Impressão",
           numero: result.impressao,
           explicacao: "O número de Impressão descreve a personalidade em seu aspecto externo, o ego, ou seja, a aparência da personalidade atual. É o número que descreve aquela primeira impressão que a pessoa causa quando é vista por outro.",
-          conteudo: getTextForNumber('impressao', result.impressao)?.body || `Impressão ${result.impressao} - Este número revela como os outros o percebem inicialmente.`
+          conteudo: (await getTextForNumber('impressao', result.impressao))?.body || `Impressão ${result.impressao} - Este número revela como os outros o percebem inicialmente.`
         },
 
         expressao: {
           titulo: "Expressão", 
           numero: result.expressao,
           explicacao: "O número de Expressão enuncia a maneira como a pessoa age e interage com os outros, com o mundo, revelando quais são os seus verdadeiros talentos e as aptidões que desenvolverá ao longo da vida e a melhor forma de expressá-los.",
-          conteudo: getTextForNumber('expressao', result.expressao)?.body || `Expressão ${result.expressao} - Este número revela seus talentos naturais e como você se expressa no mundo.`
+          conteudo: (await getTextForNumber('expressao', result.expressao))?.body || `Expressão ${result.expressao} - Este número revela seus talentos naturais e como você se expressa no mundo.`
         },
 
         destino: {
           titulo: "Destino",
           numero: result.destino,
           explicacao: "O número de destino é determinado pela data de nascimento - dia, mês e ano. O destino rege a vida do ser humano e indica o seu caminho evolutivo. Ele orienta as decisões mais importantes na vida.",
-          conteudo: getTextForNumber('destino', result.destino)?.body || `Destino ${result.destino} - Este número revela sua missão de vida e caminho evolutivo.`
+          conteudo: (await getTextForNumber('destino', result.destino))?.body || `Destino ${result.destino} - Este número revela sua missão de vida e caminho evolutivo.`
         },
 
         missao: {
           titulo: "Missão",
           numero: result.missao,
           explicacao: "Cada ser humano traz ao nascer uma Missão, que nada mais é que a sua vocação. Essa Missão será desenvolvida ao longo da vida independentemente de qual profissão exercerá.",
-          conteudo: getTextForNumber('missao', result.missao)?.body || `Missão ${result.missao} - Este número revela como você deve realizar sua vocação na vida.`
+          conteudo: (await getTextForNumber('missao', result.missao))?.body || `Missão ${result.missao} - Este número revela como você deve realizar sua vocação na vida.`
         },
 
         psiquico: {

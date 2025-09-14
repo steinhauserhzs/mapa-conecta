@@ -471,25 +471,9 @@ async function generateProfessionalHTML(mapData: any): Promise<string> {
 }
 
 async function generateDetailedAnalyses(numbers: any, mapData: any): Promise<string> {
-  console.log('🔍 Buscando textos do banco de dados para PDF');
+  console.log('🔍 Buscando textos completos do banco de dados para PDF');
   
-  // Buscar textos reais do banco de dados
-  const { data: numerologyTexts, error } = await supabase
-    .from('numerology_texts')
-    .select('section, key_number, title, body')
-    .eq('lang', 'pt-BR');
-
-  if (error) {
-    console.error('Erro ao buscar textos:', error);
-  }
-
-  const textMap = (numerologyTexts || []).reduce((acc: any, text: any) => {
-    acc[`${text.section}_${text.key_number}`] = text;
-    return acc;
-  }, {});
-
-  console.log(`📊 Encontrados ${numerologyTexts?.length || 0} textos no banco`);
-
+  // Map the sections with their corresponding numbers
   const sections = [
     { key: 'motivacao', title: 'MOTIVAÇÃO', number: numbers.motivacao || numbers.motivation || 0 },
     { key: 'impressao', title: 'IMPRESSÃO', number: numbers.impressao || numbers.impression || 0 },
@@ -499,22 +483,58 @@ async function generateDetailedAnalyses(numbers: any, mapData: any): Promise<str
     { key: 'psiquico', title: 'NÚMERO PSÍQUICO', number: numbers.psiquico || numbers.psychic || 0 }
   ];
 
-  return sections.map(section => {
-    const textKey = `${section.key}_${section.number}`;
-    const textData = textMap[textKey];
-    const content = textData ? textData.body : getDefaultText(section.key, section.number);
+  console.log('📊 Seções a processar:', sections.map(s => `${s.key}: ${s.number}`));
+
+  const analysesPromises = sections.map(async (section) => {
+    if (!section.number) {
+      console.log(`⚠️ Pulando ${section.key} - número não encontrado`);
+      return '';
+    }
+
+    console.log(`🔍 Buscando texto para ${section.key} ${section.number}`);
     
-    console.log(`📄 ${section.key} ${section.number}: ${textData ? 'ENCONTRADO' : 'USANDO FALLBACK'}`);
-    
+    // Fetch the complete text from database
+    const { data: textData, error } = await supabase
+      .from('numerology_texts')
+      .select('title, body')
+      .eq('section', section.key)
+      .eq('key_number', section.number)
+      .maybeSingle();
+
+    if (error) {
+      console.error(`❌ Erro ao buscar ${section.key} ${section.number}:`, error);
+    }
+
+    const content = textData?.body || getDefaultText(section.key, section.number);
+    const title = textData?.title || `${section.title} ${section.number}`;
+
+    console.log(`📄 ${section.key} ${section.number}: ${textData ? 'TEXTO COMPLETO ENCONTRADO' : 'USANDO FALLBACK'}`);
+    console.log(`📝 Tamanho do texto: ${content.length} caracteres`);
+
+    // Format the text with proper paragraph breaks
+    const formattedContent = content
+      .split('\n\n')
+      .map(paragraph => paragraph.trim())
+      .filter(paragraph => paragraph.length > 0)
+      .map(paragraph => `<p style="margin-bottom: 16px; text-indent: 20px; text-align: justify;">${paragraph}</p>`)
+      .join('');
+
     return `
     <div class="page-section">
-        <h2 class="section-title">${section.title} - ${section.number}</h2>
-        <div class="text-content">
-            <p>${content}</p>
+        <h2 class="section-title">${title}</h2>
+        <div class="text-content" style="line-height: 1.8; font-size: 14px;">
+            ${formattedContent}
         </div>
     </div>
-  `;
-  }).join('');
+    `;
+  });
+
+  const analyses = await Promise.all(analysesPromises);
+  const validAnalyses = analyses.filter(analysis => analysis.trim().length > 0);
+  
+  console.log(`✅ Geradas ${validAnalyses.length} análises detalhadas para o PDF`);
+  
+  return validAnalyses.join('');
 }
 
 function getDefaultText(key: string, number: number): string {
