@@ -522,14 +522,13 @@ serve(async (req) => {
     let totalTextsFound = 0;
 
     for (const query of textQueries) {
-      // Fix parsing for hyphenated section names like 'licao-carmica' and 'divida-carmica'
       const lastDashIndex = query.lastIndexOf('-');
-      const section = query.substring(0, lastDashIndex).replace(/-/g, '_'); // Convert dashes to underscores for DB
+      const section = query.substring(0, lastDashIndex).replace(/-/g, '_');
       const keyNumber = query.substring(lastDashIndex + 1);
-      
+
       try {
         console.log(`📖 Buscando texto para ${section} ${keyNumber}`);
-        
+
         const { data: textData } = await supabase
           .from('numerology_texts')
           .select('*')
@@ -551,22 +550,11 @@ serve(async (req) => {
           totalTextsFound++;
         } else {
           console.log(`⚠️ Nenhum texto encontrado para ${section} ${keyNumber}`);
-          // Add comprehensive placeholder with debugging info
           textosObj[query] = {
             titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
             numero: parseInt(keyNumber),
             explicacao: `⚠️ TEXTO NÃO ENCONTRADO: Verificar se existe no banco de dados a seção '${section}' com número ${keyNumber}. Query original: '${query}'`,
             conteudo: `Análise em desenvolvimento para ${section} ${keyNumber}. Por favor, execute a atualização do conteúdo numerológico.`,
-            cores: [],
-            pedras: [],
-            profissoes: []
-          };
-        }
-          textosObj[query] = {
-            titulo: `${section.charAt(0).toUpperCase() + section.slice(1)} ${keyNumber}`,
-            numero: parseInt(keyNumber),
-            explicacao: `Análise estruturada baseada no número ${keyNumber}`,
-            conteudo: `Este tópico está em desenvolvimento para o número ${keyNumber}.`,
             cores: [],
             pedras: [],
             profissoes: []
@@ -583,6 +571,7 @@ serve(async (req) => {
           pedras: [],
           profissoes: []
         };
+      }
     }
 
     console.log(`📊 RESUMO DE COBERTURA DOS 31 TÓPICOS:`);

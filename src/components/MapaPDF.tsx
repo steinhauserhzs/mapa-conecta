@@ -165,6 +165,25 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
   onEditText, 
   editableTexts = {} 
 }) => {
+  // Anchors helper for index and sections
+  const getAnchorId = (section: string, number?: number) => {
+    const s = section.replace('s_', '_');
+    return `sec-${s}${number !== undefined ? '-' + number : ''}`;
+  };
+
+  // Map plural UI sections to singular DB keys
+  const singularSection = (section: string) => {
+    const map: Record<string, string> = {
+      desafios: 'desafio',
+      dividas_carmicas: 'divida_carmica',
+      licoes_carmicas: 'licao_carmica',
+      ciclos_vida: 'ciclo_vida',
+      momentos_decisivos: 'momento_decisivo',
+      tendencias_ocultas: 'tendencia_oculta',
+    };
+    return map[section] || section;
+  };
+
   // Function to render all 31 topics in the correct order
   const renderTopicsByOrder = (mapData: MapaData, texts: Record<string, any>) => {
     const topics = [
@@ -175,122 +194,70 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         number: mapData.numbers?.motivation || mapData.numeros?.motivacao || mapData.motivation,
         section: "motivacao"
       },
-      // 2. Ano Pessoal  
-      {
-        icon: TrendingUp,
-        title: `Ano Pessoal ${mapData.numbers?.personalYear || mapData.numeros?.anoPessoal || mapData.personalYear} - ${mapData.header?.anoReferencia || new Date().getFullYear()}`,
-        number: mapData.numbers?.personalYear || mapData.numeros?.anoPessoal || mapData.personalYear,
-        section: "ano_pessoal"
-      },
-      // 3. Arcanos
-      {
-        icon: Star,
-        title: "Arcanos",
-        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
-        section: "arcanos"
-      },
-      // 4. Desafios
-      {
-        icon: Shield,
-        title: "Desafios",
-        number: null, // Multiple numbers
-        section: "desafios",
-        isMultiple: true
-      },
-      // 5. Destino
-      {
-        icon: TrendingUp,
-        title: "Destino",
-        number: mapData.numbers?.destiny || mapData.numeros?.destino || mapData.destiny,
-        section: "destino"
-      },
-      // 6. Dia Pessoal
-      {
-        icon: Star,
-        title: "Dia Pessoal",
-        number: mapData.numbers?.personalDay || mapData.numeros?.diaPessoal || mapData.personalDay,
-        section: "dia_pessoal"
-      },
-      // 7. Dívida Cármica
-      {
-        icon: Shield,
-        title: "Dívida Cármica",
-        number: null,
-        section: "dividas_carmicas",
-        isMultiple: true
-      },
-      // 8. Expressão
-      {
-        icon: Star,
-        title: "Expressão",
-        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
-        section: "expressao"
-      },
-      // 9. Harmonia Conjugal
-      {
-        icon: Heart,
-        title: "Harmonia Conjugal",
-        number: mapData.numbers?.motivation || mapData.numeros?.motivacao || mapData.motivation,
-        section: "harmonia_conjugal"
-      },
-      // 10. Impressão
+      // 2. Impressão
       {
         icon: Eye,
         title: "Impressão",
         number: mapData.numbers?.impression || mapData.numeros?.impressao || mapData.impression,
         section: "impressao"
       },
-      // 11. Lições Cármicas
+      // 3. Expressão
       {
-        icon: Shield,
-        title: "Lições Cármicas",
-        number: null,
-        section: "licoes_carmicas",
-        isMultiple: true
+        icon: Star,
+        title: "Expressão",
+        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
+        section: "expressao"
       },
-      // 12. Missão
+      // 4. Destino
+      {
+        icon: TrendingUp,
+        title: "Destino",
+        number: mapData.numbers?.destiny || mapData.numeros?.destino || mapData.destiny,
+        section: "destino"
+      },
+      // 5. Missão
       {
         icon: Shield,
         title: "Missão",
         number: mapData.numbers?.mission || mapData.numeros?.missao || mapData.mission,
         section: "missao"
       },
-      // 13. Mês Pessoal
-      {
-        icon: Star,
-        title: "Mês Pessoal",
-        number: mapData.numbers?.personalMonth || mapData.numeros?.mesPessoal || mapData.personalMonth,
-        section: "mes_pessoal"
-      },
-      // 14. Dia do Nascimento
-      {
-        icon: Star,
-        title: "Dia do Nascimento",
-        number: mapData.numbers?.birthDay || mapData.numeros?.diaNascimento || mapData.birthDay,
-        section: "dia_nascimento"
-      },
-      // 15. Números Harmônicos
-      {
-        icon: Star,
-        title: "Números Harmônicos",
-        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
-        section: "numeros_harmonicos"
-      },
-      // 16. Número Psíquico
+      // 6. Número Psíquico
       {
         icon: Heart,
         title: "Número Psíquico",
         number: mapData.numbers?.psychic || mapData.numeros?.psiquico || mapData.psychic,
         section: "psiquico"
       },
-      // 17. Potencialidade Profissional
+      // 7. Dia do Nascimento
       {
-        icon: Briefcase,
-        title: "Potencialidade Profissional",
-        number: mapData.numbers?.destiny || mapData.numeros?.destino || mapData.destiny,
-        section: "potencialidade_profissional"
+        icon: Star,
+        title: "Dia do Nascimento",
+        number: mapData.numbers?.birthDay || mapData.numeros?.diaNascimento || mapData.birthDay,
+        section: "dia_nascimento"
       },
-      // 18-20. Ciclos de Vida (Primeiro, Segundo, Terceiro)
+      // 8. Ano Pessoal
+      {
+        icon: TrendingUp,
+        title: `Ano Pessoal ${mapData.numbers?.personalYear || mapData.numeros?.anoPessoal || mapData.personalYear} - ${mapData.header?.anoReferencia || new Date().getFullYear()}`,
+        number: mapData.numbers?.personalYear || mapData.numeros?.anoPessoal || mapData.personalYear,
+        section: "ano_pessoal"
+      },
+      // 9. Mês Pessoal
+      {
+        icon: Star,
+        title: "Mês Pessoal",
+        number: mapData.numbers?.personalMonth || mapData.numeros?.mesPessoal || mapData.personalMonth,
+        section: "mes_pessoal"
+      },
+      // 10. Dia Pessoal
+      {
+        icon: Star,
+        title: "Dia Pessoal",
+        number: mapData.numbers?.personalDay || mapData.numeros?.diaPessoal || mapData.personalDay,
+        section: "dia_pessoal"
+      },
+      // 11. Ciclos de Vida (Primeiro, Segundo, Terceiro)
       {
         icon: TrendingUp,
         title: "Ciclos de Vida",
@@ -298,7 +265,15 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         section: "ciclos_vida",
         isMultiple: true
       },
-      // 19-22. Momentos Decisivos (Primeiro, Segundo, Terceiro, Quarto)
+      // 12. Desafios (1º, 2º, Principal)
+      {
+        icon: Shield,
+        title: "Desafios",
+        number: null,
+        section: "desafios",
+        isMultiple: true
+      },
+      // 13. Momentos Decisivos (Primeiro ao Quarto)
       {
         icon: Star,
         title: "Momentos Decisivos",
@@ -306,28 +281,30 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         section: "momentos_decisivos",
         isMultiple: true
       },
-      // 21. Relações Inter valores
-      {
-        icon: Heart,
-        title: "Relações Inter Valores",
-        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
-        section: "relacoes_inter_valores"
-      },
-      // 22. Resposta Subconsciente
+      // 14. Resposta Subconsciente
       {
         icon: Briefcase,
         title: "Resposta Subconsciente",
         number: mapData.numbers?.subconsciousResponse || mapData.numeros?.respostaSubconsciente || mapData.subconsciousResponse,
         section: "resposta_subconsciente"
       },
-      // 25. Sequências Negativas
+      // 15. Lições Cármicas
       {
         icon: Shield,
-        title: "Sequências Negativas",
-        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
-        section: "sequencias_negativas"
+        title: "Lições Cármicas",
+        number: null,
+        section: "licoes_carmicas",
+        isMultiple: true
       },
-      // 26. Tendências Ocultas
+      // 16. Dívidas Cármicas
+      {
+        icon: Shield,
+        title: "Dívidas Cármicas",
+        number: null,
+        section: "dividas_carmicas",
+        isMultiple: true
+      },
+      // 17. Tendências Ocultas
       {
         icon: Eye,
         title: "Tendências Ocultas",
@@ -335,26 +312,68 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         section: "tendencias_ocultas",
         isMultiple: true
       },
-      // 29. Cores Favoráveis
-      {
-        icon: Star,
-        title: "Cores Favoráveis",
-        number: mapData.numbers?.psychic || mapData.numeros?.psiquico || mapData.psychic,
-        section: "cores_favoraveis"
-      },
-      // 30. Grau de Ascensão
+      // 18. Grau de Ascensão
       {
         icon: TrendingUp,
         title: "Grau de Ascensão",
         number: mapData.numbers?.ascensionDegree || mapData.numeros?.grauAscensao || mapData.ascensionDegree,
         section: "grau_ascensao"
       },
-      // 31. Dias do Mês Favoráveis
+      // 19. Arcanos
+      {
+        icon: Star,
+        title: "Arcanos",
+        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
+        section: "arcanos"
+      },
+      // 20. Números Harmônicos
+      {
+        icon: Star,
+        title: "Números Harmônicos",
+        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
+        section: "numeros_harmonicos"
+      },
+      // 21. Relações Inter Valores
+      {
+        icon: Heart,
+        title: "Relações Inter Valores",
+        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
+        section: "relacoes_inter_valores"
+      },
+      // 22. Harmonia Conjugal
+      {
+        icon: Heart,
+        title: "Harmonia Conjugal",
+        number: mapData.numbers?.motivation || mapData.numeros?.motivacao || mapData.motivation,
+        section: "harmonia_conjugal"
+      },
+      // 23. Potencialidade Profissional
+      {
+        icon: Briefcase,
+        title: "Potencialidade Profissional",
+        number: mapData.numbers?.destiny || mapData.numeros?.destino || mapData.destiny,
+        section: "potencialidade_profissional"
+      },
+      // 24. Cores Favoráveis
+      {
+        icon: Star,
+        title: "Cores Favoráveis",
+        number: mapData.numbers?.psychic || mapData.numeros?.psiquico || mapData.psychic,
+        section: "cores_favoraveis"
+      },
+      // 25. Dias do Mês Favoráveis
       {
         icon: Star,
         title: "Dias do Mês Favoráveis",
         number: mapData.numbers?.personalMonth || mapData.numeros?.mesPessoal || mapData.personalMonth,
         section: "dias_favoraveis"
+      },
+      // 26. Sequências Negativas
+      {
+        icon: Shield,
+        title: "Sequências Negativas",
+        number: mapData.numbers?.expression || mapData.numeros?.expressao || mapData.expression,
+        section: "sequencias_negativas"
       }
     ];
 
@@ -363,16 +382,18 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         return renderMultipleSection(topic, mapData, texts, index);
       } else {
         const textKey = `${topic.section}-${topic.number}`;
+        const anchorId = getAnchorId(topic.section, topic.number);
         return (
-          <TopicCard
-            key={index}
-            icon={topic.icon}
-            title={topic.title}
-            number={topic.number}
-            text={texts?.[textKey] || mapData.textos?.[textKey]}
-            onEdit={onEditText ? () => onEditText(textKey, texts?.[textKey]?.conteudo || '') : undefined}
-            editableContent={editableTexts[textKey]}
-          />
+          <div id={anchorId} key={index}>
+            <TopicCard
+              icon={topic.icon}
+              title={topic.title}
+              number={topic.number}
+              text={texts?.[textKey] || mapData.textos?.[textKey]}
+              onEdit={onEditText ? () => onEditText(textKey, texts?.[textKey]?.conteudo || '') : undefined}
+              editableContent={editableTexts[textKey]}
+            />
+          </div>
         );
       }
     });
@@ -412,13 +433,14 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {data.map((number: number, subIndex: number) => {
+      {data.map((number: number, subIndex: number) => {
             const textKey = `${topic.section.replace('s_', '_').replace('s_', '-')}-${number}`;
             const altTextKey = `${topic.section.replace('_', '-')}-${number}`;
             const text = texts?.[textKey] || texts?.[altTextKey] || mapData.textos?.[textKey] || mapData.textos?.[altTextKey];
+            const anchorId = getAnchorId(topic.section, number);
             
             return (
-              <div key={subIndex} className="border-l-2 border-amber-200 dark:border-amber-800 pl-4">
+              <div id={anchorId} key={subIndex} className="border-l-2 border-amber-200 dark:border-amber-800 pl-4">
                 <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">
                   {getSubTitle(topic.section, subIndex, number)}
                 </h4>
@@ -616,7 +638,35 @@ const MapaPDF: React.FC<MapaPDFProps> = ({
         )}
       </div>
 
-      {/* All 31 Topics */}
+      {/* Índice — Meus Números */}
+      <Card className="w-full">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-amber-600 dark:text-amber-400">Índice — Meus Números</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            {[
+              { label: 'Motivação', section: 'motivacao', value: mapData.numeros?.motivacao ?? mapData.numbers?.motivation ?? mapData.motivation },
+              { label: 'Impressão', section: 'impressao', value: mapData.numeros?.impressao ?? mapData.numbers?.impression ?? mapData.impression },
+              { label: 'Expressão', section: 'expressao', value: mapData.numeros?.expressao ?? mapData.numbers?.expression ?? mapData.expression },
+              { label: 'Destino', section: 'destino', value: mapData.numeros?.destino ?? mapData.numbers?.destiny ?? mapData.destiny },
+              { label: 'Missão', section: 'missao', value: mapData.numeros?.missao ?? mapData.numbers?.mission ?? mapData.mission },
+              { label: 'Psíquico', section: 'psiquico', value: mapData.numeros?.psiquico ?? mapData.numbers?.psychic ?? mapData.psychic },
+              { label: 'Dia Nascimento', section: 'dia_nascimento', value: mapData.numeros?.diaNascimento ?? mapData.numbers?.birthDay ?? mapData.birthDay },
+              { label: 'Ano Pessoal', section: 'ano_pessoal', value: mapData.numeros?.anoPessoal ?? mapData.numbers?.personalYear ?? mapData.personalYear },
+              { label: 'Mês Pessoal', section: 'mes_pessoal', value: mapData.numeros?.mesPessoal ?? mapData.numbers?.personalMonth ?? mapData.personalMonth },
+              { label: 'Dia Pessoal', section: 'dia_pessoal', value: mapData.numeros?.diaPessoal ?? mapData.numbers?.personalDay ?? mapData.personalDay },
+            ].map((it) => (
+              <a key={it.section} href={`#${getAnchorId(it.section, it.value)}`} className="flex items-center justify-between rounded-md border px-3 py-2 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors">
+                <span>{it.label}</span>
+                <span className="font-semibold text-amber-600 dark:text-amber-400">{it.value ?? '-'}</span>
+              </a>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tópicos em ordem correta */}
       <div className="space-y-8">
         {renderTopicsByOrder(mapData, texts)}
       </div>
